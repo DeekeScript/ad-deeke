@@ -1,5 +1,5 @@
 # Deeke抖音黑科技
-
+<img src='https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke' width=0 height=0 />
 <p style="background-color:#000;padding:12px;">
 <span style="color:#ff0;text-shadow:0 0 10px #00ff00;">我们是全国唯一一家，实现贴牌自动化的科技公司！！！</span>
 </p>
