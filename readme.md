@@ -46,5 +46,5 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
 <img alt="Deeke技术" src="photo/weixin.jpg" width="30%">
-<img alt="Deeke商务" src="photo/yize.jpg" width="30%">
+<img alt="Deeke商务" src="photo/weixin.jpg" width="30%">
 </div>
