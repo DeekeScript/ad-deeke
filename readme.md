@@ -25,15 +25,21 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 ## 以下是Deeke的截图：
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke图标展示" src="photo/1.jpg" width="30%">
-<img alt="Deeke主界面" src="photo/2.jpg" width="30%">
+<img alt="Deeke图标展示" src="photo/2-1.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/2-2.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/2-3.jpg" width="30%">
+
 <img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="30%">
 <img alt="Deeke话术界面" src="photo/4.jpg" width="30%">
 <img alt="Deeke话术添加界面" src="photo/5.jpg" width="30%">
+
 <img alt="Deeke设置界面" src="photo/6.jpg" width="30%">
 <img alt="Deeke百度文心设置界面" src="photo/7.jpg" width="30%">
 <img alt="Deeke推荐营销设置界面" src="photo/8.jpg" width="30%">
+
 <img alt="Deeke推荐营销设置界面" src="photo/9.jpg" width="30%">
+<img alt="Deeke推荐营销设置界面" src="photo/10.jpg" width="30%">
+<img alt="Deeke推荐营销设置界面" src="photo/1.jpg" width="30%">
 </div>
 
 ## 后台还是沿用之前的，截图：
@@ -42,9 +48,8 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 <img alt="Deeke后台主界面" src="photo/backend-1-1.png" width="100%">
 </div>
 
-### 想加入团队的技术，请联系技术（左边）~~~~ 贴牌或者其他定制需求以及想加入团队的销售，请联系商务（右边）
+### 贴牌或者其他定制需求以及想加入团队的销售，请联系作者
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
 <img alt="Deeke技术" src="photo/weixin.jpg" width="30%">
-<img alt="Deeke商务" src="photo/weixin.jpg" width="30%">
 </div>
