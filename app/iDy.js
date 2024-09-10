@@ -8,7 +8,7 @@ import { machine } from 'common/machine.js';
 import { baiduWenxin } from 'service/baiduWenxin.js';
 import { statistics } from 'common/statistics.js';
 
-export let iDy = {
+let iDy = {
     me: {},//当前账号的信息
     taskConfig: {},
     titles: [],//今日刷视频的所有标题  标题+'@@@'+昵称   保证唯一，从而减少请求后台接口
@@ -17,6 +17,7 @@ export let iDy = {
     provices: [],
     isCity: false,//是否是同城
     nicknames: [],//所有的昵称，重复的忽略
+    runTimes: undefined,  //如果是数字0 则完成
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
@@ -57,6 +58,16 @@ export let iDy = {
         if (!hour.includes((new Date()).getHours().toString())) {
             return 101;//不在任务时间
         }
+
+        if (this.runTimes !== undefined) {
+            this.runTimes--;
+            Log.log("运行次数：" + this.runTimes);
+            if (this.runTimes <= 0) {
+                this.runTimes = 0;
+                return 1001;
+            }
+        }
+
         return 0;
     },
 
@@ -83,6 +94,12 @@ export let iDy = {
             }
             return false;
         }
+
+        console.log('同城数据判断：', rule.toker_distance, videoData.distance);
+        if (rule.toker_distance < videoData.distance) {
+            return false;
+        }
+
         return true;
     },
 
@@ -94,107 +111,84 @@ export let iDy = {
         let rpVideoCount = 0;//5重复就报错
 
         while (true) {
-            //判断是否在同城
-            if (isCity) {
-                // let tjTag = DyCommon.id('yic').text('推荐').filter((v) => {
-                //     return v && v.bounds() && v.bounds().top > 0 && v.bounds().height() > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height();
-                // }).findOne();
-                // console.log('同城', tjTag);
-                // if (tjTag) {
-                //     tjTag = tjTag.parent();
-                //     console.log('同城', tjTag);
-                //     if (tjTag && tjTag.desc() && tjTag.desc().indexOf("已选中") != -1) {
-                //         //在推荐页，直接抛异常
-                //         throw new Error('在推荐页，异常');
-                //     }
-                // }
-                if(new UiSelector().desc('已选中，推荐，按钮').exists()){
-                    throw new Error('在推荐页，异常');
-                }
-            }
             DyVideo.next();
             DyCommon.toast('-------------------滑动视频----------------');
-            try {
-                Log.log('-标题获取');
-                let vContent = DyVideo.getContent();
-                if (!vContent) {
-                    if (noTitleCount-- <= 0) {
-                        throw new Error('可能异常！');
-                    }
+
+            // //判断是否在同城  不能使用，一段时间之后，无法识别到
+            // let inRecommend = DyIndex.inRecommend();
+            // if (isCity && inRecommend) {
+            //     throw new Error('在推荐页，异常');
+            // } else if (!isCity && !inRecommend) {
+            //     throw new Error('不在推荐页，异常');
+            // }
+
+            Log.log('-标题获取');
+            let vContent = DyVideo.getContent();
+            console.log("---", vContent);
+            if (!vContent) {
+                if (noTitleCount-- <= 0) {
+                    throw new Error('可能异常！');
+                }
+                DyVideo.videoSlow();
+                DyCommon.sleep(1000 + 1000 * Math.random());
+                continue;
+            }
+            statistics.viewVideo();//刷视频数量加1
+            noTitleCount = 5;
+            Log.log('-标题检查');
+            if (!this.videoRulesCheckTitle(videoRules, vContent)) {
+                Log.log('不包含关键词', '随机休眠1-2秒');
+                DyVideo.videoSlow();
+                continue;
+            }
+
+            Log.log('-是否直播');
+            if (DyVideo.isLiving()) {
+                DyCommon.toast('直播中，切换下一个视频');
+                DyVideo.videoSlow();
+                continue;
+            }
+
+            Log.log('-昵称获取');
+            let vNickname = DyVideo.getNickname();
+            //同类型的
+            let nicknames = storage.getExcNicknames();
+            if (nicknames) {
+                nicknames = nicknames.split(/[,|，]/);
+                if (nicknames.includes(vNickname)) {
+                    DyCommon.toast('排除的昵称');
                     DyVideo.videoSlow();
-                    DyCommon.sleep(1000 + 1000 * Math.random());
                     continue;
                 }
-                noTitleCount = 5;
-                Log.log('-标题检查');
-                if (!this.videoRulesCheckTitle(videoRules, vContent)) {
-                    Log.log('不包含关键词', '随机休眠1-2秒');
-                    DyVideo.videoSlow();
-                    continue;
-                }
+            }
 
-                Log.log('-是否直播');
-                if (DyVideo.isLiving()) {
-                    DyCommon.toast('直播中，切换下一个视频');
-                    DyVideo.videoSlow();
-                    continue;
-                }
-
-                Log.log('-昵称获取');
-                let vNickname = DyVideo.getNickname();
-                //同类型的
-                let nicknames = storage.getExcNicknames();
-                if (nicknames) {
-                    nicknames = nicknames.split(/[,|，]/);
-                    if (nicknames.includes(vNickname)) {
-                        DyCommon.toast('排除的昵称');
-                        DyVideo.videoSlow();
-                        continue;
-                    }
-                }
-
-                statistics.viewVideo();//刷视频数量加1
-
-                let unique = vNickname + '_' + vContent;
-                if (this.titles.includes(unique)) {
-                    DyCommon.toast('重复视频');
-                    rpVideoCount++;
-                    if (rpVideoCount >= 5) {
-                        throw new Error('5次重复，报错');
-                    }
-                    continue;
-                }
-
-                rpVideoCount = 0;
-
-                if (this.titles.length >= 100) {
-                    this.titles.shift();
-                }
-
-                this.titles.push(unique);
-
-                if (this.nicknames.includes(vNickname) || this.accountFreGt(vNickname)) {
-                    DyCommon.toast(vNickname + '：重复或频率超出');
-                    continue;
-                }
-
-                videoData = DyVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
-            } catch (e) {
-                errorCount++;
-                Log.log(e.stack);
-                if (errorCount > 3) {
-                    throw new Error('三次都没有解决错误');
+            let unique = vNickname + '_' + vContent;
+            if (this.titles.includes(unique)) {
+                DyCommon.toast('重复视频');
+                rpVideoCount++;
+                if (rpVideoCount >= 5) {
+                    throw new Error('5次重复，报错');
                 }
                 continue;
             }
 
-            errorCount = 0;
-            // if (!videoData.title) {
-            //     DyCommon.toast('当前视频没有标题，切换到下一个');
-            //     DyVideo.videoSlow();
-            //     continue;
-            // }
+            rpVideoCount = 0;
 
+            if (this.titles.length >= 100) {
+                this.titles.shift();
+            }
+
+            this.titles.push(unique);
+
+            if (this.nicknames.includes(vNickname) || this.accountFreGt(vNickname)) {
+                DyCommon.toast(vNickname + '：重复或频率超出');
+                continue;
+            }
+
+            videoData = DyVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
+
+
+            errorCount = 0;
             //接下来是视频的参数和config比对， 不合适则刷下一个
             let tmp = this.videoRulesCheck(videoRules, videoData, isCity);
             if (!tmp) {
@@ -202,7 +196,7 @@ export let iDy = {
                 this.videoCount++;//视频数量增加
                 continue;
             }
-            //videoData = tmp;
+
             break;
         }
 
@@ -234,11 +228,10 @@ export let iDy = {
                 windowOpen = true;
                 DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
                 Log.log('评论了');
-                statistics.comment();//评论+1
             }
         }
 
-        Log.log('评论数量：', videoData.commentCount);
+        Log.log('评论数量：', videoData.commentCount, this.configData.toker_comment_area_zan_rate, this.configData.toker_comment_area_zan_rate < Math.random() * 100);
 
         //如果一开始没有评论 这里直接返回到视频
         if (videoData.commentCount === 0 || this.configData.toker_comment_area_zan_rate < Math.random() * 100) {
@@ -286,7 +279,6 @@ export let iDy = {
                     Log.log("点赞");
                     DyComment.clickZan(comment);//////////////////////操作
                     Log.log("点赞2");
-                    statistics.zanComment();//赞评论数量加1
                     opCount--;
                 } catch (e) {
                     Log.log(e);
@@ -317,7 +309,7 @@ export let iDy = {
     },
 
     run(type) {
-        this.isCity = type;
+        this.isCity = type == 1 ? true : false;
         this.configData = machine.getTokerData(type);
         Log.log(this.configData);
         return this.runTask();//返回指定编码
@@ -349,9 +341,7 @@ export let iDy = {
             Log.log('看看是不是广告');
             //看看是不是广告，是的话，不操作作者
             if (DyVideo.viewDetail()) {
-                let clickRePlayTag = DyCommon.id('fw2').filter((v) => {
-                    return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-                }).findOnce();
+                let clickRePlayTag = UiSelector().text('点击重播').clickable(true).className('android.widget.Button').isVisibleToUser(true).findOnce();
                 if (clickRePlayTag) {
                     Log.log('点击重播');
                     clickRePlayTag.click();
@@ -360,6 +350,7 @@ export let iDy = {
                 Gesture.click(500 + Math.random() * 200, 500 + Math.random() * 300);
                 DyCommon.sleep(500);
                 Log.log('广告，开始处理评论区了');
+
                 this.commentDeal(videoData);
                 Log.log('开始下个视频');
                 continue;
@@ -372,7 +363,6 @@ export let iDy = {
             if (this.configData.toker_zan_rate / 100 >= Math.random() && !DyVideo.isZan()) {
                 Log.log('点赞了');
                 DyVideo.clickZan();///////////////////////////////////操作  视频点赞
-                statistics.zan();//点赞视频数量加1
             }
 
             //现在决定是否对视频作者作者进行操作
@@ -392,7 +382,7 @@ export let iDy = {
                     //看看是不是进入了广告
                     Log.log('用户数据异常', e);
                     DyCommon.sleep(2000);
-                    if (new UiSelector().text('反馈').desc('反馈').clickable(true).filter((v) => {
+                    if (UiSelector().text('反馈').desc('反馈').clickable(true).filter((v) => {
                         return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
                     }).exists()) {
                         Log.log('存在“反馈”字眼');
@@ -400,7 +390,7 @@ export let iDy = {
                         if (text('确定').filter((v) => {
                             return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
                         }).exists()) {
-                            let a = new UiSelector().text('确定').filter((v) => {
+                            let a = UiSelector().text('确定').filter((v) => {
                                 return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
                             });
                             a.click();
@@ -408,9 +398,16 @@ export let iDy = {
                         }
                         continue;
                     }
+
+                    //查看是不是有弹窗
+                    if (DyUser.hasAlertInput()) {
+                        DyCommon.back();
+                        DyCommon.sleep(1000);
+                        userData = DyUser.getUserInfo();///////////操作  进入用户主页
+                    }
                 }
 
-                statistics.viewUser();//目标视频数量加1
+                
                 if (userData) {
                     Log.log('看到了用户数据了哦');
                 } else {
@@ -422,19 +419,23 @@ export let iDy = {
 
                 let isPrivateAccount = userData.isPrivate;
                 if (!isPrivateAccount && this.configData.toker_focus_rate > focus_rate) {
-                    Log.log('关注了哦');
-                    DyUser.focus();///////////////////////////////////操作  关注视频作者
-                    DyCommon.sleep(3000);
-                    statistics.focus();//关注数量加1
+                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                        Log.log('关注了哦');
+                        DyUser.focus();///////////////////////////////////操作  关注视频作者
+                        DyCommon.sleep(3000);
+                    }
                 }
 
                 if (!this.douyinExist(userData.douyin)) {
-                    if (!isPrivateAccount && this.configData.toker_private_msg_rate > private_rate) {
-                        let msg = this.getMsg(1, userData.nickname);
-                        Log.log('要私信了哦');
-                        if (msg) {
-                            let privateRes = DyUser.privateMsg(msg.msg);///////////////////////////////////操作  私信视频作者
-                            statistics.privateMsg();//私信数量加1
+                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                        if (!isPrivateAccount && this.configData.toker_private_msg_rate > private_rate) {
+                            let msg = this.getMsg(1, userData.nickname);
+                            Log.log('要私信了哦');
+                            if (msg) {
+                                DyUser.privateMsg(msg.msg);///////////////////////////////////操作  私信视频作者
+                            }
                         }
                     }
                 }
@@ -452,3 +453,5 @@ export let iDy = {
         }
     },
 }
+
+module.exports = { iDy };

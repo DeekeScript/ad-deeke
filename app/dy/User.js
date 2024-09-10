@@ -1,44 +1,27 @@
 import { Common } from 'app/dy/Common.js';
-export const User = {
+import { statistics } from 'common/statistics.js';
+import { V } from 'version/V.js';
+
+const User = {
     //保证执行的时候在哪个页面，执行完成也是哪个界面
     //返回false是失败，true是成功，-1是被封禁
     privateMsg(msg) {
-        if (Common.id('title').text('私密账号').findOnce()) {
+        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
             Log.log('私密账号');
             return false;
         }
 
-        let settingTag = Common.id('v0f').desc('更多').filter((v) => {
-            return v && v.bounds() && v.bounds().top && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-        }).findOnce();
-
+        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
         if (!settingTag) {
             Log.log('找不到setting按钮');
             return false;
         }
 
-        let clickCount = 3;
-        let sendTag;
-        while (clickCount--) {
-            if (clickCount === 2 || !Common.id('cancel_btn').findOnce()) {
-                Common.click(settingTag);
-                Common.sleep(1000);
-                if (clickCount !== 2) {
-                    Log.log('找不到发私信按钮，重试 -_-');
-                }
-                settingTag = Common.id('v0f').desc('更多').findOnce();
-                continue;
-            }
+        Common.click(settingTag);
+        Log.log("私信");
+        Common.sleep(1000);
 
-            sendTag = Common.id('desc').text('发私信').findOnce();
-            if (!sendTag) {
-                sendTag = Common.id('desc').text('发私信').findOnce();
-                Log.log('找不到发私信按钮，重试');
-                Common.sleep(500);
-                continue;
-            }
-        }
-
+        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
         if (!sendTag) {
             Log.log('找不到发私信按钮');
             return false;
@@ -47,7 +30,7 @@ export const User = {
         Common.click(sendTag.parent());
         Common.sleep(2000);
 
-        let textTag = Common.id('n-v').findOnce();
+        let textTag = Common.id(V.User.privateMsg[6]).findOnce();
         if (!textTag) {
             Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
             Common.back();
@@ -55,17 +38,16 @@ export const User = {
         }
         Common.click(textTag);
 
-        textTag = Common.id('n-v').findOnce();
-        msg = msg.split('');
-        let input = '';
-        for (let i in msg) {
-            input += msg[i];
-            textTag.setText(input);
-            Common.sleep(100 + Math.random() * 200);
+        textTag = Common.id(V.User.privateMsg[6]).findOnce();
+        let iText = '';
+        for (let i = 0; i < msg.length; i++) {
+            iText = msg.substring(0, i + 1);
+            textTag.setText(iText);
+            Common.sleep(500 + 1000 * Math.random());
         }
 
-        Common.sleep(1000);
-        let sendTextTag = Common.id('j2').findOnce();
+        Common.sleep(500);
+        let sendTextTag = Common.id(V.User.privateMsg[7]).findOnce();
         if (!sendTextTag) {
             Log.log('发送消息失败');
             return false;
@@ -73,13 +55,18 @@ export const User = {
 
         Common.click(sendTextTag);
         Common.sleep(1000);
-        let closePrivateMsg = new UiSelector().textContains('私信功能已被封禁').findOne(1000);
+        Log.log("私信发送完成");
+        let closePrivateMsg = UiSelector().textContains(V.User.privateMsg[8]).findOneBy(1000);
+        Log.log("私信被关闭了么？");
         if (closePrivateMsg) {
             Common.sleep(Math.random() * 1000);
             Common.back(2);
+            Log.log("返回两次");
             return -1;
         }
+        statistics.privateMsg();
         Common.sleep(Math.random() * 1000);
+        Log.log("成功：返回2次");
         Common.back(2);
         return true;
     },
@@ -88,11 +75,12 @@ export const User = {
         //一般用户
         let i = 3;
         while (i--) {
-            let nickname = Common.id('oth').filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0;
-            }).findOnce();
+            let nickname = Common.id(V.User.getNickname[0]).isVisibleToUser(true).findOnce();
             if (nickname && nickname.text()) {
-                return nickname.text().replace("，复制名字", '');
+                if (290701 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+                    return nickname.text();
+                }
+                return nickname.text().replace(V.User.getNickname[1], '');
             }
             Common.sleep(200);
         }
@@ -102,40 +90,32 @@ export const User = {
 
     //机构 媒体等账号 公司
     isCompany() {
-        // if (Common.id('vrv').findOnce()) {
-        //     return true;
-        // }
-
-        // if (Common.id('vjf').findOnce()) {
-        //     return false;
-        // }
-
-        return false;
-        //throw new Error('找不到是不是公司标签');
+        return this.getDouyin() == this.getNickname();
     },
 
     getDouyin() {
-        let douyin = Common.id('y1j').findOnce();
+        let douyin = Common.id(V.User.getDouyin[0]).isVisibleToUser(true).findOnce();
         if (douyin && douyin.text()) {
-            return douyin.text().replace("抖音号：", '');
+            return douyin.text().replace(V.User.getDouyin[1], '');
+        }
+
+        //部分机型ID不一样
+        douyin = UiSelector().textContains(V.User.getDouyin[1]).findOnce();
+        if (douyin && douyin.text()) {
+            return douyin.text().replace(V.User.getDouyin[1], '');
         }
 
         //官方账号等等
-        douyin = Common.id('y_7').findOnce();
+        douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
         if (douyin && douyin.text()) {
             return douyin.text();
         }
 
-        // douyin = Common.id('a2h').findOnce();//优质电商作者
-        // if (douyin && douyin.text()) {
-        //     return douyin.text();
-        // }
-
-        throw new Error('找不到抖音号');//
+        return this.getNickname();
     },
 
     getZanCount() {
-        let zan = Common.id('y=0').findOnce();
+        let zan = Common.id(V.User.getZanCount[0]).findOnce();
         if (!zan || !zan.text()) {
             throw new Error('找不到赞');
         }
@@ -144,8 +124,8 @@ export const User = {
     },
 
     getFocusCount() {
-        let focus = Common.id('y=3').findOnce();
-        if (!focus || !focus.text()) {
+        let focus = Common.id(V.User.getFocusCount[0]).findOnce();
+        if (!focus) {
             throw new Error('找不到关注');
         }
 
@@ -153,8 +133,8 @@ export const User = {
     },
 
     getFansCount() {
-        let fans = Common.id('y=7').findOnce();
-        if (!fans || !fans.text()) {
+        let fans = Common.id(V.User.getFansCount[0]).findOnce();
+        if (!fans) {
             throw new Error('找不到粉丝');
         }
 
@@ -162,7 +142,7 @@ export const User = {
     },
 
     getIntroduce() {
-        let tags = Common.getTags(Common.id('pgx').findOnce().children().find(new UiSelector().textMatches("[\\s\\S]+")));
+        let tags = Common.id(V.User.getIntroduce[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
         let text = '';
         if (!tags) {
             return text;
@@ -181,7 +161,7 @@ export const User = {
     },
 
     getIp() {
-        let tags = Common.getTags(Common.id('pgx').findOnce().children().find(new UiSelector().textMatches("[\\s\\S]+")));
+        let tags = Common.id(V.User.getIp[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
         let text = '';
         if (!tags) {
             return text;
@@ -195,8 +175,7 @@ export const User = {
     },
 
     getAge() {
-        return 0;
-        let tags = Common.getTags(Common.id('pgx').findOnce().children().find(new UiSelector().textMatches("[\\s\\S]+")));
+        let tags = Common.id(V.User.getAge[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
         let text = 0;
         if (!tags) {
             return text;
@@ -210,8 +189,9 @@ export const User = {
     },
 
     getWorksTag() {
-        let tags = new UiSelector().textMatches("作品 [\\d]+").findOnce();//rj5 或者 ptm
-        if (!tags || tags.length === 0) {
+        let tags = Common.aId(V.User.getWorksTag[1]).textContains(V.User.getWorksTag[0]).findOnce();//rj5 或者 ptm
+        console.log("tags", tags);
+        if (!tags) {
             return {
                 text: function () {
                     return 0;
@@ -228,7 +208,7 @@ export const User = {
     },
 
     openWindow() {
-        //let file = new UiSelector().textMatches([\\d]+件好物).findOnce();
+        //let file = UiSelector().textMatches([\\d]+件好物).findOnce();
         // let tag = Common.id('nee').findOnce();
         // if (!tag) {
         //     return false;
@@ -240,34 +220,33 @@ export const User = {
     //比较耗时，需要优化
     //比较耗时，需要优化
     getGender() {
-        return 3;
-        let genderTag = new UiSelector().clickable(false).descContains('男').findOnce();
+        let genderTag = Common.id(V.User.getIp[0]).findOnce().children().findOne(UiSelector().descContains("男"));
         if (genderTag && genderTag.bounds().height() > 0 && genderTag.bounds().left > 0 && genderTag.bounds().top > 0) {
-            return 1;
+            return '1';
         }
 
-        genderTag = new UiSelector().clickable(false).descContains('女').findOnce();
+        genderTag = Common.id(V.User.getIp[0]).findOnce().children().findOne(UiSelector().descContains("女"));
         if (genderTag && genderTag.bounds().height() > 0 && genderTag.bounds().left > 0 && genderTag.bounds().top > 0) {
-            return 2;
+            return '0';
         }
 
-        return 3;
+        return '2';
     },
 
     //是否是私密账号
     isPrivate() {
         Log.log("是否是私密账号？");
-        if (new UiSelector().text('私密账号').findOnce() ? true : false) {
+        if (UiSelector().text(V.User.isPrivate[0]).findOnce() ? true : false) {
             return true;
         }
 
         //帐号已被封禁
-        if (new UiSelector().textContains('封禁').findOnce()) {
+        if (UiSelector().textContains(V.User.isPrivate[1]).findOnce()) {
             return true;
         }
 
         //注销了
-        if (new UiSelector().textContains('账号已经注销').findOnce()) {
+        if (UiSelector().textContains(V.User.isPrivate[2]).findOnce()) {
             return true;
         }
 
@@ -286,7 +265,7 @@ export const User = {
     },
 
     isFocus() {
-        let hasFocusTag = Common.id('q1z').text('已关注').findOnce() || Common.id('q1z').text('互相关注').findOnce();
+        let hasFocusTag = Common.id(V.User.isFocus[0]).text(V.User.isFocus[1]).findOnce() || Common.id(V.User.isFocus[0]).text(V.User.isFocus[2]).findOnce();
         if (hasFocusTag) {
             return true;
         }
@@ -294,13 +273,14 @@ export const User = {
     },
 
     focus() {
-        let focusTag = Common.id('q1y').findOnce();//.text('关注')  .text('回关')
+        let focusTag = Common.id(V.User.focus[0]).findOnce();//.text('关注')  .text('回关')
         if (focusTag) {
             Common.click(focusTag);
+            statistics.focus();
             return true;
         }
 
-        let hasFocusTag = Common.id('q1z').text('已关注').findOnce() || Common.id('q1z').text('互相关注').findOnce();
+        let hasFocusTag = Common.id(V.User.focus[1]).text(V.User.focus[2]).findOnce() || Common.id(V.User.focus[1]).text(V.User.focus[3]).findOnce();
         if (hasFocusTag) {
             return true;
         }
@@ -309,42 +289,45 @@ export const User = {
     },
 
     cancelFocus() {
-        let hasFocusTag = Common.id('q1z').findOnce();//text(已关注) || text(相互关注)
+        let hasFocusTag = Common.id(V.User.cancelFocus[0]).findOnce();//text(已关注) || text(互相关注)
         if (hasFocusTag) {
             hasFocusTag.click();
             Common.sleep(500);
 
             //真正地点击取消
-            let cancelTag = Common.id('l2+').text('取消关注').findOnce();
+            let cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
             if (!cancelTag || cancelTag.bounds().top > Device.height() - 200) {
                 let x = Math.random() * 500 + 100;
                 Gesture.swipe(x, Device.height() / 2, x, 200, 200);
                 Common.sleep(1000);
-                cancelTag = Common.id('l2+').text('取消关注').findOnce();
+                cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
                 if (!cancelTag) {
                     throw new Error('取消关注的核心按钮找不到');
                 }
                 Common.click(cancelTag);
                 Common.sleep(1000 + Math.random() * 500);
-                let cancelTag = Common.id('l2+').text('取消关注').findOne(1000);
+                cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOneBy(1000);
                 if (cancelTag) {
-                    Common.click(cancelTag);
+                    cancelTag.parent() ? cancelTag.parent().click() : Common.click(cancelTag);
                 }
             } else {
-                Common.click(cancelTag);
+                cancelTag.parent() ? cancelTag.parent().click() : Common.click(cancelTag);
             }
         }
 
-        //私密账号的问题修复
-        // let privateMsgTag = Common.id('bfr').filter((v) => {
-        //     return v && v.bounds() && v.bounds().top > 0 && v.bounds().height() + v.bounds().top < Device.height();
-        // }).findOnce();
-        // if (privateMsgTag) {
-        //     Common.click(privateMsgTag);
-        //     Common.sleep(500);
-        // }
+        Common.sleep(2000);
+        //私密账号会再次弹出“取消关注”的底部弹窗，需要再次点击
+        let cancelBtn = UiSelector().text(V.User.cancelFocus[2]).findOne();
+        console.log('私密账号', UiSelector().textContains(V.User.cancelFocus[2]).findOne());
+        console.log(cancelBtn);
 
-        let focusTag = Common.id('q1y').findOnce();//.text('关注') 或者回关
+        if (cancelBtn) {
+            Common.sleep(1000);
+            cancelBtn.click();
+            Common.sleep(1000);
+        }
+
+        let focusTag = Common.id(V.User.cancelFocus[3]).findOnce();//.text('关注') 或者回关
         if (focusTag) {
             return true;
         }
@@ -387,16 +370,16 @@ export const User = {
     },
 
     contents: [],
-    cancelFocusList() {
-        let focus = Common.id('y=7').findOnce();
+    cancelFocusList(machine) {
+        let focus = Common.id(V.User.cancelFocusList[0]).findOnce();
         if (!focus) {
             throw new Error('找不到关注');
         }
 
         Gesture.click(focus.bounds().centerX(), focus.bounds().centerY());
-        Common.sleep(2000);
+        Common.sleep(5000);
 
-        let focusCountTag = Common.id('yp-').findOnce();
+        let focusCountTag = Common.id(V.User.cancelFocusList[1]).findOnce();
         if (!focusCountTag) {
             throw new Error('找不到focus');
         }
@@ -410,8 +393,8 @@ export const User = {
         let loop = 0;
         let arr = [];
         while (true) {
-            let containers = Common.id('root_layout').filter((v) => {
-                return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() - 300;
+            let containers = Common.id(V.User.cancelFocusList[2]).filter((v) => {
+                return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
             }).find();
 
             if (containers.length === 0) {
@@ -428,7 +411,8 @@ export const User = {
                 if (isNaN(i)) {
                     continue;
                 }
-                let titleTag = containers[i].children().findOne(Common.id('yq3'));
+                let titleTag = containers[i].children().findOne(Common.id(V.User.cancelFocusList[3]));
+                Log.log("获取_addr：" + titleTag._addr);
                 if (!titleTag || this.contents.includes(titleTag.text())) {
                     continue;
                 }
@@ -436,7 +420,7 @@ export const User = {
                 Log.log(this.contents.length, this.contents.includes(titleTag.text()));
                 let nickname = titleTag.text();
 
-                let titleBarTag = Common.id('title_bar').findOnce();
+                let titleBarTag = Common.id(V.User.cancelFocusList[4]).findOnce();
                 if (titleBarTag && titleTag.bounds().top <= titleBarTag.bounds().top + titleBarTag.bounds().height()) {
                     continue;
                 }
@@ -445,14 +429,16 @@ export const User = {
                     continue;
                 }
 
-                let hasFocusTag = containers[i].children().findOne(Common.id('br+'));
+                let hasFocusTag = containers[i].children().findOne(Common.id(V.User.cancelFocusList[5]));
                 if (!hasFocusTag) {
                     continue;
                 }
 
                 //第一种机型
-                if (hasFocusTag.text() === '已关注') {
-                    let setting = containers[i].children().findOne(Common.id('n=y'));
+                Log.log(machine.get('task_dy_cancel_focus_mutual_switch', 'bool'), hasFocusTag.text());
+                if (hasFocusTag.text() === '已关注' || (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && hasFocusTag.text() === '互相关注')) {
+                    let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
+                    Log.log('setting', setting);
                     if (!setting) {
                         Log.log('找不到focus setting-1');
                         errorCount++;
@@ -462,13 +448,13 @@ export const User = {
                     setting.click();
                     Common.sleep(1000);
 
-                    let cancelTag = Common.id('title').text('取消关注').filter((v) => {
+                    let cancelTag = Common.id(V.User.cancelFocusList[7]).text(V.User.cancelFocusList[8]).filter((v) => {
                         return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
                     }).findOnce();
                     Common.click(cancelTag);
-                } else if (hasFocusTag.text() !== '相互关注' && hasFocusTag.text() !== '关注') {
+                } else if (hasFocusTag.text() !== V.User.cancelFocusList[9] && hasFocusTag.text() !== V.User.cancelFocusList[10]) {
                     //既不是“已关注”也不是“相互关注” 还不是“关注”  适配老机型
-                    let setting = containers[i].children().findOne(Common.id('n=y'));
+                    let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
                     if (!setting) {
                         errorCount++;
                         Log.log('找不到focus setting');
@@ -478,7 +464,11 @@ export const User = {
                     Common.click(titleTag);
                     Common.sleep(1000);
 
-                    let focusTag = new UiSelector().text('已关注').findOnce();
+                    let focusTag = UiSelector().text(V.User.cancelFocusList[11]).findOnce();
+                    if (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && !focusTag) {
+                        focusTag = UiSelector().text(V.User.cancelFocusList[9]).findOnce();
+                    }
+
                     if (!focusTag) {
                         Common.back();
                         this.contents.push(nickname);
@@ -530,14 +520,14 @@ export const User = {
 
         let times = 3;
         while (times--) {
-            let fans = Common.id('y=7').findOnce();
+            let fans = Common.id(V.User.fansIncList[0]).findOnce();
             if (!fans) {
                 throw new Error('找不到粉丝');
             }
 
             Common.click(fans);
             Common.sleep(2000);
-            fans = Common.id('y=7').findOnce();
+            fans = Common.id(V.User.fansIncList[0]).findOnce();
             if (fans) {
                 continue;
             }
@@ -548,18 +538,12 @@ export const User = {
             return true;
         }
 
-        let topTag = Common.id('u-o').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
-        }).findOnce();
-
-        let top = (topTag && (topTag.bounds().top + topTag.bounds().height())) || 400;
+        let topTag = Common.id(V.User.fansIncList[1]).isVisibleToUser(true).findOnce();
         let errorCount = 0;
         let loop = 0;
         let arr = [];
         while (true) {
-            let containers = Common.id('root_layout').filter((v) => {
-                return v && v.bounds() && v.bounds().top > top && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-            }).find();
+            let containers = Common.id(V.User.fansIncList[2]).isVisibleToUser(true).find();
             Log.log("containers长度：" + containers.length);
 
             if (containers.length === 0) {
@@ -578,16 +562,22 @@ export const User = {
                     continue;
                 }
 
-                let titleTag = containers[i].children().findOne(Common.id('yq3'));
+                let titleTag = containers[i].children().findOne(Common.id(V.User.fansIncList[3]));
+                if (titleTag.bounds().top < topTag.bounds().top + topTag.bounds().height()) {
+                    continue;
+                }
+
                 if (!titleTag || contents.includes(titleTag.text())) {
                     continue;
                 }
 
                 Log.log("title", titleTag.text());
 
-                if (containers[i].children().findOne(Common.id('r94'))) {
-                    //rp++;//是自己（从自己的粉丝页面搜索进入之后，第一个用户很可能是自己）
-                    continue;
+                if (290701 != App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+                    if (containers[i].children().findOne(Common.id(V.User.fansIncList[4]))) {
+                        //rp++;//是自己（从自己的粉丝页面搜索进入之后，第一个用户很可能是自己）
+                        continue;
+                    }
                 }
 
                 Log.log(contents.length, contents.includes(titleTag.text()));
@@ -636,15 +626,12 @@ export const User = {
                 Log.log("点击头像概率：" + settingData.task_dy_fans_inc_head_zan_rate);
                 if (rateCurrent <= settingData.task_dy_fans_inc_head_zan_rate * 1) {
                     Log.log("准备点击头像");
-                    let header = Common.id('pgn').filter((v) => {
-                        return v && v.bounds() && v.bounds().top > top && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-                    }).findOne();
+                    let header = Common.id(V.User.fansIncList[5]).isVisibleToUser(true).findOne();
+                    Log.log(header);
                     if (header) {
                         Common.click(header);
                         Common.sleep(1000);
-                        let zanTag = Common.id("l_f").textContains('点赞').filter((v) => {
-                            return v && v.bounds() && v.bounds().top > top && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-                        }).findOne();
+                        let zanTag = Common.id(V.User.fansIncList[6]).textContains(V.User.fansIncList[7]).isVisibleToUser(true).findOne();
                         Common.click(zanTag);
                         Common.sleep(1000);
                         Common.back(1);
@@ -746,27 +733,27 @@ export const User = {
         let times = 3;
         while (times--) {
             if (type === 0) {
-                let focus = Common.id('y=3').findOnce();
+                let focus = Common.id(V.User.focusUserList[0]).findOnce();
                 if (!focus) {
                     throw new Error('找不到关注');
                 }
 
                 Common.click(focus);
                 Common.sleep(2000);
-                focus = Common.id('y=3').findOnce();
+                focus = Common.id(V.User.focusUserList[0]).findOnce();
                 if (focus) {
                     continue;
                 }
                 break;
             } else {
-                let fans = Common.id('y=7').findOnce();
+                let fans = Common.id(V.User.focusUserList[1]).findOnce();
                 if (!fans) {
                     throw new Error('找不到粉丝');
                 }
 
                 Common.click(fans);
                 Common.sleep(2000);
-                fans = Common.id('y=7').findOnce();
+                fans = Common.id(V.User.focusUserList[1]).findOnce();
                 if (fans) {
                     continue;
                 }
@@ -776,21 +763,15 @@ export const User = {
 
         if (times <= 0) {
             FloatDialogs.show(type === 0 ? '关注列表都已操作' : '粉丝列表都已操作');
-            return false;//设置了隐私，不能操作 
+            return false;//设置了隐私，不能操作
         }
 
-        let topTag = Common.id('u-o').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
-        }).findOnce();
-
-        let top = (topTag && (topTag.bounds().top + topTag.bounds().height())) || 400;
+        let topTag = Common.id(V.User.focusUserList[2]).isVisibleToUser(true).findOnce();
         let errorCount = 0;
         let loop = 0;
         let arr = [];
         while (true) {
-            let containers = Common.id('root_layout').filter((v) => {
-                return v && v.bounds() && v.bounds().top > top && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-            }).find();
+            let containers = Common.id(V.User.focusUserList[3]).isVisibleToUser(true).find();
             Log.log("containers长度：" + containers.length);
 
             if (containers.length === 0) {
@@ -811,14 +792,18 @@ export const User = {
                     continue;
                 }
 
-                let titleTag = containers[i].children().findOne(Common.id('yq3'));
+                let titleTag = containers[i].children().findOne(Common.id(V.User.focusUserList[4]));
+                if (titleTag.bounds().top < topTag.bounds().top + topTag.bounds().height()) {
+                    continue;
+                }
+
                 if (!titleTag || contents.includes(titleTag.text())) {
                     continue;
                 }
 
                 Log.log("title", titleTag.text());
 
-                if (containers[i].children().findOne(Common.id('r94'))) {
+                if (containers[i].children().findOne(Common.id(V.User.focusUserList[5]))) {
                     //rp++;//是自己（从自己的粉丝页面搜索进入之后，第一个用户很可能是自己）
                     continue;
                 }
@@ -848,6 +833,8 @@ export const User = {
                     }
                     break;
                 }
+
+                statistics.viewUser();
 
                 if (this.isPrivate()) {
                     Log.log('私密账号');
@@ -920,9 +907,7 @@ export const User = {
 
                 Common.back(1, 800);
                 contents.push(nickname);
-                if (Common.id('v0f').filter((v) => {
-                    return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0;
-                }).findOnce()) {
+                if (Common.id(V.User.focusUserList[6]).isVisibleToUser(true).findOnce()) {
                     Common.back(1, 800);//偶尔会出现没有返回回来的情况，这里加一个判断
                 }
                 Common.sleep(500 + 500 * Math.random());
@@ -951,9 +936,7 @@ export const User = {
 
     //进入关注列表 我的，不是其他的关注列表
     intoFocusList() {
-        let fans = Common.id('vq7').filter((v) => {
-            return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().top > 0 && v.bounds().left > 0;
-        }).findOnce();
+        let fans = Common.id(V.User.intoFocusList[0]).isVisibleToUser(true).findOnce();
         if (!fans) {
             throw new Error('找不到关注列表');
         }
@@ -965,7 +948,7 @@ export const User = {
         Gesture.click(fans.bounds().centerX(), fans.bounds().centerY());
         Common.sleep(2000);
 
-        let focusCountTag = Common.id('u+m').findOnce();
+        let focusCountTag = Common.id(V.User.intoFocusList[1]).findOnce();
         if (!focusCountTag) {
             throw new Error('找不到focusCountTag');
         }
@@ -978,21 +961,17 @@ export const User = {
     },
 
     focusListSearch(keyword) {
-        let searchBox = Common.id('gly').filter((v) => {
-            return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().top > 0 && v.bounds().left > 0;
-        }).findOnce();
+        let searchBox = Common.id(V.User.focusListSearch[0]).isVisibleToUser(true).findOnce();
         Common.click(searchBox);
         Common.sleep(1000 + 1000 * Math.random());
 
-        searchBox = Common.id('gly').filter((v) => {
-            return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().top > 0 && v.bounds().left > 0;
-        }).findOnce();
+        searchBox = Common.id(V.User.focusListSearch[0]).isVisibleToUser(true).findOnce();
         searchBox.setText(keyword);
 
-        let nickTag = Common.id('yq3').text(keyword).findOnce();//昵称查找
-        Log.log('nickTag', nickTag);
+        let nickTag = Common.id(V.User.focusListSearch[1]).text(keyword).findOnce();//昵称查找
+        Log.log('nickTag', keyword, nickTag);
         if (!nickTag) {
-            nickTag = Common.id('txt_desc').textContains(keyword).findOnce();//账号查找
+            nickTag = Common.id(V.User.focusListSearch[2]).textContains(keyword).findOnce();//账号查找
             if (!nickTag) {
                 return false;
             }
@@ -1005,9 +984,7 @@ export const User = {
 
     //粉丝回访
     viewFansList(nicknames) {
-        let fans = Common.id('y=w').filter((v) => {
-            return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().top > 0 && v.bounds().left > 0;
-        }).findOnce();
+        let fans = Common.id(V.User.viewFansList[0]).isVisibleToUser(true).findOnce();
         if (!fans) {
             throw new Error('找不到粉丝');
         }
@@ -1015,7 +992,7 @@ export const User = {
         Gesture.click(fans.bounds().centerX(), fans.bounds().centerY());
         Common.sleep(2000);
 
-        let fansCountTag = Common.id('xcr').findOnce();
+        let fansCountTag = Common.id(V.User.viewFansList[1]).findOnce();
         if (!fansCountTag) {
             throw new Error('找不到fans');
         }
@@ -1029,7 +1006,7 @@ export const User = {
         let contents = [];
         let loop = 0;
         while (true) {
-            let containers = Common.id('root_layout').filter((v) => {
+            let containers = Common.id(V.User.viewFansList[2]).filter((v) => {
                 return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() - 200;
             }).find();
 
@@ -1043,7 +1020,7 @@ export const User = {
                 if (isNaN(i)) {
                     continue;
                 }
-                let titleTag = containers[i].children().findOne(Common.id('yq3'));
+                let titleTag = containers[i].children().findOne(Common.id(V.User.viewFansList[3]));
                 if (!titleTag || contents.includes(titleTag.text())) {
                     rp++;
                     continue;
@@ -1056,7 +1033,7 @@ export const User = {
                     continue;
                 }
 
-                let titleBarTag = Common.id('title_bar').findOnce();
+                let titleBarTag = Common.id(V.User.viewFansList[4]).findOnce();
                 if (titleBarTag && titleTag.bounds().top <= titleBarTag.bounds().top + titleBarTag.bounds().height()) {
                     continue;
                 }
@@ -1069,10 +1046,6 @@ export const User = {
                 while (rp--) {
                     Common.click(titleTag);
                     Common.sleep(1000);
-                    //                    titleTag = containers[i].children().findOne(Common.id('yq3'));
-                    //                    if (titleTag) {
-                    //                        continue;
-                    //                    }
                     Common.sleep(4000 * Math.random() + 2500);
                     Common.back();
                     Common.sleep(500);
@@ -1101,87 +1074,13 @@ export const User = {
         }
     },
 
-    getStep(oldArr, newArr) {
-        // Log.log(oldArr, newArr);
-        if (newArr.length === 0) {
-            return oldArr.length;
+    hasAlertInput() {
+        if (290701 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+            return false;
         }
 
-        let some = [];
-        for (let i in newArr) {
-            for (let j in oldArr) {
-                if (oldArr[j] === newArr[i]) {
-                    let kk = [];
-                    for (let k = i; k < newArr.length; k++) {
-                        if (oldArr[k * 1 - i * 1 + j * 1] === newArr[k]) {
-                            kk.push(newArr[k]);
-                            continue;
-                        }
-                        break;
-                    }
-
-                    if (kk.length) {
-                        some.push(kk);
-                    }
-                }
-            }
-        }
-
-        let max = [];
-        for (let i in some) {
-            if (some[i].length > max.length) {
-                max = some[i];
-            }
-        }
-
-        return oldArr.length - max.length;
-    },
-
-    //暂未处理
-    gotoIndex(index, idName) {
-        if (!idName) {
-            idName = 'yq3';//走到关注的第几位
-        }
-
-        let newArr = [];
-        let oldArr = [];
-        let currentIndex = 0;
-        let rp = 0;
-
-        while (true) {
-            let tags = Common.id(idName).filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().top + v.bounds().height() < Device.height();
-            }).find();
-
-            for (let i in tags) {
-                if (isNaN(i)) {
-                    continue;
-                }
-
-                oldArr.push(tags[i].text());
-            }
-
-            let step = this.getStep(oldArr, newArr);
-            Log.log('step', step, rp);
-            if (step === 0) {
-                rp++;
-            } else {
-                rp = 0;
-            }
-
-            if (rp >= 3) {
-                return false;
-            }
-
-            currentIndex += step;
-            Log.log(currentIndex, step, index);
-            if (currentIndex >= index) {
-                return true;
-            }
-            newArr = JSON.parse(JSON.stringify(oldArr));
-            oldArr = [];
-            Gesture.swipe(300, 2000, 300, 1200, 500);
-            Common.sleep(2000 + 1000 * Math.random());
-        }
+        return Common.id(V.User.hasAlertInput[0]).findOne()
     },
 }
+
+module.exports = { User };

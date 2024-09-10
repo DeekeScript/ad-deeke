@@ -1,9 +1,10 @@
 import { Common } from 'app/dy/Common.js';
-export let Live = {
+import { statistics } from 'common/statistics';
+import { V } from 'version/V.js';
+
+let Live = {
     getUserCountTag() {
-        return Common.id('o4u').filter((v) => {
-            return v && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
-        }).findOnce();
+        return Common.id(V.Live.getUserCountTag[0]).isVisibleToUser(true).findOnce();
     },
 
     //打开粉丝列表
@@ -14,9 +15,12 @@ export let Live = {
     },
 
     getUserTags() {
-        let tags = Common.id('ah0').findOnce().children().find(new UiSelector().textMatches("[\\s\\S]+")).filter((v) => {
-            return v && !v.text().includes('我的信息') && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() - 300 && v.bounds().left === 0 && v.bounds().width() === Device.width();
-        });
+        //小米手机的left是1，华为是0，这里10控制
+        console.log("length", Common.id(V.Live.getUserTags[0]).findOnce().children().length);
+        let tags = Common.id(V.Live.getUserTags[0]).findOnce().children().find(UiSelector().textMatches(V.Live.getUserTags[1]).isVisibleToUser(true).filter((v) => {
+            //console.log("vvv", v);
+            return v && !v.text().includes('我的信息') && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10;
+        }));
         return tags;
     },
 
@@ -41,8 +45,9 @@ export let Live = {
         Common.click(data.tag);
         Log.log('点击list');
         Common.sleep(2000);
-        let nickTag = Common.id('opq').findOnce();
+        let nickTag = Common.id(V.Live.intoFansPage[0]).findOnce();
         Common.click(nickTag);
+        statistics.viewUser();
         Log.log('点击弹窗');
         Common.sleep(3500);
     },
@@ -95,7 +100,7 @@ export let Live = {
         while (true) {
             try {
                 data = [];
-                let tags = new UiSelector().id("com.ss.android.ugc.aweme:id/text").className("android.widget.TextView").find();
+                let tags = Common.id(V.Live.listenBarrage[0]).className(V.Live.listenBarrage[1]).find();
                 if (!tags || tags.length == 0) {
                     continue;
                 }
@@ -164,7 +169,7 @@ export let Live = {
 
     loopClick(times) {
         try {
-            let closeTag = new UiSelector().desc('关闭').clickable(true).filter((v) => {
+            let closeTag = UiSelector().desc(V.Live.loopClick[0]).clickable(true).isVisibleToUser(true).filter((v) => {
                 return v && v.bounds() && v.bounds().top > Device.height() / 3 && v.bounds().width > 0 && v.bounds().left > 0;
             }).findOnce();
             if (closeTag) {
@@ -176,37 +181,49 @@ export let Live = {
             let top = Device.height() / 3 + Device.height() / 4 * Math.random();
             for (let i = 0; i < times; i++) {
                 Gesture.click(left, top + i);
-                Common.sleep(100 + 100 * Math.random());
+                Common.sleep(50 + 50 * Math.random());
             }
         } catch (e) {
             Log.log(e);
         }
 
-        if (!Common.id('o4u').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().height() > 0 && v.bounds().left > 0;
-        }).findOnce()) {
+        if (!this.getUserCountTag()) {
             return false;
         }
     },
 
-    comment(msg) {
-        let tag = Common.id('f9h').clickable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-        }).findOnce();
-
+    comment(msg, withEmoji) {
+        let tag = Common.id(V.Live.comment[0]).clickable(true).isVisibleToUser(true).findOnce();
         if (tag) {
             tag.click();
             Common.sleep(2000);
         }
 
-        let iptTag = new UiSelector().className('android.widget.EditText').clickable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0;
-        }).findOnce();
+        let iptTag = UiSelector().className(V.Live.comment[1]).clickable(true).isVisibleToUser(true).findOnce();
 
         iptTag.setText(msg);
-        let submitTag = Common.id('x_9').desc('发送').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0;
-        }).findOnce();
+
+
+        //是否带表情
+        if (withEmoji) {
+            let emojiTag = Common.id(V.Live.comment[4]).clickable(true).isVisibleToUser(true).findOne();
+            if (emojiTag) {
+                emojiTag.click();
+                Common.sleep(1000);
+
+                let lists = Common.id(V.Live.comment[5]).scrollable(true).findOne();
+                let emojisTag = lists.children().find(UiSelector().clickable(true).className(V.Live.comment[6]));
+
+                console.log(emojisTag.length);
+                let max = emojisTag.length;
+
+                let rd = Math.floor(Math.random() * max);
+                emojisTag[rd].click();
+                Common.sleep(1000);
+            }
+        }
+
+        let submitTag = Common.id(V.Live.comment[2]).desc(V.Live.comment[3]).isVisibleToUser(true).findOnce();
 
         if (submitTag) {
             Common.click(submitTag);
@@ -214,17 +231,13 @@ export let Live = {
         }
     },
 
-    loopComment(msg) {
+    loopComment(msg, withEmoji) {
         try {
-            this.comment(msg);
+            this.comment(msg, withEmoji);
         } catch (e) {
             Log.log(e);
         }
-
-        if (!Common.id('o4u').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().height() > 0 && v.bounds().left > 0;
-        }).findOnce()) {
-            return false;
-        }
     }
 }
+
+module.exports = { Live };

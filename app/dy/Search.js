@@ -1,51 +1,59 @@
 import { Common } from 'app/dy/Common.js';
 import { User } from 'app/dy/User.js';
+import { statistics } from 'common/statistics';
+import { V } from 'version/V.js';
+import { Video } from 'app/dy/Video.js';
 
-export const Search = {
+const Search = {
     //type = 0 视频  type = 1 用户  需要先进入搜索页
     intoSearchList(keyword, type) {
         if (!type) {
             type = 0;
         }
         //开始搜索
-        let iptTag = Common.id('et_search_kw').findOne(5000);
+        let iptTag = Common.id(V.Search.intoSearchList[0]).isVisibleToUser(true).findOneBy(5000);
         if (!iptTag) {
             throw new Error('没有找到输入框');
         }
-
-        keyword = keyword.split('');
-        let input = '';
-        for (let i in keyword) {
-            input += keyword[i];
-            Common.sleep(300 + 500 * Math.random());
-            Log.log(iptTag);
-            Log.log("输入框");
-            iptTag.setText(input);
-        }
+        iptTag.setText(keyword);
 
         Common.sleep(1500);
         //找到搜索按钮
-        let searchBtnTag = Common.id('x=2').desc('搜索').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-        }).findOnce();
+        let searchBtnTag = Common.id(V.Search.intoSearchList[1]).desc(V.Search.intoSearchList[2]).isVisibleToUser(true).findOnce();
         if (!searchBtnTag) {
-            throw new Error('没有找到搜索点击按钮');
+            Log.log('新按钮');
+            searchBtnTag = UiSelector().className('android.widget.TextView').text(V.Search.intoSearchList[2]).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.TextView').text(V.Search.intoSearchList[2]).findOne();
+            if (!searchBtnTag) {
+                throw new Error('没有找到搜索点击按钮');
+            }
         }
 
         Log.log('searchBtnTag', searchBtnTag);
         Common.click(searchBtnTag);
         Common.sleep(3000 + 2000 * Math.random());
-
         let videoTag;
-        if (type === 0) {
-            videoTag = Common.aId('text1').text('视频').findOnce();
-        } else if (type === 1) {
-            videoTag = Common.aId('text1').text('用户').findOnce();
+        let rp = 3;
+        while (!videoTag) {
+            if (type === 0) {
+                videoTag = Common.aId(V.Search.intoSearchList[5]).text(V.Search.intoSearchList[3]).isVisibleToUser(true).findOnce();
+            } else if (type === 1) {
+                videoTag = Common.aId(V.Search.intoSearchList[5]).text(V.Search.intoSearchList[4]).isVisibleToUser(true).findOnce();
+            }
+
+            if (rp-- <= 0 || videoTag) {
+                break;
+            }
+
+            Common.swipeSearchTabToLeft();
+            Common.sleep(1500);
         }
 
         if (!videoTag) {
+            console.log('找不到用户tab');
             throw new Error('找不到视频或者用户tab;type=' + type);
         }
+
+        console.log('进入用户或者视频：', videoTag);
         Common.click(videoTag);
         Common.sleep(3000 + 2000 * Math.random());
     },
@@ -53,7 +61,7 @@ export const Search = {
     //跟上面的方法基本相同，搜索链接进入视频  不需要点击搜索列表，系统自动跳转到对应视频
     intoSearchLinkVideo(keyword) {
         //开始搜索
-        let iptTag = Common.id('et_search_kw').findOne(3000);
+        let iptTag = Common.id(V.Search.intoSearchLinkVideo[0]).findOneBy(3000);
         if (!iptTag) {
             throw new Error('没有找到输入框');
         }
@@ -61,11 +69,13 @@ export const Search = {
         iptTag.setText(keyword);
         Common.sleep(1500);
         //找到搜索按钮
-        let searchBtnTag = Common.id('x=2').desc('搜索').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-        }).findOnce();
+        let searchBtnTag = Common.id(V.Search.intoSearchLinkVideo[1]).desc(V.Search.intoSearchLinkVideo[2]).isVisibleToUser(true).findOnce();
         if (!searchBtnTag) {
-            throw new Error('没有找到搜索点击按钮');
+            Log.log('新按钮');
+            searchBtnTag = UiSelector().className('android.widget.TextView').text(V.Search.intoSearchLinkVideo[2]).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.TextView').text(V.Search.intoSearchLinkVideo[2]).findOne();
+            if (!searchBtnTag) {
+                throw new Error('没有找到搜索点击按钮');
+            }
         }
 
         Log.log('searchBtnTag', searchBtnTag);
@@ -76,19 +86,19 @@ export const Search = {
 
     //从列表进入详情
     intoSearchVideo() {
-        let descTag = Common.id('desc').findOnce();
+        let descTag = Common.id(V.Search.intoSearchVideo[0]).isVisibleToUser(true).findOnce();
         if (descTag) {
             Common.click(descTag);
             return true;
         }
 
-        let container = Common.id('sg6').findOnce();
+        let container = Common.id(V.Search.intoSearchVideo[1]).isVisibleToUser(true).findOnce();
         if (container) {
             Common.click(container);
             return true;
         }
 
-        let titleTag = Common.id('j=').findOnce();
+        let titleTag = Common.id(V.Search.intoSearchVideo[2]).isVisibleToUser(true).findOnce();
         if (titleTag) {
             Common.click(titleTag);
             return true;
@@ -99,13 +109,13 @@ export const Search = {
     //从搜索页进入用户主页
     intoSeachUser(keyword) {
         Log.log("开始寻找抖音号了哈", keyword);
-        let userTag = new UiSelector().descContains('抖音号：' + keyword).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
+        let userTag = UiSelector().descContains(V.Search.intoSeachUser[0] + keyword).isVisibleToUser(true).filter((v) => {
+            return v && v.bounds() && v.bounds().left > 0 && v.bounds().top > 0;
         }).findOnce();
 
         if (!userTag) {
-            userTag = new UiSelector().descContains('抖音号').descContains(keyword).filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
+            userTag = UiSelector().descContains(V.Search.intoSeachUser[1]).descContains(keyword).isVisibleToUser(true).filter((v) => {
+                return v && v.bounds() && v.bounds().left > 0 && v.bounds().top > 0;
             }).findOnce();
         }
 
@@ -119,25 +129,24 @@ export const Search = {
         throw new Error('找不到用户');
     },
 
-    intoLiveRoom(keyword) {
-        let userTag = new UiSelector().descContains('抖音号：' + keyword).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
-        }).findOnce();
+    intoLiveRoom(douyin) {
+        let tag = UiSelector().textContains(douyin).textContains(V.Search.intoUserLiveRoom[1]).filter((v) => {
+            return v && v.bounds() && v.bounds().top >= 0 && v.bounds().left >= 0 && v.bounds().width() > 0 && v.bounds().height() > 0;
+        }).isVisibleToUser(true).filter((v) => {
+            return v && v._id == null;
+        }).findOnce().parent();
 
-        if (!userTag) {
-            userTag = new UiSelector().descContains('抖音号').descContains(keyword).filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
-            }).findOnce();
+        console.log(douyin, V.Search.intoUserLiveRoom[0]);
+        console.log('找进入用户内容', tag);
+        if (!tag) {
+            return false;
         }
 
-        if (userTag) {
-            Log.log('userTag', userTag.bounds(), userTag.bounds().width(), userTag.bounds().height());
-            Gesture.click(userTag.bounds().left - 100, userTag.bounds().centerX());
-            Common.sleep(5000 + 3000 * Math.random());
-            return true;
-        }
-
-        throw new Error('找不到用户');
+        //Common.click(tag);
+        console.log('点击位置：', tag.bounds().left + 100 + 20 * Math.random(), tag.bounds().centerY() * 0.4 + tag.bounds().centerY() * 0.2 * Math.random());
+        Gesture.click(tag.bounds().left + 100 + 20 * Math.random(), tag.bounds().top + tag.bounds().height() * 0.5 * Math.random());//头像高度实际低于parent一些
+        Common.sleep(5000);
+        return true;
     },
 
     backIntoHome() {
@@ -168,89 +177,43 @@ export const Search = {
     intoUserLiveRoom(douyin, type) {
         this.intoSearchList(douyin, type);
 
-        Log.log(new UiSelector().textContains(douyin).filter((v) => {
-            return v && v.id() === null && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().height() > 0;
-        }).findOnce().parent());
-
-        let tag = new UiSelector().textContains(douyin).filter((v) => {
-            Log.log("属性分解", v, v.id(), v.id() == null, v.bounds().top, v.bounds().left, v.bounds().height());
-            return v && v.id() === null && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().height() > 0;
-        }).findOnce().parent().children().findOne(new UiSelector().textContains('直播'));
-
-        if (!tag) {
-            return false;
-        }
-        Common.click(tag);
-        Common.sleep(5000);
-        return true;
+        return this.intoLiveRoom(douyin);
     },
 
     //搜索，进入用户页面，再进入视频页面
     intoUserVideoPage(douyin, type) {
         this.intoSearchList(douyin, type);
-        let tag = new UiSelector().textContains(douyin).filter((v) => {
-            return v && v.id() === null && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().height() > 0;
+        let topTag = Common.id(V.Search.userList[0]).isVisibleToUser(true).findOne();
+        let tag = UiSelector().textContains(douyin).isVisibleToUser(true).filter((v) => {
+            return v && v._id == null && v.bounds().top > topTag.bounds().top + topTag.bounds().height();
         }).findOnce()
+        Log.log("进入搜索用户页面：", tag);
         if (!tag) {
             return false;
         }
         Common.click(tag);
         Common.sleep(2500);
 
-        let workTag = new UiSelector().id('android:id/text1').descContains('作品').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().height() > 0 && v.bounds().top < Device.height() - v.bounds().height();
-        }).findOnce();
-        if (workTag) {
-            Common.click(workTag);
-            Log.log('点击workTag');
-            Common.sleep(2000);
-
-            Gesture.press(workTag.bounds().centerX(), workTag.bounds().centerY(), 50);
-            Common.sleep(1500);
-        }
-
-        let rp = 3;
-        let container;
-        while (rp-- > 0) {
-            container = Common.id('container').filter((v) => {
-                return v && v.bounds().top > 0 && v.bounds().height() + v.bounds().top < Device.height() - 200 && !v.children().findOne(new UiSelector().descContains('置顶'));
-            }).findOnce();
-            if (!container) {
-                Common.swipe(0, 0.5);
-                Common.sleep(2000);
-                continue;
-            }
-            break;
-        }
-
-        if (!container) {
-            throw new Error('找不到视频');
-        }
-
-        Log.log(container);
-        Common.click(container);
-        Common.sleep(5000);
-        return true;
+        return Video.intoUserVideo();
     },
 
     contents: [],
     userList(getAccounts, decCount, DyUser, DyComment, DyVideo, setAccount, getMsg, params) {
         let settingData = params.settingData;
         Log.log('开始执行用户列表');
-        let textTag = Common.id('u-o').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().height() > 0;
-        }).findOnce();
+        let textTag = Common.id(V.Search.userList[0]).isVisibleToUser(true).findOnce();//需注意V.Search.userList不仅仅在当前方法使用
         let rpCount = 0;
         let arr = [];
         let errorCount = 0;
+        let _top = textTag.bounds().top;
+        let _height = textTag.bounds().height();
 
         while (true) {
-            let tags = new UiSelector().className('android.widget.FrameLayout').focusable(true).filter((v) => {
-                return v && v.bounds() && v.bounds().left === 0 && v.bounds().top > textTag.bounds().top + textTag.bounds().height() && v.bounds().top + v.bounds().height() < Device.height() && !!v.children() && !!v.children().findOne(new UiSelector().textContains('粉丝'));
+            let tags = UiSelector().className(V.Search.userList[1]).isVisibleToUser(true).focusable(true).filter((v) => {
+                return v && v.bounds() && v.bounds().left === 0 && v.bounds().top > _top + _height && v.bounds().top + v.bounds().height() < Device.height() && !!v.children() && !!v.children().findOne(UiSelector().textContains(V.Search.userList[2]));
             }).find();
-            Log.log('tags', tags.length);
-            Log.log("tags", tags[0]._addr);
 
+            Log.log('tags', tags.length);
             if (tags.length === 0) {
                 errorCount++;
                 Log.log('containers为0');
@@ -267,8 +230,8 @@ export const Search = {
                     continue;
                 }
 
-                let child = tags[i].children().findOne(new UiSelector().textContains('粉丝'));
-                if (!child || !child.text() || !child.bounds() || child.bounds().left < 0 || child.bounds().width() < 0 || child.bounds().top < 0 || child.bounds().height() < 0 || child.bounds().height() + child.bounds().top > Device.height()) {
+                let child = tags[i].children().findOne(UiSelector().isVisibleToUser(true).textContains(V.Search.userList[2]));
+                if (!child || !child.text()) {
                     continue;
                 }
 
@@ -277,19 +240,12 @@ export const Search = {
                 }
 
                 let text = child.text().split(/[,|，]/);
-                let account = text[2].replace('抖音号：', '').replace('按钮', '');
+                let account = text[2].replace(V.Search.userList[3], '').replace('按钮', '');
                 Log.log(account, 'account');
 
                 if (!account || this.contents.includes(account) || getAccounts(account)) {
                     continue;
                 }
-
-                // Log.log(child);
-                // let fansMatch = /粉丝[:：\s]+(\d+)万?[,，]/.exec(child.text());
-                // if (!fansMatch || fansMatch[1] * 1 > params['fansCount']) {
-                //     Log.log(fansMatch[1] * 1, params['fansCount']);
-                //     continue;
-                // }
 
                 try {
                     Common.click(child);//部分机型超出范围
@@ -299,6 +255,7 @@ export const Search = {
                 Common.sleep(2000 + 1000 * Math.random());
 
                 //看看有没有视频，有的话，操作评论一下，按照20%的频率即可
+                statistics.viewUser();
                 let isPrivateAccount = DyUser.isPrivate();
                 Log.log('是否是私密账号：' + isPrivateAccount);
                 if (isPrivateAccount) {
@@ -352,9 +309,10 @@ export const Search = {
                 let commentRate = Math.random() * 100;
                 let zanRate = Math.random() * 100;
 
-                Log.log('即将进入视频');
+                Log.log('即将进入视频', commentRate, zanRate);
                 if ((settingData.isFirst || commentRate < settingData.commentRate * 1 || zanRate < settingData.zanRate * 1) && DyVideo.intoUserVideo()) {
                     //点赞
+                    Log.log('点赞频率检测', zanRate , settingData.zanRate * 1);
                     if (settingData.isFirst || zanRate <= settingData.zanRate * 1) {
                         DyVideo.clickZan();
                     }
@@ -388,7 +346,7 @@ export const Search = {
                 Log.log(account, getAccounts(account));
                 this.contents.push(account);
                 Common.back(1, 800);//用户页到列表页
-                if (Common.id('v0f').filter((v) => {
+                if (Common.id(V.Search.userList[4]).filter((v) => {
                     return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0;
                 }).findOnce()) {
                     Common.back(1, 800);//偶尔会出现没有返回回来的情况，这里加一个判断
@@ -417,3 +375,5 @@ export const Search = {
         }
     }
 }
+
+module.exports = { Search };

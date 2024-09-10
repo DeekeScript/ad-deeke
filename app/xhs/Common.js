@@ -1,12 +1,11 @@
-
 import { storage as cStorage } from 'common/storage.js';
-import { V } from 'version/V.js';
+import { XhsV as V } from 'version/XhsV.js';
 
 const Common = {
     //封装的方法
     logs: [],
     id(name) {
-        return UiSelector().id('com.ss.android.ugc.aweme:id/' + name);
+        return UiSelector().id('com.xingin.xhs:id/' + name);
     },
 
     aId(name) {
@@ -20,7 +19,7 @@ const Common = {
     },
 
     packageName() {
-        return 'com.ss.android.ugc.aweme';
+        return 'com.xingin.xhs';
     },
 
     backHome() {
@@ -29,9 +28,8 @@ const Common = {
         while (i++ < 5) {
             let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
             if (!homeTag) {
-                Log.log(this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce());
                 this.back();
-                this.sleep(1000);
+                this.sleep(2000);
                 continue;
             }
             Log.log("找到了homeTag");
@@ -72,7 +70,7 @@ const Common = {
             this.sleep(2000);
         }
 
-        App.launch('com.ss.android.ugc.aweme');//打开抖音
+        App.launch('com.xingin.xhs');//打开抖音
         this.sleep(8000);
     },
 
@@ -112,8 +110,8 @@ const Common = {
             return 0;
         }
 
-        if (text[0].indexOf('w') !== -1 || text[0].indexOf('万') !== -1) {
-            text[0] = text[0].replace('w', '').replace('万', '') * 10000;
+        if (text[0].indexOf('w') !== -1 || text[0].indexOf('W') !== -1 || text[0].indexOf('万') !== -1) {
+            text[0] = text[0].replace('w', '').replace('W', '').replace('万', '') * 10000;
         }
         return text[0] * 1;
     },
@@ -141,6 +139,20 @@ const Common = {
         }
     },
 
+    swipeRecommendListOp() {
+        this.swipeFansListOpTarge = this.id(V.Common.swipeFansListOp[0]).scrollable(true).filter((v) => {
+            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
+        }).findOnce();
+
+        if (this.swipeFansListOpTarge) {
+            this.swipeFansListOpTarge.scrollForward();
+        } else {
+            Log.log('滑动失败');
+        }
+        //Log.log(this.swipeFansListOpTarge);
+    },
+
+
     swipeFansListOp() {
         this.swipeFansListOpTarge = this.id(V.Common.swipeFansListOp[0]).scrollable(true).filter((v) => {
             return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
@@ -163,8 +175,6 @@ const Common = {
         } else {
             Log.log('滑动失败');
         }
-        //Log.log(this.swipeFocusListOpTarge);
-
     },
 
     swipeCommentListOp() {
@@ -179,81 +189,28 @@ const Common = {
         //Log.log(this.swipeCommentListOpTarget);
     },
 
-    swipeSearchTabToLeft() {
-        let tag = this.id(V.C.userListTop).isVisibleToUser(true).findOne() || this.id(V.C.userListTop).findOne();
-        if (tag) {
-            tag.scrollForward();
-        } else {
-            Log.log('滑动列表');
-        }
-    },
-
     //关闭弹窗
-    closeAlert(type) {
+    closeAlert() {
         this.log('开启线程监听弹窗');
         let k = 0;
 
         while (true) {
             //检测是否只有当前的线程，是的话则关闭
-            // console.log("---线程数量：" + Engines.getEngines());
-            // if (Engines.getEngines() == 1) {
-            //     Engines.close();
-            // }
-
-            if (!type) {
-                this.sleep(10000);
-                continue;
-            }
-
-            k++;
-            if (k > 1000) {
-                k = 0;
-            }
-            let f = function (v) {
-                return v && v.bounds() && v.bounds().top > Device.height() / 5 && v.bounds().top + v.bounds().height() < Device.height() * 0.8 && v.bounds().left > Device.width() / 10 && v.bounds().left + v.bounds().width() < Device.width() * 0.9;//只有在中间的位置才是弹窗
-            }
-
             try {
-                let a = null;
-                if (!a) {
-                    a = UiSelector().text("稍后").clickable(true).filter(f).isVisibleToUser(true).findOne() || UiSelector().text("以后再说").clickable(true).isVisibleToUser(true).findOne() || UiSelector().text("我知道了").clickable(true).filter(f).isVisibleToUser(true).findOne() || UiSelector().text("直接退出").clickable(true).filter(f).isVisibleToUser(true).findOne();
-                }
-                if (!a) {
-                    a = UiSelector().text("下次再说").clickable(true).isVisibleToUser(true).findOne() || UiSelector().text("满意").clickable(true).filter(f).isVisibleToUser(true).findOne() || UiSelector().text("不感兴趣").clickable(true).filter(f).isVisibleToUser(true).findOne();
-                }
-
-                if (!a) {
-                    a = UiSelector().text("好的").clickable(true).filter(f).isVisibleToUser(true).findOne() || UiSelector().text("确定").clickable(true).filter(f).isVisibleToUser(true).findOne() || UiSelector().text("取消").clickable(true).filter(f).isVisibleToUser(true).findOne();
-                }
-
-                if (!a) {
-                    a = UiSelector().text("拒绝").clickable(true).isVisibleToUser(true).findOne() || UiSelector().text("拒绝").desc('拒绝').clickable(true).filter(f).isVisibleToUser(true).findOne();
-                }
-
-                let ff = function (v) {
-                    return v && v.bounds() && v.bounds().top > Device.height() / 5 && v.bounds().top + v.bounds().height() < Device.height() * 0.8 && v.bounds().left > Device.width() / 2 && v.bounds().left + v.bounds().width() < Device.width() * 0.9;//只有在中间的位置才是弹窗
-                }
-                let b = UiSelector().clickable(true).filter(ff).desc('关闭').isVisibleToUser(true).findOnce();
-                //不是主页里面的“删除”关注其他用户
-                if (b) {
-                    b.click();
-                    Log.log("关闭：b");
-                }
-
-                if (!a) {
-                    a = UiSelector().text('暂不公开').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().text('忽略本次').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().descContains('不再提醒').clickable(true).filter(f).isVisibleToUser(true).findOne();
-                }
-
+                let a = this.id('close').findOne();
                 if (a) {
                     a.click();
                     Log.log(a);
                     Log.log("可能的弹窗点击了");
                 }
 
+                this.sleep(200);
                 if (k % 50 == 0) {
                     Log.log("对象清理");
                     System.cleanUp();//清理线程垃圾
+                    k = 0;
                 }
+                k++;
             } catch (e) {
                 console.log("线程中断状态：", Engines.isInterrupted());
                 if (Engines.isInterrupted()) {
@@ -262,10 +219,6 @@ const Common = {
                 }
                 this.log("close dialog 异常了");
                 this.log(e);
-            }
-
-            if (type) {
-                break;
             }
         }
     },
@@ -332,32 +285,6 @@ const Common = {
             }
         }
         return false;
-    },
-
-    noContainsWord(noContain, title) {
-        noContain = this.splitKeyword(noContain);
-        for (let con of noContain) {
-            if (typeof (con) === 'string' && title.indexOf(con) !== -1) {
-                return false;
-            }
-
-            if (typeof (con) === 'object') {
-                let len = 0;
-                for (let i in con) {
-                    if (title.indexOf(con[i]) !== -1) {
-                        len++;
-                    }
-                }
-                if (len === con.length) {
-                    return false;
-                }
-            }
-        }
-        return noContain;
-    },
-
-    playAudio(file) {
-        media.playMusic(file);
     },
 }
 

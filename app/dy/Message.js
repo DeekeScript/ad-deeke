@@ -2,12 +2,12 @@ import { Common } from 'app/dy/Common.js';
 import { Comment } from 'app/dy/Comment.js';
 import { User } from 'app/dy/User.js';
 import { Video } from 'app/dy/Video.js';
+import { statistics } from 'common/statistics';
+import { V } from 'version/V.js';
 
-export let Message = {
+let Message = {
     showAll() {
-        let showTag = Common.id('text').text('查看全部').clickable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-        }).findOnce();
+        let showTag = Common.id(V.Message.showAll[0]).text(V.Message.showAll[1]).clickable(true).isVisibleToUser(true).findOnce();
 
         if (showTag) {
             showTag.click();
@@ -30,13 +30,10 @@ export let Message = {
         let rp = 3;
         while (rp--) {
             //读取消息数量
-            let commentCountTags = Common.id('red_tips_count_view').descContains('未读消息').filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-            }).find();
-
+            let commentCountTags = Common.id(V.Message.backMsg[0]).descContains(V.Message.backMsg[1]).isVisibleToUser(true).find();
             if (!commentCountTags || commentCountTags.length === 0) {
                 Common.sleep(10 * 1000);//休眠10秒
-                Log.log('没消息，休息10秒')
+                Log.log('没消息，休息10秒');
                 return false;
             }
 
@@ -45,7 +42,7 @@ export let Message = {
                     continue;
                 }
 
-                let msgTag = commentCountTags[i].parent().children().findOne(Common.id('tv_title').descContains('互动消息'));
+                let msgTag = commentCountTags[i].parent().children().findOne(Common.id(V.Message.backMsg[2]).descContains(V.Message.backMsg[3]));
                 if (!msgTag) {
                     continue;
                 }
@@ -55,9 +52,7 @@ export let Message = {
                 Common.sleep(3000 + 2000 * Math.random());
             }
 
-            let hudongTag = Common.id('tv_title').descContains('互动消息').filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-            }).findOnce();
+            let hudongTag = Common.id(V.Message.backMsg[2]).descContains(V.Message.backMsg[3]).isVisibleToUser(true).findOnce();
 
             if (hudongTag) {
                 Common.click(hudongTag);
@@ -74,7 +69,7 @@ export let Message = {
         let stopCount = 0;
 
         while (true) {
-            let containers = Common.id('jf').descMatches(/[\s\S]+[小时|分钟]前，[\s\S]+/).clickable(true).className('android.view.ViewGroup').find();
+            let containers = Common.id(V.Message.backMsg[4]).descMatches("[\\s\\S]+[小时|分钟]前，[\\s\\S]+").isVisibleToUser(true).clickable(true).className(V.Message.backMsg[5]).find();
             if (containers.length === 0) {
                 stopCount++;
             }
@@ -96,13 +91,13 @@ export let Message = {
 
                 contents.push(containers[i].desc());
 
-                let zanTag = containers[i].children().findOne(Common.id('c2s').descContains('赞'));
+                let zanTag = containers[i].children().findOne(Common.id(V.Message.backMsg[6]).descContains(V.Message.backMsg[7]));
                 if (zanTag) {
                     zanTag.click();
                     Common.sleep(500);
                 }
 
-                let commentTag = containers[i].children().findOne(Common.id('c5f').descContains('回复评论'));
+                let commentTag = containers[i].children().findOne(Common.id(V.Message.backMsg[8]).descContains(V.Message.backMsg[9]));
                 if (!commentTag) {
                     continue;
                 }
@@ -111,15 +106,12 @@ export let Message = {
                     Common.sleep(2000 + 1000 * Math.random());
                 }
 
-                let iptTag = Common.id('dg0').filter((v) => {
-                    return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-                }).findOnce();
-
+                let iptTag = Common.id(V.Message.backMsg[10]).isVisibleToUser(true).findOnce();
                 if (iptTag) {
                     Comment.iptEmoj(1 + Math.round(Math.random() * 3));
                     let rp = 3;
                     while (rp--) {
-                        let submitTag = Common.id('ti6').findOnce();
+                        let submitTag = Common.id(V.Message.backMsg[11]).findOnce();
                         if (!submitTag) {
                             break;
                         }
@@ -148,21 +140,16 @@ export let Message = {
     },
 
     search(account) {
-        let searchTag = Common.id('k0t').clickable(true).desc('搜索').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-        }).findOnce();
+        let searchTag = Common.id(V.Message.search[0]).clickable(true).desc(V.Message.search[1]).isVisibleToUser(true).findOnce();
         if (!searchTag) {
             throw new Error('遇到错误，找不到输入框');
         }
         Common.click(searchTag);
         Common.sleep(2000);
 
-        let iptTag = Common.id('et_search_kw').clickable(true).text('搜索').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-        }).findOnce();
-
+        let iptTag = Common.id(V.Message.search[2]).clickable(true).text(V.Message.search[1]).isVisibleToUser(true).findOnce();
         if (!iptTag) {
-            Log.log(Common.id('et_search_kw').clickable(true).text('搜索').findOne());
+            Log.log(Common.id(V.Message.search[2]).clickable(true).text(V.Message.search[1]).isVisibleToUser(true).findOne());
             throw new Error('遇到错误，找不到输入框-2');
         }
 
@@ -178,17 +165,12 @@ export let Message = {
         while (true) {
             let rp = 0;
             let allRp = 0;
-            let groupTag = Common.id('c6k').text('群聊').filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left > 0 && v.bounds().width() > 0;
-            }).findOnce();
+            let groupTag = Common.id(V.Message.intoFansGroup[0]).text(V.Message.intoFansGroup[1]).isVisibleToUser(true).findOnce();
             if (!groupTag) {
                 throw new Error('找不到群聊');
             }
 
-            let contains = Common.id('content_container').filter((v) => {
-                return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().left >= 0 && v.bounds().width() > 0;
-            }).find();
-
+            let contains = Common.id(V.Message.intoFansGroup[2]).isVisibleToUser(true).find();
             if (contains.length === 0) {
                 throw new Error('找不到群聊-2');
             }
@@ -203,7 +185,7 @@ export let Message = {
                     continue;
                 }
 
-                let titleTag = contains[i].children().findOne(Common.id('ojv'));
+                let titleTag = contains[i].children().findOne(Common.id(V.Message.intoFansGroup[3]));
                 if (!titleTag || !titleTag.text()) {
                     continue;
                 }
@@ -235,9 +217,7 @@ export let Message = {
     },
 
     intoGroupUserList(contents, getMsg, machineInclude, machineSet) {
-        let tag = Common.id('r=7').desc('更多').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-        }).findOnce();
+        let tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
 
         if (!tag) {
             throw new Error('找不到“更多“');
@@ -245,20 +225,7 @@ export let Message = {
         tag.click();
         Common.sleep(2000 + 2000 * Math.random());
 
-        // let intoGroupUserTag = Common.id('f+a').filter((v) => {
-        //     return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left >= 0;
-        // }).findOnce();
-
-        // if (!intoGroupUserTag) {
-        //     throw new Error('找不到“查看群成员“');
-        // }
-
-        // intoGroupUserTag.click();
-        // Common.sleep(2000 + 2000 * Math.random());
-
-        let groupTag = new UiSelector().descContains('群成员按钮').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left >= 0;
-        }).findOnce();
+        let groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).isVisibleToUser(true).findOnce();
 
         if (!groupTag) {
             throw new Error('找不到“groupTag“');
@@ -268,51 +235,35 @@ export let Message = {
         Common.sleep(2300);
         Log.log(groupTag);
 
-        let groupTag2 = new UiSelector().textContains('查看群成员').filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left >= 0;
-        }).findOnce();
+        let groupTag2 = UiSelector().textContains(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOnce();
 
         if (groupTag2) {
             Common.click(groupTag2);
             Common.sleep(3000);
         }
 
-        // let searchTag = new UiSelector().textContains('搜索群成员').filter((v) => {
-        //     return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-        // }).findOnce();
-
-        // if (!searchTag) {
-        //     throw new Error('找不到“searchTag“');
-        // }
-
         let rpCount = 0;
         while (true) {
             let rp = 0;
             let count = 0
-            let contains = Common.id('content').find();
+            let contains = Common.id(V.Message.intoGroupUserList[4]).find();
             for (let i in contains) {
                 if (isNaN(i)) {
                     continue;
                 }
 
                 count++;
-                //Log.log(contains[i].bounds().top, groupTag.bounds().top);
                 if (contains[i].bounds().top < groupTag.bounds().top) {
                     rp++;
                     continue;
                 }
-
-                // if (contains[i].bounds().top <= searchTag.bounds().top + searchTag.bounds().height()) {
-                //     rp++;
-                //     continue;
-                // }
 
                 if (contains[i].bounds().top > Device.height()) {
                     rp++;
                     continue;
                 }
 
-                let titleTag = contains[i].children().findOne(Common.id('tv_name')) || contains[i].children().findOne(Common.id('ojv'));
+                let titleTag = contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[5])) || contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[6]));
                 if (!titleTag || !titleTag.text()) {
                     rp++;
                     continue;
@@ -325,6 +276,7 @@ export let Message = {
 
                 contains[i].click();
                 Common.sleep(2000 + 2000 * Math.random());
+                statistics.viewUser();
                 let isPrivateAccount = User.isPrivate();
                 if (isPrivateAccount) {
                     Common.back();
@@ -350,7 +302,6 @@ export let Message = {
                         Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
                         Log.log('评论了');
                         Common.back(2, 800);
-                        //this.commentData.push(tmp.commentMsgTime);//将评论的数据写上  这里的评论不计算频率
                     } else {
                         Common.back();//从视频页面到用户页面
                     }
@@ -378,3 +329,5 @@ export let Message = {
         }
     }
 }
+
+module.exports = { Message };
