@@ -1,4 +1,4 @@
-export let baiduImageRead = {
+let baiduImageRead = {
     apiKey: '',
     secretKey: '',
     url: 'https://aip.baidubce.com/rest/2.0/ocr/v1/numbers',
@@ -38,3 +38,5 @@ export let baiduImageRead = {
         return re['access_token'];
     }
 }
+
+module.exports = baiduImageRead;

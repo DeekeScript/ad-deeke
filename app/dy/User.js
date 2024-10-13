@@ -1,6 +1,6 @@
-import { Common } from 'app/dy/Common.js';
-import { statistics } from 'common/statistics.js';
-import { V } from 'version/V.js';
+let Common = require('app/dy/Common.js');
+let statistics = require('common/statistics.js');
+let V = require('version/V.js');
 
 const User = {
     //保证执行的时候在哪个页面，执行完成也是哪个界面
@@ -37,13 +37,14 @@ const User = {
             return false;
         }
         Common.click(textTag);
+        Common.sleep(500);
 
         textTag = Common.id(V.User.privateMsg[6]).findOnce();
         let iText = '';
         for (let i = 0; i < msg.length; i++) {
             iText = msg.substring(0, i + 1);
             textTag.setText(iText);
-            Common.sleep(500 + 1000 * Math.random());
+            Common.sleep(200 + 300 * Math.random());
         }
 
         Common.sleep(500);
@@ -402,7 +403,7 @@ const User = {
                 Log.log('containers为0');
             }
 
-            arr.push(containers ? (containers[0]?._addr) : null);
+            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
             if (arr.length > 2) {
                 arr.shift();
             }
@@ -551,7 +552,7 @@ const User = {
                 Log.log('containers为0');
             }
 
-            arr.push(containers ? (containers[0]?._addr) : null);
+            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
             if (arr.length >= 3) {
                 arr.shift();
             }
@@ -779,7 +780,7 @@ const User = {
                 Log.log('containers为0');
             }
 
-            arr.push(containers ? (containers[0]?._addr) : null);
+            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
             if (arr.length >= 3) {
                 arr.shift();
             }
@@ -1079,8 +1080,106 @@ const User = {
             return false;
         }
 
-        return Common.id(V.User.hasAlertInput[0]).findOne()
+        return Common.id(V.User.hasAlertInput[0]).findOne();
     },
+
+    zanHead() {
+        Log.log("准备点击头像");
+        let header = Common.id(V.User.head[0]).isVisibleToUser(true).findOne();
+        Log.log(header);
+        if (header) {
+            Common.click(header);
+            Common.sleep(1000 + 1000 * Math.random());
+            let zanTag = Common.id(V.User.head[1]).textContains(V.User.head[2]).isVisibleToUser(true).findOne();
+            Common.click(zanTag);
+            Common.sleep(1000);
+            Common.back(1);
+            Common.sleep(1000);
+        } else {
+            Common.back();
+            Common.sleep(1000);
+        }
+    },
+
+    intoLive() {
+        let header = Common.id(V.User.head[0]).isVisibleToUser(true).findOne();
+        Log.log(header);
+        if (header) {
+            Common.click(header);
+            return true;
+        }
+        return false;
+    },
+
+    privateMsgCard(index) {
+        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
+            Log.log('私密账号');
+            return false;
+        }
+
+        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+        if (!settingTag) {
+            Log.log('找不到setting按钮');
+            return false;
+        }
+
+        Common.click(settingTag);
+        Log.log("私信");
+        Common.sleep(1000);
+
+        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
+        if (!sendTag) {
+            Log.log('找不到发私信按钮');
+            return false;
+        }
+
+        Common.click(sendTag.parent());
+        Common.sleep(4000 + 2000 * Math.random());
+
+        let tag = Common.id(V.User.more[0]).descContains(V.User.more[1]).findOnce();
+        if (!tag) {
+            Log.log('找不到“更多”');//点击更多，弹出“经营工具”
+            Common.back();
+            return false;
+        }
+
+        Common.click(tag);
+        Common.sleep(500);
+
+        let jingyingTag = Common.id(V.User.more[2]).textContains(V.User.more[3]).findOne();
+        Common.click(jingyingTag);
+        Common.sleep(4000 + 1200 * Math.random());
+
+        let highTag = UiSelector().textContains(V.User.more[4]).descContains(V.User.more[4]).isVisibleToUser(true).findOne();
+        Log.log(highTag);
+        if (!highTag) {
+            Log.log('没有找到高级在线预约');
+            return false;
+        }
+
+        Log.log('点击高级在线预约');
+        Common.click(highTag);
+        Common.sleep(3000 + 1200 * Math.random());
+
+        let cardsTag = UiSelector().textContains(V.User.more[5]).descContains(V.User.more[5]).isVisibleToUser(true).findOne();
+        if (!cardsTag) {
+            Log.log('没有卡片');
+            return false;
+        }
+
+        Gesture.click(cardsTag.bounds().left + Device.width() / 2 * Math.random(), cardsTag.bounds().top - 160 * Math.random());
+        Common.sleep(500 + 500 * Math.random());
+
+        let sendTags = UiSelector().textContains(V.User.more[6]).descContains(V.User.more[6]).clickable(true).isVisibleToUser(true).findOne();
+        if (!sendTags) {
+            Log.log('没有发送按钮');
+            return false;
+        }
+
+        Log.log(sendTags.bounds());
+        Common.click(sendTags);
+        Common.sleep(1000 + 1000 * Math.random());
+    }
 }
 
-module.exports = { User };
+module.exports = User;

@@ -1,5 +1,5 @@
-import { XhsV as V } from "version/XhsV.js";
-import { Common } from "app/xhs/Common.js";
+let V = require("version/XhsV.js");
+let Common = require("app/xhs/Common.js");
 
 let Index = {
     intoCity() {
@@ -103,7 +103,21 @@ let Index = {
             return Common.id(V.Work.head[0]).isVisibleToUser(true).findOne();
         }
         return Common.id(V.Work.videoNickname[0]).isVisibleToUser(true).findOne();
-    }
+    },
+
+    //从主页进入搜索页
+    intoSearchPage() {
+        Common.sleep(3000);
+        let searchTag = Common.id(V.Index.intoSearchPage[0]).descContains(V.Index.intoSearchPage[1]).isVisibleToUser(true).findOneBy(5000);
+        Log.log(searchTag);
+        if (!searchTag) {
+            throw new Error('找不到搜索框，无法进入搜索页');
+        }
+        //searchTag.click();
+        Common.click(searchTag);
+        Common.sleep(2000);
+        return true;
+    },
 }
 
-module.exports = { Index };
+module.exports = Index;

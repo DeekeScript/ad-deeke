@@ -1,9 +1,9 @@
-import { storage } from "common/storage.js";
-import { XhsV as V } from "version/XhsV.js";
-import { Common } from "app/xhs/Common.js";
-import { Index } from "app/xhs/Index.js";
-import { User } from "app/xhs/User.js";
-import { Work } from "app/xhs/Work.js";
+let storage = require("common/storage.js");
+let V = require("version/XhsV.js");
+let Common = require("app/xhs/Common.js");
+let Index = require("app/xhs/Index.js");
+let User = require("app/xhs/User.js");
+let Work = require("app/xhs/Work.js");
 
 let xhs = {
     config: {
@@ -117,7 +117,8 @@ let xhs = {
                     }
 
                     if (currentCommentRate < this.config.commentRate) {
-                        let msg = getMsg(0, title)?.msg || '';
+                        let ttt = getMsg(0, title);
+                        let msg = ttt ? ttt.msg : '';
                         Log.log('评论内容：', msg);
                         if (msg) {
                             Work.msg(type, msg);
@@ -154,4 +155,4 @@ let xhs = {
     }
 }
 
-module.exports = { xhs };
+module.exports = xhs;

@@ -1,4 +1,4 @@
-export let db = {
+let db = {
     _table: undefined,
     _limit: limit,
     _offset: offset,
@@ -28,3 +28,5 @@ export let db = {
         
     }
 }
+
+module.exports = db;

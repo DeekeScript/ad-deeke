@@ -1,6 +1,6 @@
-import { Common } from 'app/dy/Common.js';
-import { statistics } from 'common/statistics.js';
-import { V } from 'version/V.js';
+let Common = require('app/dy/Common.js');
+let statistics = require('common/statistics.js');
+let V = require('version/V.js');
 
 const Video = {
     next() {
@@ -468,4 +468,4 @@ const Video = {
 }
 
 
-module.exports = { Video };
+module.exports = Video;

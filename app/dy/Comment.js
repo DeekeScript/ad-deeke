@@ -1,7 +1,7 @@
-import { Common } from 'app/dy/Common.js';
-import { storage } from 'common/storage.js';
-import { statistics } from 'common/statistics.js';
-import { V } from 'version/V.js';
+let Common = require('app/dy/Common.js');
+let storage = require('common/storage.js');
+let statistics = require('common/statistics.js');
+let V = require('version/V.js');
 
 const Comment = {
     tag: undefined,//当前的tag标签
@@ -30,8 +30,9 @@ const Comment = {
     },
 
     getBackTag(tag) {
-        this.tag = tag;
-        return this.getTimeTag();
+        return Common.id(V.Comment.getBackMsg[0]).filter(v => {
+            return v.bounds().left >= tag.bounds().left && v.bounds().top >= tag.bounds().top && v.bounds().top + v.bounds().height() <= tag.bounds().top + tag.bounds().height();
+        }).findOne();
     },
 
     getZanTag(tag) {
@@ -93,7 +94,7 @@ const Comment = {
     //data 是getList返回的参数
     clickZan(data) {
         let zanTag = this.getZanTag(data.tag);
-        zanTag?.parent()?.click();
+        zanTag && zanTag.parent() && zanTag.parent().click();
         statistics.zanComment();
         //Common.click(zanTag);
         return true;
@@ -151,7 +152,9 @@ const Comment = {
     },
 
     getList() {
-        let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).find();
+        let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
+            return v && v.bounds() && v.bounds().left <= 10;//过滤评论回复内容
+        }).find();
         Log.log("数量：", contains.length);
         let contents = [];
         let data = {};
@@ -221,10 +224,8 @@ const Comment = {
     //data 是getList返回的参数 评论
     backMsg(data, msg) {
         let backTag = this.getBackTag(data.tag);
-        //Log.log(data);
-        //Common.click(backTag);
-        backTag.setClickable(true);
-        backTag.click();
+        Log.log(backTag.bounds());
+        Common.click(backTag);
         Common.sleep(1000 + 2000 * Math.random());
 
         iptTag = Common.id(V.Comment.backMsg[0]).find();
@@ -239,7 +240,7 @@ const Comment = {
         for (let i in msg) {
             input += msg[i];
             iptTag.setText(input);
-            Common.sleep(1000 + Math.random() * 1000);//每个字1-2秒
+            Common.sleep(200 + Math.random() * 300);//每个字1-2秒
         }
         Common.sleep(Math.random() * 1000);
 
@@ -283,7 +284,7 @@ const Comment = {
         for (let i = 0; i < msg.length; i++) {
             iText = msg.substring(0, i + 1);
             iptTag.setText(iText);
-            Common.sleep(500 + 1000 * Math.random());
+            Common.sleep(100 + 300 * Math.random());
         }
 
         Common.sleep(500 + Math.random() * 1000);
@@ -388,7 +389,7 @@ const Comment = {
 
         while (true) {
             let tvTag = Common.id(V.Comment.commentAtUser[2]).find();
-            arr.push(tvTag ? (tvTag[0]?._addr) : null);
+            arr.push(tvTag ? (tvTag[0] && tvTag[0]._addr) : null);
             if (arr.length > 2) {
                 arr.shift();
             }
@@ -661,4 +662,4 @@ const Comment = {
     }
 }
 
-module.exports = { Comment };
+module.exports = Comment;

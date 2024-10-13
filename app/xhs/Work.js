@@ -1,5 +1,5 @@
-import { Common } from "app/xhs/Common.js";
-import { XhsV as V } from "version/XhsV.js"
+let Common = require("app/xhs/Common.js");
+let V = require("version/XhsV.js");
 
 let Work = {
     getZanTag() {
@@ -23,6 +23,32 @@ let Work = {
         let zanTag = this.getZanTag();
         if (zanTag) {
             return zanTag.isSelected();
+        }
+
+        return false;
+    },
+
+    getCollectTag() {
+        return Common.id(V.Work.collect[0]).isVisibleToUser(true).findOne() || Common.id(V.Work.collect[1]).isVisibleToUser(true).findOne();
+    },
+
+    collect() {
+        if (this.isCollect()) {
+            Log.log('已经点过赞了');
+            return;
+        }
+
+        let collectTag = this.getCollectTag();
+        if (collectTag) {
+            Common.click(collectTag);
+            Log.log('点赞成功');
+        }
+    },
+
+    isCollect() {
+        let collectTag = this.getCollectTag();
+        if (collectTag) {
+            return collectTag.isSelected();
         }
 
         return false;
@@ -176,7 +202,29 @@ let Work = {
 
         tag.click();
         return true;
+    },
+
+    getNickname() {
+        let tag = Common.id(V.Work.nickname).isVisibleToUser(true).findOne();
+        return tag ? tag.text() : '';
+    },
+
+    getContent() {
+        let tag = Common.id(V.Work.title).isVisibleToUser(true).findOne();
+        return tag ? tag.text() : '';
+    },
+
+    getType() {
+        if (Common.id(V.Work.nickname).isVisibleToUser(true).findOne()) {
+            return 0;//笔记
+        }
+
+        if (Common.id(V.Work.VideoNickname).isVisibleToUser(true).findOne()) {
+            return 1;//视频
+        }
+
+        return -1;
     }
 }
 
-module.exports = { Work };
+module.exports = Work;

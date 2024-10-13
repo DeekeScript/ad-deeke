@@ -1,6 +1,6 @@
-import { storage } from 'common/storage.js';
+let storage = require('common/storage.js');
 
-export let statistics = {
+let statistics = {
     getDate() {
         let d = new Date();
         let m = d.getMonth() + 1;
@@ -10,49 +10,49 @@ export let statistics = {
 
     viewVideo() {
         let time = this.getDate();
-        let count = storage.get('s_viewVideo' + time) || 0;
+        let count = storage.get('s_viewVideo' + time, 'int') || 0;
         storage.set('s_viewVideo' + time, count + 1);
     },
 
     viewTargetVideo() {
         let time = this.getDate();
-        let count = storage.get('s_viewTargetVideo' + time) || 0;
+        let count = storage.get('s_viewTargetVideo' + time, 'int') || 0;
         storage.set('s_viewTargetVideo' + time, count + 1);
     },
 
     zan() {
         let time = this.getDate();
-        let count = storage.get('s_zan' + time) || 0;
+        let count = storage.get('s_zan' + time, 'int') || 0;
         storage.set('s_zan' + time, count + 1);
     },
 
     comment() {
         let time = this.getDate();
-        let count = storage.get('s_comment' + time) || 0;
+        let count = storage.get('s_comment' + time, 'int') || 0;
         storage.set('s_comment' + time, count + 1);
     },
 
     zanComment() {
         let time = this.getDate();
-        let count = storage.get('s_zanComment' + time) || 0;
+        let count = storage.get('s_zanComment' + time, 'int') || 0;
         storage.set('s_zanComment' + time, count + 1);
     },
 
     privateMsg() {
         let time = this.getDate();
-        let count = storage.get('s_privateMsg' + time) || 0;
+        let count = storage.get('s_privateMsg' + time, 'int') || 0;
         storage.set('s_privateMsg' + time, count + 1);
     },
 
     focus() {
         let time = this.getDate();
-        let count = storage.get('s_focus' + time) || 0;
+        let count = storage.get('s_focus' + time, 'int') || 0;
         storage.set('s_focus' + time, count + 1);
     },
 
     viewUser() {
         let time = this.getDate();
-        let count = storage.get('s_viewUser' + time) || 0;
+        let count = storage.get('s_viewUser' + time, 'int') || 0;
         storage.set('s_viewUser' + time, count + 1);
     },
 
@@ -94,14 +94,14 @@ export let statistics = {
         }
 
         return {
-            s_viewVideo: storage.get('s_viewVideo' + time) || 0,
-            s_viewTargetVideo: storage.get('s_viewTargetVideo' + time) || 0,
-            s_zan: storage.get('s_zan' + time) || 0,
-            s_comment: storage.get('s_comment' + time) || 0,
-            s_zanComment: storage.get('s_zanComment' + time) || 0,
-            s_privateMsg: storage.get('s_privateMsg' + time) || 0,
-            s_focus: storage.get('s_focus' + time) || 0,
-            s_viewUser: storage.get('s_viewUser' + time) || 0,
+            s_viewVideo: storage.get('s_viewVideo' + time, 'int') || 0,
+            s_viewTargetVideo: storage.get('s_viewTargetVideo' + time, 'int') || 0,
+            s_zan: storage.get('s_zan' + time, 'int') || 0,
+            s_comment: storage.get('s_comment' + time, 'int') || 0,
+            s_zanComment: storage.get('s_zanComment' + time, 'int') || 0,
+            s_privateMsg: storage.get('s_privateMsg' + time, 'int') || 0,
+            s_focus: storage.get('s_focus' + time, 'int') || 0,
+            s_viewUser: storage.get('s_viewUser' + time, 'int') || 0,
         }
     },
 
@@ -124,3 +124,6 @@ export let statistics = {
         return res;
     }
 }
+
+
+module.exports = statistics;

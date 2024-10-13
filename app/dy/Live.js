@@ -1,6 +1,6 @@
-import { Common } from 'app/dy/Common.js';
-import { statistics } from 'common/statistics';
-import { V } from 'version/V.js';
+let Common = require('app/dy/Common.js');
+let statistics = require('common/statistics');
+let V = require('version/V.js');
 
 let Live = {
     getUserCountTag() {
@@ -14,9 +14,9 @@ let Live = {
         Common.sleep(3000);
     },
 
-    getUserTags() {
+    _getUserTags() {
         //小米手机的left是1，华为是0，这里10控制
-        console.log("length", Common.id(V.Live.getUserTags[0]).findOnce().children().length);
+        console.log("length", Common.id(V.Live.getUserTags[0]).findOnce().children().length());
         let tags = Common.id(V.Live.getUserTags[0]).findOnce().children().find(UiSelector().textMatches(V.Live.getUserTags[1]).isVisibleToUser(true).filter((v) => {
             //console.log("vvv", v);
             return v && !v.text().includes('我的信息') && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10;
@@ -24,27 +24,36 @@ let Live = {
         return tags;
     },
 
+    getUserTags() {
+        let tags = Common.id(V.Live.getUserTags[0]).findOnce().children().find(UiSelector().className(V.Live.getUserTags[2]).isVisibleToUser(true).filter((v) => {
+            //console.log("vvv", v);
+            return v && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10;
+        }));
+        return tags;
+    },
+
+    //userCount: 0,
     getUsers() {
         let tags = this.getUserTags();
         let users = [];
         for (let i in tags) {
-            let tp = /第(\d+)名/.exec(tags[i].text());
             users.push({
-                title: tags[i].text(),
+                //title: tags[i].text(),//_addr
                 tag: tags[i],
-                index: (tp && tp[1]) || 1000,
+                //index: ++this.userCount,
             });
+            Log.log(tags[i]);
         }
         Log.log("粉丝列表：" + tags.length);
-        Log.log(tags);
         return users;
     },
 
-    intoFansPage(data) {
-        Log.log(data.tag);
-        Common.click(data.tag);
-        Log.log('点击list');
-        Common.sleep(2000);
+    getNickname() {
+        let userTag = Common.id(V.Live.intoFansPage[0]).isVisibleToUser(true).findOne();
+        return userTag ? userTag.text() : '';
+    },
+
+    intoFansPage() {
         let nickTag = Common.id(V.Live.intoFansPage[0]).findOnce();
         Common.click(nickTag);
         statistics.viewUser();
@@ -52,14 +61,14 @@ let Live = {
         Common.sleep(3500);
     },
 
-    swipeFansList(rate) {
-        if (rate === undefined) {
-            rate = 1;
+    swipeFansList() {
+        let a = UiSelector().scrollable(true).isVisibleToUser(true).findOne();
+        if (a) {
+            a.scrollForward();
+            Log.log('滑动成功');
+        } else {
+            Log.log('滑动失败');
         }
-        let left = Math.random() * Device.width() * 0.8 + Device.width() * 0.2;
-        let bottom = Device.height() * 2 / 3;
-        let top = Device.height() / 2;
-        Gesture.swipe(left, bottom * rate, left, top * rate, 150 + 100 * Math.random());//从下往上推，清除
     },
 
     getNewRecord: function (baseRecord, grabRecord) {
@@ -240,4 +249,4 @@ let Live = {
     }
 }
 
-module.exports = { Live };
+module.exports = Live;

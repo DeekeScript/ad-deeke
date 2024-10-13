@@ -1,11 +1,11 @@
-import {Common as tCommon} from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
 const DyUser = require('app/dy/User.js');
-import { Video as DyVideo } from 'app/dy/Video.js';
-import { Comment as DyComment } from 'app/dy/Comment.js';
-import {storage} from "common/storage";
-import {baiduWenxin} from "service/baiduWenxin";
-import {machine} from "common/machine";
+let DyVideo = require('app/dy/Video.js');
+let DyComment = require('app/dy/Comment.js');
+let storage = require("common/storage");
+let baiduWenxin = require("service/baiduWenxin");
+let machine = require("common/machine");
 
 let task = {
     msg: [],

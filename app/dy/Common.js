@@ -1,6 +1,6 @@
 
-import { storage as cStorage } from 'common/storage.js';
-import { V } from 'version/V.js';
+let cStorage = require('common/storage.js');
+let V = require('version/V.js');
 
 const Common = {
     //封装的方法
@@ -23,8 +23,53 @@ const Common = {
         return 'com.ss.android.ugc.aweme';
     },
 
+    clickRange(tag, top, bottom) {
+        if (tag.bounds().top + tag.bounds().height() <= top) {
+            return false;
+        }
+
+        if (tag.bounds().top >= bottom) {
+            return false;
+        }
+
+        if (tag.bounds().top > top && tag.bounds().top + tag.bounds().height() < bottom) {
+            this.click(tag);
+            return true;
+        }
+
+        //卡在top的上下
+        if (tag.bounds().top <= top && tag.bounds().top + tag.bounds().height() > top) {
+            let topY = tag.bounds().top + tag.bounds().height() - top;
+            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), (tag.bounds().top + 1) + (topY - 1) * Math.random());
+            return true;
+        }
+
+        if (tag.bounds().top < bottom && tag.bounds().top + tag.bounds().height() >= bottom) {
+            let topY = bottom - tag.bounds().top;
+            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), tag.bounds().top + (topY - 1) * Math.random());
+            return true;
+        }
+        return false;
+    },
+
     backHome() {
         this.openApp();
+        let i = 0;
+        while (i++ < 5) {
+            let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
+            if (!homeTag) {
+                Log.log(this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce());
+                this.back();
+                this.sleep(1000);
+                continue;
+            }
+            Log.log("找到了homeTag");
+            break;
+        }
+        return true;
+    },
+
+    backHomeOnly() {
         let i = 0;
         while (i++ < 5) {
             let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
@@ -188,6 +233,20 @@ const Common = {
         }
     },
 
+    //粉丝群列表滑动
+    swipeFansGroupListOp() {
+        let tag = this.id(V.Message.fansSwipe[0]).scrollable(true).filter((v) => {
+            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
+        }).findOnce();
+        console.log(tag);
+        if (tag) {
+            tag.scrollForward();
+        } else {
+            Log.log('滑动失败');
+        }
+        //Log.log(this.swipeCommentListOpTarget);
+    },
+
     //关闭弹窗
     closeAlert(type) {
         this.log('开启线程监听弹窗');
@@ -255,11 +314,6 @@ const Common = {
                     System.cleanUp();//清理线程垃圾
                 }
             } catch (e) {
-                console.log("线程中断状态：", Engines.isInterrupted());
-                if (Engines.isInterrupted()) {
-                    Log.log("线程被外部中断");
-                    break;
-                }
                 this.log("close dialog 异常了");
                 this.log(e);
             }
@@ -359,6 +413,10 @@ const Common = {
     playAudio(file) {
         media.playMusic(file);
     },
+
+    getRemark(remark) {
+        return remark.indexOf('#') == 0 || remark.indexOf('＃') == 0;
+    }
 }
 
-module.exports = { Common };
+module.exports = Common;

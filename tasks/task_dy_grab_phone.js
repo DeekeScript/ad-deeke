@@ -1,10 +1,10 @@
-import { Common as tCommon } from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { Search as DySearch } from 'app/dy/Search.js';
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
+let DySearch = require('app/dy/Search.js');
 const DyUser = require('app/dy/User.js');
-import { machine } from "common/machine";
-// import { Video as DyVideo } from 'app/dy/Video.js';
-// import { Comment as DyComment } from 'app/dy/Comment.js';
+let machine = require("common/machine");
+// let DyVideo = require('app/dy/Video.js');
+// let DyComment = require('app/dy/Comment.js');
 
 // let dy = require('app/iDy');
 // let config = require('config/config');
@@ -37,11 +37,11 @@ let task = {
         let grabLvError = 0;
 
         while (true) {
-            let tags = new UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').textContains('粉丝').filter((v) => {
+            let tags = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').textContains('粉丝').filter((v) => {
                 return v && !!v.bounds() && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
             }).find();
 
-            arr.push(contains ? (contains[0]?._addr) : null);
+            arr.push(contains ? (contains[0] && contains[0]._addr) : null);
             if (contains.length > 2) {
                 contains.shift();
             }
@@ -72,7 +72,7 @@ let task = {
                     tCommon.click(tags[i]);
                     tCommon.sleep(3000);
 
-                    let contentTag = new UiSelector().className('android.widget.TextView').filter((v) => {
+                    let contentTag = UiSelector().className('android.widget.TextView').filter((v) => {
                         return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0;
                     }).textContains('更多').findOnce();
 
@@ -91,7 +91,7 @@ let task = {
                             System.sleep(30);
                         }
                         tCommon.sleep(2000);
-                        contentTag = new UiSelector().className('android.widget.TextView').filter((v) => {
+                        contentTag = UiSelector().className('android.widget.TextView').filter((v) => {
                             return v && v.bounds() && v.bounds().left == contentTag.bounds().left && v.bounds().top == contentTag.bounds().top && v.bounds().width() == contentTag.bounds().width();
                         }).clickable(true).findOnce();
                     }

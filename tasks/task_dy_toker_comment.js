@@ -1,12 +1,13 @@
-import { Common as tCommon } from "app/dy/Common";
-import { Index as DyIndex } from "app/dy/Index";
-import { Search as DySearch } from "app/dy/Search";
-import { User as DyUser } from "app/dy/User";
-import { Video as DyVideo } from "app/dy/Video";
-import { Comment as DyComment } from "app/dy/Comment";
-import { storage } from "common/storage";
-import { machine } from "common/machine";
-import { baiduWenxin } from "service/baiduWenxin";
+let tCommon = require("app/dy/Common");
+let DyIndex = require("app/dy/Index");
+let DySearch = require("app/dy/Search");
+let DyUser = require("app/dy/User");
+let DyVideo = require("app/dy/Video");
+let DyComment = require("app/dy/Comment");
+let storage = require("common/storage");
+let machine = require("common/machine");
+let baiduWenxin = require("service/baiduWenxin");
+let statistics = require("common/statistics");
 
 let task = {
     index: -1,
@@ -17,7 +18,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
-        if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
+        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -42,39 +43,53 @@ let task = {
     testTask(input, kw, sleepSecond) {
         //首先进入页面
         let intoUserFansList = input.indexOf('+') === 0;
-        if (intoUserFansList) {
-            input = input.substring(1);
-            DyIndex.intoMyPage();
-            DyUser.intoFocusList();
-            tCommon.sleep(3000);
+        let hasRemark = tCommon.getRemark(input);
+        this.index++;
+        let douyin;
+        if (!hasRemark) {
+            if (intoUserFansList) {
+                input = input.substring(1);
+                DyIndex.intoMyPage();
+                DyUser.intoFocusList();
+                tCommon.sleep(3000);
+            } else {
+                DyIndex.intoSearchPage();
+            }
+            input = tCommon.splitKeyword(input);
+            douyin = input[this.index];
         } else {
-            DyIndex.intoSearchPage();
+            input = input.substring(1);
+            input = tCommon.splitKeyword(input);
+            douyin = input[this.index];
+            App.gotoIntent('snssdk1128://user/profile/' + douyin);
+            tCommon.sleep(5000 + 2000 * Math.random());
+            DyVideo.intoUserVideo();
         }
 
-        input = tCommon.splitKeyword(input);
         kw = tCommon.splitKeyword(kw);
         Log.log('账号：', input);
         Log.log('关键词：', kw);
-        this.index++;
+
         if (this.index >= input.length) {
             this.index = 0;
         }
 
-        let douyin = input[this.index];
         let res;
-        if (intoUserFansList) {
-            res = DyUser.focusListSearch(douyin);
-        } else {
-            res = DySearch.intoUserVideoPage(input[this.index], 1);
-        }
+        if (!hasRemark) {
+            if (intoUserFansList) {
+                res = DyUser.focusListSearch(douyin);
+            } else {
+                res = DySearch.intoUserVideoPage(input[this.index], 1);
+            }
 
-        if (!res) {
-            System.toast('找不到用户账号：' + input);
-            return 'exit';
-        }
+            if (!res) {
+                System.toast('找不到用户账号：' + input);
+                return 'exit';
+            }
 
-        if (intoUserFansList) {
-            DyVideo.intoUserVideo();
+            if (intoUserFansList) {
+                DyVideo.intoUserVideo();
+            }
         }
 
         //获取最新的前三视频
@@ -88,6 +103,9 @@ let task = {
                 tCommon.sleep(3000);
                 continue;
             }
+
+            statistics.viewVideo();
+            statistics.viewTargetVideo();
 
             DyVideo.openComment(commentCount);
             tCommon.sleep(2000 + 1000 * Math.random());
@@ -188,9 +206,9 @@ let task = {
         }
 
         if (intoUserFansList) {
-            tCommon.back(4, 1500);
+            tCommon.back(5, 1500);
         } else {
-            tCommon.back(4, 1500);
+            tCommon.back(5, 1500);
         }
 
         tCommon.backApp();
@@ -229,18 +247,13 @@ if (sleepSecond <= 0) {
     System.exit();
 }
 
-if (!sleepSecond) {
-    System.toast('你取消了任务');
-    System.exit();
-}
-
 tCommon.openApp();
+//开启线程  自动关闭弹窗
+Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();
     try {
-        //开启线程  自动关闭弹窗
-        Engines.executeScript("unit/dialogClose.js");
         let r = task.run(input, kw, sleepSecond);
         if (r === 'exit') {
             if (thr) {
@@ -256,7 +269,8 @@ while (true) {
 
         tCommon.sleep(3000);
     } catch (e) {
-        Log.log(e.stack);
+        Log.log(e);
+        tCommon.closeAlert(1);
         tCommon.backHome();
     }
 }

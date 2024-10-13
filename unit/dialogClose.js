@@ -1,3 +1,3 @@
-import { Common as tCommon } from "app/dy/Common";
+let tCommon = require("app/dy/Common");
 
 tCommon.closeAlert();

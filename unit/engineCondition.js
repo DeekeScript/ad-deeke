@@ -1,4 +1,4 @@
-export let condition = {
+let condition = {
 	dailyLastHour: function(){
 		let dt = new Date();
 		if(dt.getHours() >= 22){
@@ -14,3 +14,5 @@ export let condition = {
 		return false;
 	}
 };
+
+module.exports = condition;

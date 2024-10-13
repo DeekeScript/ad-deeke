@@ -9,4 +9,4 @@ const Code = {
     107: '任务因为某种原因中断了',//此时可以休息10分钟  直接关掉抖音即可
 }
 
-module.exports = { Code };
+module.exports = Code;

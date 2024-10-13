@@ -1,6 +1,7 @@
-import { Common as tCommon } from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { User as DyUser } from 'app/dy/User.js';
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
+let DyUser = require('app/dy/User.js');
+let machine = require('common/machine.js');
 
 let task = {
     run() {
@@ -17,18 +18,17 @@ let task = {
     testTask() {
         //首先进入点赞页面
         DyIndex.intoMyPage();
-        return DyUser.cancelFocusList();
+        return DyUser.cancelFocusList(machine);
     },
 }
 
-
 tCommon.openApp();
+//开启线程  自动关闭弹窗
+Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();
     try {
-        //开启线程  自动关闭弹窗
-        Engines.executeScript("unit/dialogClose.js");
         if (task.run()) {
             tCommon.sleep(1000);
             FloatDialogs.show('提示', '取消关注已完成');
@@ -36,7 +36,8 @@ while (true) {
         }
         tCommon.sleep(3000);
     } catch (e) {
-        Log.log(e.stack);
+        Log.log(e);
+        tCommon.closeAlert(1);
         tCommon.backHome();
     }
 }

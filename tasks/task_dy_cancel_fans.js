@@ -1,9 +1,10 @@
-import {Common as tCommon} from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
-// import { Search as DySearch } from 'app/dy/Search.js';
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
+// let DySearch = require('app/dy/Search.js');
 const DyUser = require('app/dy/User.js');
-import { Video as DyVideo } from 'app/dy/Video.js';
-// import { Comment as DyComment } from 'app/dy/Comment.js';
+let DyVideo = require('app/dy/Video.js');
+let machine = require('common/machine.js');
+// let DyComment = require('app/dy/Comment.js');
 
 // let dy = require('app/iDy');
 // let config = require('config/config');
@@ -23,7 +24,7 @@ let task = {
     testTask() {
         //首先进入点赞页面
         DyIndex.intoMyPage();
-        DyUser.cancelFocusList();
+        DyUser.cancelFocusList(machine);
     },
 }
 

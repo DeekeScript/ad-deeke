@@ -1,4 +1,4 @@
-export let baiduImageSimilar = {
+let baiduImageSimilar = {
     apiKey: '',
     secretKey: '',
     addImageUrl: 'https://aip.baidubce.com/rest/2.0/image-classify/v1/realtime_search/similar/add',
@@ -53,9 +53,11 @@ export let baiduImageSimilar = {
     },
 
     getAccessToken: function () {
-        let res = http.get(this.getAccessTokenUrl + '?grant_type=client_credentials&client_id=' + this.apiKey + '&client_secret=' + this.secretKey);
+        let res = http.httpGet(this.getAccessTokenUrl + '?grant_type=client_credentials&client_id=' + this.apiKey + '&client_secret=' + this.secretKey);
         let re = res.body.json();
         // Log.log(re);
         return re['access_token'];
     }
 }
+
+module.exports = baiduImageSimilar;

@@ -1,9 +1,9 @@
-import { Common } from 'app/dy/Common.js';
-import { Comment } from 'app/dy/Comment.js';
-import { User } from 'app/dy/User.js';
-import { Video } from 'app/dy/Video.js';
-import { statistics } from 'common/statistics';
-import { V } from 'version/V.js';
+let Common = require('app/dy/Common.js');
+let Comment = require('app/dy/Comment.js');
+let User = require('app/dy/User.js');
+let Video = require('app/dy/Video.js');
+let statistics = require('common/statistics');
+let V = require('version/V.js');
 
 let Message = {
     showAll() {
@@ -228,7 +228,11 @@ let Message = {
         let groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).isVisibleToUser(true).findOnce();
 
         if (!groupTag) {
-            throw new Error('找不到“groupTag“');
+            groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).findOnce();
+
+            if (!groupTag) {
+                throw new Error('找不到“groupTag“');
+            }
         }
 
         groupTag.click();
@@ -243,34 +247,49 @@ let Message = {
         }
 
         let rpCount = 0;
+        let rpContains = [];
         while (true) {
-            let rp = 0;
-            let count = 0
-            let contains = Common.id(V.Message.intoGroupUserList[4]).find();
+            let contains = Common.id(V.Message.intoGroupUserList[4]).isVisibleToUser(true).find();
+
+            if (0 == contains.length) {
+                return true;
+            }
+
+            let isAddFirst = false;
             for (let i in contains) {
                 if (isNaN(i)) {
                     continue;
                 }
 
-                count++;
                 if (contains[i].bounds().top < groupTag.bounds().top) {
-                    rp++;
                     continue;
                 }
 
                 if (contains[i].bounds().top > Device.height()) {
-                    rp++;
                     continue;
                 }
 
                 let titleTag = contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[5])) || contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[6]));
                 if (!titleTag || !titleTag.text()) {
-                    rp++;
                     continue;
                 }
 
+                if (!isAddFirst) {
+                    rpContains.push(titleTag.text());
+                    if (rpContains[0] == rpContains[1]) {
+                        rpCount++;
+                    } else {
+                        rpCount = 0;
+                    }
+
+                    if (rpContains.length >= 2) {
+                        rpContains.shift();
+                    }
+                    Log.log('rpContains', rpContains, rpCount);
+                    isAddFirst = true;
+                }
+
                 if (contents.includes(titleTag.text()) || machineInclude(titleTag.text())) {
-                    rp++;
                     continue;
                 }
 
@@ -314,20 +333,14 @@ let Message = {
                 Common.back();
             }
 
-            if (rp === count) {
-                rpCount++;
-            } else {
-                rpCount = 0;
-            }
-
             if (rpCount >= 3) {
                 return true;
             }
-            Common.swipe(0, 0.6);
+            Common.swipeFansGroupListOp();
             Log.log('滑动');
             Common.sleep(1000 + 1000 * Math.random());
         }
     }
 }
 
-module.exports = { Message };
+module.exports = Message;

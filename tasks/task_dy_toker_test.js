@@ -1,10 +1,10 @@
 const tDyCommon = require('app/dy/Common.js');
-import { Index as DyIndex } from 'app/dy/Index.js';
+let DyIndex = require('app/dy/Index.js');
 const DyUser = require('app/dy/User.js');
-import { Video as DyVideo } from 'app/dy/Video.js';
-import { Comment as DyComment } from 'app/dy/Comment.js';
-import {storage} from "common/storage";
-import {baiduWenxin} from "service/baiduWenxin";
+let DyVideo = require('app/dy/Video.js');
+let DyComment = require('app/dy/Comment.js');
+let storage = require("common/storage");
+let baiduWenxin = require("service/baiduWenxin");
 
 let task = {
     me: {},//我的抖音号和昵称

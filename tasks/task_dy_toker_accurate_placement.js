@@ -1,12 +1,12 @@
-import {Common as tCommon} from "app/dy/Common";
-import {Index as DyIndex} from "app/dy/Index";
-import {Search as DySearch} from "app/dy/Search";
-import {User as DyUser} from "app/dy/User";
-import {Video as DyVideo} from "app/dy/Video";
-import {Comment as DyComment} from "app/dy/Comment";
+let tCommon = require("app/dy/Common");
+let DyIndex = require("app/dy/Index");
+let DySearch = require("app/dy/Search");
+let DyUser = require("app/dy/User");
+let DyVideo = require("app/dy/Video");
+let DyComment = require("app/dy/Comment");
 let Http = require('unit/mHttp');
-import {storage} from "common/storage";
-import {machine} from "common/machine";
+let storage = require("common/storage");
+let machine = require("common/machine");
 
 // let dy = require('app/iDy');
 // let config = require('config/config');

@@ -1,7 +1,7 @@
-import { storage as cStorage } from 'common/storage.js';
-import { XhsV as V } from 'version/XhsV.js';
+let cStorage = require('common/storage.js');
+let V = require('version/XhsV.js');
 
-const Common = {
+let Common = {
     //封装的方法
     logs: [],
     id(name) {
@@ -61,6 +61,35 @@ const Common = {
 
         this.sleep(500);
         return true;
+    },
+
+    clickRange(tag, top, bottom) {
+        if (tag.bounds().top + tag.bounds().height() <= top) {
+            return false;
+        }
+
+        if (tag.bounds().top >= bottom) {
+            return false;
+        }
+
+        if (tag.bounds().top > top && tag.bounds().top + tag.bounds().height() < bottom) {
+            this.click(tag);
+            return true;
+        }
+
+        //卡在top的上下
+        if (tag.bounds().top <= top && tag.bounds().top + tag.bounds().height() > top) {
+            let topY = tag.bounds().top + tag.bounds().height() - top;
+            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), (tag.bounds().top + 1) + (topY - 1) * Math.random());
+            return true;
+        }
+
+        if (tag.bounds().top < bottom && tag.bounds().top + tag.bounds().height() >= bottom) {
+            let topY = bottom - tag.bounds().top;
+            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), tag.bounds().top + (topY - 1) * Math.random());
+            return true;
+        }
+        return false;
     },
 
     openApp() {
@@ -189,6 +218,19 @@ const Common = {
         //Log.log(this.swipeCommentListOpTarget);
     },
 
+    swipeWorkOp() {
+        let tag = this.id(V.Search.container).scrollable(true).filter((v) => {
+            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
+        }).findOnce();
+        if (tag) {
+            tag.scrollForward();
+        } else {
+            Log.log('滑动失败');
+        }
+        //Log.log(this.swipeCommentListOpTarget);
+    },
+
+
     //关闭弹窗
     closeAlert() {
         this.log('开启线程监听弹窗');
@@ -197,7 +239,7 @@ const Common = {
         while (true) {
             //检测是否只有当前的线程，是的话则关闭
             try {
-                let a = this.id('close').findOne();
+                let a = this.id('aj3').textContains('稍后再说').isVisibleToUser(true).findOne();//免流量升级
                 if (a) {
                     a.click();
                     Log.log(a);
@@ -212,11 +254,6 @@ const Common = {
                 }
                 k++;
             } catch (e) {
-                console.log("线程中断状态：", Engines.isInterrupted());
-                if (Engines.isInterrupted()) {
-                    Log.log("线程被外部中断");
-                    break;
-                }
                 this.log("close dialog 异常了");
                 this.log(e);
             }
@@ -288,4 +325,4 @@ const Common = {
     },
 }
 
-module.exports = { Common };
+module.exports = Common;

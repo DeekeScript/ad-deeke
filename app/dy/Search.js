@@ -1,8 +1,8 @@
-import { Common } from 'app/dy/Common.js';
-import { User } from 'app/dy/User.js';
-import { statistics } from 'common/statistics';
-import { V } from 'version/V.js';
-import { Video } from 'app/dy/Video.js';
+let Common = require('app/dy/Common.js');
+let User = require('app/dy/User.js');
+let statistics = require('common/statistics');
+let V = require('version/V.js');
+let Video = require('app/dy/Video.js');
 
 const Search = {
     //type = 0 视频  type = 1 用户  需要先进入搜索页
@@ -54,7 +54,7 @@ const Search = {
         }
 
         console.log('进入用户或者视频：', videoTag);
-        Common.click(videoTag);
+        Common.click(videoTag, 0.2);
         Common.sleep(3000 + 2000 * Math.random());
     },
 
@@ -219,7 +219,7 @@ const Search = {
                 Log.log('containers为0');
             }
 
-            arr.push(tags ? (tags[0]?._addr) : null);
+            arr.push(tags ? (tags[0] && tags[0]._addr) : null);
             if (arr.length >= 3) {
                 arr.shift();
             }
@@ -376,4 +376,4 @@ const Search = {
     }
 }
 
-module.exports = { Search };
+module.exports = Search;

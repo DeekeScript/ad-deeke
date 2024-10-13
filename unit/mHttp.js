@@ -1,13 +1,10 @@
-import { storage } from 'common/storage.js';
-import { config as mConfig } from 'config/config.js';
+let storage = require('common/storage.js');
+let mConfig = require('config/config.js');
 
-export let mHttp = {
+let mHttp = {
     getConfig() {
         let config = {
             url: mConfig.domain,
-            token: storage.getToken(),
-            mobile: storage.getMobile(),
-            machine_id: storage.getMachineId(),
         };
 
         //dev环境判断
@@ -24,8 +21,6 @@ export let mHttp = {
     post(controller, action, data, type) {
         let result = this.postBase(controller, action, data, type);
         if (result.code === 401) {
-            //生成新的token并且继续上传内容
-            storage.removeToken();
             return result;
         }
         return result;
@@ -200,3 +195,5 @@ export let mHttp = {
         });
     },
 }
+
+module.exports = mHttp;

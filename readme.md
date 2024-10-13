@@ -27,7 +27,11 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
 <img alt="Deeke图标展示" src="photo/2-1.jpg" width="30%">
 <img alt="Deeke主界面" src="photo/2-2.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/2-2-1.jpg" width="30%">
+
 <img alt="Deeke主界面" src="photo/2-3.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/2-3-1.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/2-3-2.jpg" width="30%">
 
 <img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="30%">
 <img alt="Deeke话术界面" src="photo/4.jpg" width="30%">

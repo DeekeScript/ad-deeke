@@ -1,11 +1,12 @@
-import { Common as tCommon } from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { Search as DySearch } from 'app/dy/Search.js';
-import { Video as DyVideo } from 'app/dy/Video.js';
-import { storage } from "common/storage";
-import { machine } from "common/machine";
-import { Comment as DyComment } from 'app/dy/Comment.js';
-import { baiduWenxin } from "service/baiduWenxin";
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
+let DySearch = require('app/dy/Search.js');
+let DyVideo = require('app/dy/Video.js');
+let storage = require("common/storage");
+let machine = require("common/machine");
+let DyComment = require('app/dy/Comment.js');
+let baiduWenxin = require("service/baiduWenxin");
+let statistics = require("common/statistics");
 
 // let dy = require('app/iDy');
 // let config = require('config/config');
@@ -14,6 +15,9 @@ let task = {
     contents: [],
     lib_id: undefined,
     count: 100,
+    zanRate: storage.get('task_dy_search_zan_rate', 'int'),
+    commentRate: storage.get('task_dy_search_comment_rate', 'int'),
+    focusRate: storage.get('task_dy_search_focus_rate', 'int'),
     run(keyword) {
         return this.testTask(keyword);
     },
@@ -28,7 +32,7 @@ let task = {
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
         if (storage.getMachineType() === 1) {
-            if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
+            if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
             }
             return machine.getMsg(type) || false;//永远不会结束
@@ -43,97 +47,115 @@ let task = {
         tCommon.sleep(5000);
 
         let rpCount = 0;
+        let noNicknameCount = 0;
         while (true) {
-            if (DyVideo.isLiving()) {
-                Log.log('直播');
-                tCommon.sleep(2000 + Math.random() * 2000);
-                DyVideo.next();
-                tCommon.sleep(2000);
-                continue;
-            }
+            try {
+                if (DyVideo.isLiving()) {
+                    Log.log('直播');
+                    tCommon.sleep(2000 + Math.random() * 2000);
+                    DyVideo.next();
+                    tCommon.sleep(2000);
+                    continue;
+                }
 
-            let title = DyVideo.getContent();
-            let nickname = DyVideo.getNickname();
-            if (machine.get('task_dy_search_vertical_' + nickname + "_" + title, 'bool')) {
-                Log.log('重复视频');
-                tCommon.sleep(2000 + Math.random() * 2000);
-                DyVideo.next();
-                tCommon.sleep(2000);
-                continue;
-            }
+                let title = DyVideo.getContent();
+                let nickname = DyVideo.getNickname();
 
-            if (this.contents.includes(nickname + '_' + title)) {
-                rpCount++;
-                if (rpCount > 3) {
+                if (machine.get('task_dy_search_vertical_' + nickname + "_" + title, 'bool')) {
+                    Log.log('重复视频');
+                    tCommon.sleep(2000 + Math.random() * 2000);
+                    DyVideo.next();
+                    tCommon.sleep(2000);
+                    continue;
+                }
+
+                statistics.viewVideo();
+                statistics.viewTargetVideo();
+
+                if (this.contents.includes(nickname + '_' + title)) {
+                    rpCount++;
+                    if (rpCount > 3) {
+                        return true;
+                    }
+                }
+
+                rpCount = 0;
+
+                if (this.count-- <= 0) {
                     return true;
                 }
-            }
 
-            rpCount = 0;
-
-            if (this.count-- <= 0) {
-                return true;
-            }
-
-            //刷视频
-            let processBar = DyVideo.getProcessBar();
-            //Log.log('processBar', processBar, processBar && processBar.bounds().height(), processBar && processBar.bounds().top);
-            if (storage.getPackage() !== 'org.autojs.autoxjs.v6') {
-                if (processBar) {
-                    let sleepSec = 20 + 20 * Math.random() - 5;
-                    Log.log('休眠' + sleepSec + 's');
-                    tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-                } else {
-                    let sleepSec = (15 + 10 * Math.random() - 5);
-                    Log.log('休眠' + sleepSec + 's');
-                    tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-                }
-            } else {
-                let sleepSec = (5 + 10 * Math.random() - 5);
+                //刷视频
+                let sleepSec = (10 + 10 * Math.random());
                 Log.log('休眠' + sleepSec + 's');
                 tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-            }
 
-            Log.log('看看是不是广告');
-            //看看是不是广告，是的话，不操作作者
-            if (DyVideo.viewDetail()) {
-                let clickRePlayTag = tCommon.id('fw2').filter((v) => {
-                    return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-                }).findOnce();
-                if (clickRePlayTag) {
-                    Log.log('点击重播');
-                    clickRePlayTag.click();
-                    tCommon.sleep(1000);
+                Log.log('看看是不是广告');
+                //看看是不是广告，是的话，不操作作者
+                if (DyVideo.viewDetail()) {
+                    let clickRePlayTag = UiSelector().textContains('点击重播').filter((v) => {
+                        return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
+                    }).findOnce();
+                    if (clickRePlayTag) {
+                        Log.log('点击重播');
+                        clickRePlayTag.click();
+                        tCommon.sleep(1000);
+                    }
+                    Gesture.click(500 + Math.random() * 200, 500 + Math.random() * 300);
+                    tCommon.sleep(1500);
+                } else {
+                    //Log.log('不是广告，准备进入主页');
                 }
-                Gesture.click(500 + Math.random() * 200, 500 + Math.random() * 300);
-                tCommon.sleep(1500);
-            } else {
-                Log.log('不是广告，准备进入主页');
+
+                let commentCount = DyVideo.getCommentCount();
+
+                if (Math.random() * 100 <= task.commentRate) {
+                    Log.log('评论')
+                    let videoTitle = DyVideo.getContent();
+                    DyVideo.openComment(!!commentCount);
+                    tCommon.sleep(500 + 500 * Math.random());
+                    let msg = this.getMsg(0, videoTitle);
+                    DyComment.commentMsg(msg.msg);
+                    tCommon.sleep(2000 + 2000 * Math.random());
+                    tCommon.back();
+                    tCommon.sleep(500);
+                }
+
+                if (Math.random() * 100 <= task.zanRate) {
+                    Log.log('点赞');
+                    DyVideo.clickZan();
+                    tCommon.sleep(1000 + 1000 * Math.random());
+                }
+
+                if (Math.random() * 100 <= task.focusRate) {
+                    DyVideo.intoUserPage();
+                    tCommon.sleep(3000 + 1000 * Math.random());
+                    Log.log('关注开始');
+                    DyUser.focus();
+                    tCommon.sleep(1000 + 1000 * Math.random());
+                    tCommon.back();
+                    Log.log('关注完成');
+                }
+
+                machine.set('task_dy_search_vertical_' + nickname + "_" + title, true);
+                this.contents.push(nickname + "_" + title);
+                DyVideo.next();
+                tCommon.sleep(2000);
+                noNicknameCount = 0;
+            } catch (e) {
+                Log.log(e);
+                if (noNicknameCount++ >= 3) {
+                    if (noNicknameCount > 6) {
+                        Log.log('多次退出未解决问题');
+                        break;
+                    }
+                    tCommon.back();
+                    tCommon.sleep(500);
+                    DyVideo.next();
+                    tCommon.sleep(2000);
+                }
+                continue;
             }
-
-            let commentCount = DyVideo.getCommentCount();
-
-            if (Math.random() <= 0.333) {
-                Log.log('评论')
-                let videoTitle = DyVideo.getContent();
-                DyVideo.openComment(!!commentCount);
-                tCommon.sleep(500 + 500 * Math.random());
-                let msg = this.getMsg(0, videoTitle);
-                DyComment.commentMsg(msg.msg);
-                tCommon.sleep(2000 + 2000 * Math.random());
-                tCommon.back();
-                tCommon.sleep(500);
-            }
-
-            if (Math.random() <= 0.333) {
-                Log.log('点赞');
-                DyVideo.clickZan();
-            }
-
-            machine.set('task_dy_search_vertical_' + nickname + "_" + title, true);
-            this.contents.push(nickname + "_" + title);
-            DyVideo.next();
-            tCommon.sleep(2000);
         }
     },
 }
@@ -153,12 +175,12 @@ if (!task.count) {
 }
 
 tCommon.openApp();
+//开启线程  自动关闭弹窗
+Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();
     try {
-        //开启线程  自动关闭弹窗
-        Engines.executeScript("unit/dialogClose.js");
         let res = task.run(keyword);
         if (res) {
             tCommon.sleep(3000);
@@ -174,7 +196,8 @@ while (true) {
 
         tCommon.sleep(3000);
     } catch (e) {
-        Log.log(e.stack);
+        Log.log(e);
+        tCommon.closeAlert(1);
         tCommon.backHome();
     }
 }

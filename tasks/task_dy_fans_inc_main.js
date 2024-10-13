@@ -1,16 +1,17 @@
-import { Common as tCommon } from 'app/dy/Common.js';
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { Search as DySearch } from 'app/dy/Search.js';
-import { User as DyUser } from 'app/dy/User.js';
-import { Video as DyVideo } from 'app/dy/Video.js';
-import { storage } from 'common/storage.js';
-import { machine } from 'common/machine.js';
-import { Comment as DyComment } from 'app/dy/Comment.js';
-import { baiduWenxin } from 'service/baiduWenxin.js';
+let tCommon = require('app/dy/Common.js');
+let DyIndex = require('app/dy/Index.js');
+let DySearch = require('app/dy/Search.js');
+let DyUser = require('app/dy/User.js');
+let DyVideo = require('app/dy/Video.js');
+let storage = require('common/storage.js');
+let machine = require('common/machine.js');
+let DyComment = require('app/dy/Comment.js');
+let baiduWenxin = require('service/baiduWenxin.js');
 
 let task = {
     contents: [],
     me: {},
+    remark: false,//是否是#开头
     run(settingData) {
         return this.testTask(settingData);
     },
@@ -24,7 +25,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
-        if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
+        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
 
@@ -47,15 +48,20 @@ let task = {
         }));
         DyIndex.intoHome();
 
-        if (settingData.account.indexOf('+') === 0) {
-            DyIndex.intoMyPage();
+        if (this.remark) {
+            App.gotoIntent('snssdk1128://user/profile/' + settingData.account);
+            tCommon.sleep(5000 + 2000 * Math.random());
         } else {
-            DyIndex.intoSearchPage();
-        }
+            if (settingData.account.indexOf('+') === 0) {
+                DyIndex.intoMyPage();
+            } else {
+                DyIndex.intoSearchPage();
+            }
 
-        let res = DySearch.homeIntoSearchUser(settingData.account);
-        if (res) {
-            return res;
+            let res = DySearch.homeIntoSearchUser(settingData.account);
+            if (res) {
+                return res;
+            }
         }
 
         return DyUser.fansIncList(this.getMsg, DyVideo, DyComment, machine, settingData, this.contents, this.me.nickname);
@@ -69,7 +75,7 @@ Log.log('settingData', settingData);
 
 let count = settingData.task_dy_fans_inc_head_zan_rate + settingData.task_dy_fans_inc_video_zan_rate + settingData.task_dy_fans_inc_comment_rate + settingData.task_dy_fans_inc_collection_rate;
 if (count == 0) {
-    count = 1;
+    count = 100;
 }
 
 settingData.task_dy_fans_inc_head_zan_rate = (settingData.task_dy_fans_inc_head_zan_rate / count) * 100;
@@ -80,11 +86,15 @@ settingData.task_dy_fans_inc_collection_rate = (settingData.task_dy_fans_inc_col
 console.log(machine.getMsg(0));
 Log.log('settingData', settingData);
 
-let tmp = settingData.task_dy_fans_inc_account.split(',');
+task.remark = tCommon.getRemark(settingData.task_dy_fans_inc_accounts);
+if (task.remark) {
+    settingData.task_dy_fans_inc_accounts = settingData.task_dy_fans_inc_accounts.substring(1);
+}
+let tmp = settingData.task_dy_fans_inc_accounts.split("\n");
 
 tCommon.openApp();
 Engines.executeScript("unit/dialogClose.js"); //开启线程  自动关闭弹窗
-Log.log('日志开始');
+Log.log('日志开始', tmp);
 task.log();
 
 while (true) {
@@ -100,7 +110,8 @@ while (true) {
             tCommon.sleep(3000);
         }
     } catch (e) {
-        Log.log(e.stack);
+        Log.log(e);
+        tCommon.closeAlert(1);
         tCommon.backHome();
     }
 }

@@ -1,11 +1,11 @@
-import {Common as tCommon} from "app/dy/Common";
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { Search as DySearch } from 'app/dy/Search.js';
+let tCommon = require("app/dy/Common");
+let DyIndex = require('app/dy/Index.js');
+let DySearch = require('app/dy/Search.js');
 const DyUser = require('app/dy/User.js');
-import {machine} from "common/machine";
+let machine = require("common/machine");
 let mHttp = require('unit/mHttp');
 let Wx = require('app/wx/Wx.js');
-import {storage} from "common/storage";
+let storage = require("common/storage");
 
 let task = {
     setting: {},
@@ -239,11 +239,11 @@ let task = {
         let rp = 0;
 
         while (true) {
-            let tags = new UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').textContains('粉丝').filter((v) => {
+            let tags = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').textContains('粉丝').filter((v) => {
                 return v && !!v.bounds() && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
             }).find();
 
-            arr.push(contains ? (contains[0]?._addr) : null);
+            arr.push(contains ? (contains[0] && contains[0]._addr) : null);
             if (contains.length > 2) {
                 contains.shift();
             }
@@ -274,7 +274,7 @@ let task = {
                     tCommon.click(tags[i]);
                     tCommon.sleep(3000);
 
-                    let contentTag = new UiSelector().className('android.widget.TextView').clickable(true).filter((v) => {
+                    let contentTag = UiSelector().className('android.widget.TextView').clickable(true).filter((v) => {
                         return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0;
                     }).textContains('更多').findOnce();
 
@@ -293,7 +293,7 @@ let task = {
                             System.sleep(30);
                         }
                         tCommon.sleep(2000);
-                        contentTag = new UiSelector().className('android.widget.TextView').filter((v) => {
+                        contentTag = UiSelector().className('android.widget.TextView').filter((v) => {
                             return v && v.bounds() && v.bounds().left == contentTag.bounds().left && v.bounds().top == contentTag.bounds().top && v.bounds().width() == contentTag.bounds().width();
                         }).clickable(true).findOnce();
                     } else {
@@ -301,7 +301,7 @@ let task = {
                             return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() > 0;
                         }).findOnce();
 
-                        contentTag = new UiSelector().className('android.widget.TextView').filter((v) => {
+                        contentTag = UiSelector().className('android.widget.TextView').filter((v) => {
                             return v && v.bounds() && v.bounds().left >= 0 && v.bounds().top == tag.bounds().top + tag.bounds().height() && v.bounds().width() > 0;
                         }).clickable(true).findOnce();
                     }

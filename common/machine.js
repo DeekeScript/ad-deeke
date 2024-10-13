@@ -1,5 +1,5 @@
-import { storage } from 'common/storage.js';
-export let machine = {
+let storage = require('common/storage.js');
+let machine = {
     db() {
         return Storage;
     },
@@ -153,14 +153,6 @@ export let machine = {
         return { privateClose: true };
     },
 
-    addDouyinConfig(account) {
-        let db = this.db();
-        let key = 'privateClose_' + account;
-        db.put(key, {
-            timestamp: Date.parse(new Date()) / 1000,
-        });
-    },
-
     getMsg(type) {
         let speechs = storage.getSpeech();
         if (speechs.length === 0) {
@@ -185,11 +177,11 @@ export let machine = {
     },
 
     douyinExist(account) {
-        let res = this.db().get('douyinExist_' + account, 'bool');
+        let res = this.db().getBoolean('douyinExist_' + account);
         if (res) {
             return true;
         }
-        this.db().put('douyinExist_' + account, true);
+        this.db().putBool('douyinExist_' + account, true);
         return false;
     },
 
@@ -198,7 +190,7 @@ export let machine = {
         if (res) {
             return true;
         }
-        this.db().put('videoExist_' + nickname, true);
+        this.db().putBool('videoExist_' + nickname, true);
         return false;
     },
 
@@ -239,48 +231,6 @@ export let machine = {
         }
         this.db().put(key, JSON.stringify([current]));
         return { code: 1 };
-    },
-
-    //let types = { 'zanVideo': 0, 'zanComment': 1, 'comment': 2, 'focus': 3, 'privateMsg': 4, 'viewUserPage': 5, 'refreshVideo': 6 };
-    op(index, type) {
-        let db = this.db();
-        let current = Date.parse(new Date()) / 1000;
-        if (type === 6) {
-            let res = db.get('config_' + index + '_videoTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_videoTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 0) {
-            let res = db.get('config_' + index + '_zanVideoTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_zanVideoTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 1) {
-            let res = db.get('config_' + index + '_zanCommentTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_zanCommentTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 2) {
-            let res = db.get('config_' + index + '_commentTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_commentTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 3) {
-            let res = db.get('config_' + index + '_focusTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_focusTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 4) {
-            let res = db.get('config_' + index + '_privateMsgTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_privateMsgTimestamp_' + this.getDate(), JSON.stringify(res));
-        } else if (type === 5) {
-            let res = db.get('config_' + index + '_viewUserPageTimestamp_' + this.getDate()) || '[]';
-            res = JSON.parse(res);
-            res.push(current);
-            db.put('config_' + index + '_viewUserPageTimestamp_' + this.getDate(), JSON.stringify(res));
-        }
     },
 
     getProvinces() {
@@ -354,7 +304,7 @@ export let machine = {
 
     getFansIncSettingRate() {
         return {
-            task_dy_fans_inc_account: this.get("task_dy_fans_inc_account") || "95448698248,58750165149,38881966964,94758877668,92447212883,68126855345,61699752775,71395667132,75142410816,889256509,395884542288,66578272648,169732746,87455571449,47194470908,32644724711,23187788634,62510783289,69223680672,96559110830,79005535521,88799238805,895625215,77363968851,55217137528,54622933772,37437482688,48352073886,76908371782,38640136098,40456270246,98424754311,35818992365,96759008218,65221746903,76624998351,98305400525,24960970462,69244897030,75685568264,85532304608,81363075786,96075763758,2246367608,23067498754,45111336856,42885218405,76689548008,67205394933,88962987158,69719995846,42818130984,46282922894,75298522313,72604960726,69871128004,63592002784,54846140779,32388171981,55723218866,35749719069,36537826537,79463954521,84474997814,50431204320,42061882164,37166306794,68599155804,39263028799,31886238669,23157543024,44012618457,29563170032,28299323774,56416830940,64506637557,78870241551,48526777093,24876415948,89408353473,96539996331,936476675,89957893782,34572776530,92395004509,97344880844,37922724907,45531367850,45744197922,95791428263,91213830582,64584170675,87848495482,70863532958,75402323381,33777722078,21870652822,55476237990,70351088381,65026526521,42698001513,23802956189,39588454228,82301202960,31378632368,52111285916,97147471316,89423632858,88591002525,90059730444,94597858923,85726685665,92118626390,32388028850,90166424348,95083742969,81513762732,84903176304,83632618320,67912093054,158429800,97041911019,44470985369,52384977465,27359079074,37647703624,68483129852,26973719491,26095825044,36514652748,67896511190,87927348300,78768278304,90280584550,33055446816,60868933832,21855860437,56241533261,68668816385,62213741333,2175832856,59060487184,37503636816,89858990850,85321761615,38322383217,30591990979,64680579392,75946503526,66414381472,69376551175,52673069280,42484456260,77079260519,54381291881,62145675388,39065033624,20127226665,79430769320,86211094786,34015597930,68450894086,85946916017,62174862151,33008215614,44836317668,53050413966,59820605725,2194007165,22134321918,37723146157,65108802891,85523640615,43317117423,59139428846,91827246644,38914989360,64746155764,66627939316,80804316279,72907749899,66565888957,87772529698,55454795916,47145585472,24800193566,36913812765,73137166987,48643824711,31909045905,55196300609,68199805575,20283350687,81562472957,46136323673,87136403907,28514222882,73199869765,404562702465,227632044135,54228512456,52936694827,68678273893,231275712045,68469408408,72671115108,86027468523,77298829198,562339186595,44311099572,90936310434,70494211453,929634987315,43141608431,27240998586,84275354579,57275028977,52593974019,32642537469,70335428329,97112022294,27896818599,84436815315,51610018133,91276940375,50468599848,91515681050,73598809368,206019269,35710454738,53157771146,89216074723,27914282999,34854026483,428181309845,22638146246,72391363090,94306065597,95978575346,98029311634,53672229175,55346084685,93679528985,98658571072,81571383599,87650762334,42624561769,26704301808,95551165144,69687938635,91776336482,54471764323,23127571204,68558522036,37828435111,44030025432,68639048072,32362386757,29510188307,81375201152,34727642669,56233918659,52717110047,20858754929,90326988020,28667805730,25670861510,483520738868,937531915628,55755189275,67848133766,39227926439,88781869853,61459254906,64599313314,1124607785,70906367584,40476441875,32744216673,836326183208,590604871848,230165851448,73973310514,28765571071,42331821886,26131405437,53024297183,56124976548",
+            task_dy_fans_inc_accounts: this.get("task_dy_fans_inc_accounts") || '',
             task_dy_fans_inc_head_zan_rate: this.get("task_dy_fans_inc_head_zan_rate", "int") || 0,
             task_dy_fans_inc_video_zan_rate: this.get("task_dy_fans_inc_video_zan_rate", "int") || 0,
             task_dy_fans_inc_comment_rate: this.get("task_dy_fans_inc_comment_rate", "int") || 0,
@@ -395,6 +345,29 @@ export let machine = {
 
     //这里返回的字段要一直，只是值不一致
     getTokerData(type) {
+        //type 2 轻松拓客， 默认设置参数
+        if (type == 2) {
+            return {
+                toker_view_video_second: this.get('task_dy_qingsong_tuoke_interval', 'int'),
+                toker_view_video_keywords: "",
+                toker_zan_rate: 70,
+                toker_comment_rate: 60,
+                toker_focus_rate: 5,
+                toker_comment_area_zan_rate: 80,
+                toker_run_hour: [
+                    '0', '1', '2', '3', '4',
+                    '5', '6', '7', '8', '9',
+                    '10', '11', '12', '13', '14',
+                    '15', '16', '17', '18', '19',
+                    '20', '21', '22', '23'
+                ],
+                toker_run_sex: ["0", "1", "2"],//0,1,2分别表示  女，男，未知
+                toker_run_min_age: 0,
+                toker_run_max_age: 120,
+                runTimes: this.get('task_dy_qingsong_tuoke_run_times', 'int'),
+            }
+        }
+
         if (!type) {
             return {
                 toker_view_video_second: this.get('toker_view_video_second', 'int'),
@@ -405,6 +378,9 @@ export let machine = {
                 toker_private_msg_rate: this.get('toker_private_msg_rate', 'int'),
                 toker_comment_area_zan_rate: this.get('toker_comment_area_zan_rate', 'int'),
                 toker_run_hour: this.getArray('toker_run_hour'),
+                toker_run_sex: this.getArray('toker_run_sex'),//0,1,2分别表示  女，男，未知
+                toker_run_min_age: this.get('toker_run_min_age', 'int'),
+                toker_run_max_age: this.get('toker_run_max_age', 'int'),
             }
         }
 
@@ -417,6 +393,10 @@ export let machine = {
             toker_private_msg_rate: this.get('toker_city_private_msg_rate', 'int'),
             toker_comment_area_zan_rate: this.get('toker_city_comment_area_zan_rate', 'int'),
             toker_run_hour: this.getArray('toker_city_run_hour'),
+            toker_distance: this.get('toker_city_distance', 'int'),
+            toker_run_sex: this.getArray('toker_city_run_sex'),//0,1,2分别表示  女，男，未知
+            toker_run_min_age: this.get('toker_city_run_min_age', 'int'),
+            toker_run_max_age: this.get('toker_city_run_max_age', 'int'),
         }
     },
 
@@ -441,7 +421,10 @@ export let machine = {
     },
 
     //尽量 文件名 + key的模式
-    get(key, type = "string") {
+    get(key, type) {
+        if (type == undefined) {
+            type = "string";
+        }
         let db = this.db();
         Log.log("key:" + key + ":type:" + type);
         if (type == "string") {
@@ -467,8 +450,24 @@ export let machine = {
     //尽量 文件名 + key的模式
     set(key, value) {
         let db = this.db();
-        db.put(key, value);
+        if (typeof value == 'string') {
+            db.put(key, value);
+        } else if (typeof value == 'boolean') {
+            db.putBool(key, value);
+        } else if (typeof value == 'object') {
+            db.putDouble(key, value);
+        } else if (typeof value == 'undefined' || typeof value == 'null') {
+            db.putObj(key, value);
+        } else if (Number.isInteger(value)) {
+            db.putInteger(key, value);
+        } else if (Number.isFloat(value)) {
+            db.putDouble(key, value);
+        } else {
+            db.putObj(key, value);
+        }
+
         return true;
     }
 };
 
+module.exports = machine;

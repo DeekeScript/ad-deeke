@@ -1,12 +1,12 @@
-import { Common as DyCommon } from 'app/dy/Common.js';
-import { Video as DyVideo } from 'app/dy/Video.js';
-import { User as DyUser } from 'app/dy/User.js';
-import { Index as DyIndex } from 'app/dy/Index.js';
-import { Comment as DyComment } from 'app/dy/Comment.js';
-import { storage } from 'common/storage.js';
-import { machine } from 'common/machine.js';
-import { baiduWenxin } from 'service/baiduWenxin.js';
-import { statistics } from 'common/statistics.js';
+let DyCommon = require('app/dy/Common.js');
+let DyVideo = require('app/dy/Video.js');
+let DyUser = require('app/dy/User.js');
+let DyIndex = require('app/dy/Index.js');
+let DyComment = require('app/dy/Comment.js');
+let storage = require('common/storage.js');
+let machine = require('common/machine.js');
+let baiduWenxin = require('service/baiduWenxin.js');
+let statistics = require('common/statistics.js');
 
 let iDy = {
     me: {},//当前账号的信息
@@ -54,8 +54,7 @@ let iDy = {
     taskCheck() {
         //查看是否到了时间，没有的话，直接返回flase
         let hour = this.configData.toker_run_hour;
-
-        if (!hour.includes((new Date()).getHours().toString())) {
+        if (!hour.includes("" + (new Date()).getHours())) {
             return 101;//不在任务时间
         }
 
@@ -407,7 +406,7 @@ let iDy = {
                     }
                 }
 
-                
+
                 if (userData) {
                     Log.log('看到了用户数据了哦');
                 } else {
@@ -454,4 +453,4 @@ let iDy = {
     },
 }
 
-module.exports = { iDy };
+module.exports = iDy;

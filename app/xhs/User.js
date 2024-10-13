@@ -1,5 +1,5 @@
-import { Common } from "app/xhs/Common.js";
-import { XhsV as V } from "version/XhsV.js";
+let Common = require("app/xhs/Common.js");
+let V = require("version/XhsV.js");
 
 let User = {
     swipeFans(selectText) {
@@ -32,6 +32,7 @@ let User = {
         } else {
             let sendMsgTag = Common.id(V.User.sendMsg[0]).findOne();
             sendMsgTag.click();
+            Common.sleep(2000 + 1000 * Math.random());
         }
 
         let sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
@@ -103,4 +104,4 @@ let User = {
     }
 }
 
-module.exports = { User };
+module.exports = User;

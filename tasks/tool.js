@@ -1,1 +1,5 @@
-FloatDialogs.show('功能开发中···');
+//import { Common } from "app/dy/Common.js"
+
+
+console.log('哈哈哈');
+console.log(UiSelector());
