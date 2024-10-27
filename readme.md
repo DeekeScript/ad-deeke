@@ -14,9 +14,11 @@ Deeke作为“嘀客”的升级版本，稳定性等方面有较大提升；软
 
 > 功能进行全面的简化，只保留用户最关心的功能
 
-> 支持群控
+> 支持支付宝在线支付
 
 > 支持智能评论、角色评论
+
+> 支持功能定制（包括群控等）
 
 Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，后台就能给你自动生成一个和Deeke一模一样的黑科技软件，并且自带后台。我们的技术通过不断努力，终于把市场价几万的贴牌干到几千👍🏻👍🏻👍🏻，有兴趣从事这个行业的；可以相互交流😄～
 
@@ -35,9 +37,9 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 
 <img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="30%">
 <img alt="Deeke话术界面" src="photo/4.jpg" width="30%">
-<img alt="Deeke话术添加界面" src="photo/5.jpg" width="30%">
+<img alt="Deeke话术添加界面" src="photo/6.jpg" width="30%">
 
-<img alt="Deeke设置界面" src="photo/6.jpg" width="30%">
+<img alt="Deeke设置界面" src="photo/5.jpg" width="30%">
 <img alt="Deeke百度文心设置界面" src="photo/7.jpg" width="30%">
 <img alt="Deeke推荐营销设置界面" src="photo/8.jpg" width="30%">
 
