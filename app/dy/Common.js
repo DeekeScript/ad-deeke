@@ -152,15 +152,17 @@ const Common = {
     },
 
     numDeal(text) {
-        text = /[\d\.]+[\w|万]*/.exec(text);
+        text = /[\d\.\,]+[\w|万]*/.exec(text);
         if (!text) {
             return 0;
         }
 
+        text[0] = text[0].replace(',', '').replace(',', '').replace(',', '');
         if (text[0].indexOf('w') !== -1 || text[0].indexOf('万') !== -1) {
             text[0] = text[0].replace('w', '').replace('万', '') * 10000;
         }
-        return text[0] * 1;
+        Log.log('数字：', text[0]);
+        return text[0] * 1;//可能存在多个逗号
     },
 
     swipe(type, sensitivity) {

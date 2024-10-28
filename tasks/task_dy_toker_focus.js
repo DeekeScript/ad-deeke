@@ -75,7 +75,7 @@ while (true) {
         let res = task.run(settingData);
         if (res) {
             tCommon.sleep(3000);
-            FloatDialogs.show('提示', '截流关注已完成');
+            FloatDialogs.show('提示', '关注截流已完成');
             break;
         }
 

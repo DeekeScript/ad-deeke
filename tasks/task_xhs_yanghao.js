@@ -21,7 +21,7 @@ let task = {
     log() {
         let d = new Date();
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-        let allFile = "log/log-search-vertical-" + file + ".txt";
+        let allFile = "log/log-task-xhs-yanghao-" + file + ".txt";
         Log.setFile(allFile);
     },
 
@@ -38,15 +38,23 @@ let task = {
     testTask(keyword) {
         //首先进入点赞页面
         DyIndex.intoIndex();
+        tCommon.sleep(3000 + Math.random() * 2000);
         DyIndex.intoSearchPage();
         DySearch.intoSearchList(keyword);
         tCommon.sleep(4000 + 2000 * Math.random());
 
         let topTag = tCommon.id(V.Search.searchTop).isVisibleToUser(true).findOne();
-        let top = topTag ? topTag.bounds().top + topTag.bounds().height() : 210;
+        let top = topTag ? topTag.bounds().top + topTag.bounds().height() : 342;
+        Log.log('top', top, topTag ? topTag.bounds() : null);
         let interval = storage.get('task_xhs_yanghao_interval', 'int');
         while (true) {
             let tags = DySearch.getList();
+            if (tags.length === 0) {
+                throw new Error('没有内容，报错');
+            } else {
+                Log.log('长度是：' + tags.length);
+            }
+
             for (let i in tags) {
                 try {
                     let text = tags[i].text();
@@ -59,10 +67,18 @@ let task = {
                         continue;
                     }
 
-                    tCommon.clickRange(tags[i], top, Device.height());
+                    Log.log(tags[i].bounds(), tags[i].text());
+                    if (!tCommon.clickRange(tags[i], top, Device.height())) {
+                        Log.log('点击位置不对，执行下一个');
+                        continue;
+                    }
                     tCommon.sleep(3000 + 2000 * Math.random());
 
                     let title = Work.getContent();
+                    if (!title) {
+                        Log.log('界面更新了，需要滑动');
+                        break;//很可能是更新了
+                    }
                     Log.log('title:' + title);
                     //let nickname = Work.getNickname();
                     statistics.viewVideo();

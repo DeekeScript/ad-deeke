@@ -7,6 +7,7 @@ let machine = require("common/machine");
 let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require("service/baiduWenxin");
 let statistics = require("common/statistics");
+let DyUser = require('app/dy/User.js');
 
 // let dy = require('app/iDy');
 // let config = require('config/config');

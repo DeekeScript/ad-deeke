@@ -13,7 +13,7 @@ const Video = {
 
         Log.log("滑动参数：" + left + ":" + bottom + ":" + left2 + ":" + top + ":" + duration);
         Gesture.swipe(left, bottom, left2, top, duration);
-        Common.sleep(300);
+        Common.sleep(600);
     },
 
     getZanTag() {
@@ -156,10 +156,16 @@ const Video = {
     //是否直播中
     isLiving() {
         //两种方式，一种是屏幕上展示，一种是头像
-        let tags = Common.id(V.Video.isLiving[0]).descContains(V.Video.isLiving[1]).filter((v) => {
-            return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
-        }).isVisibleToUser(true).exists();
-
+        let tags;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            tags = Common.id(V.Video.isLiving[0]).descContains(V.Video.isLiving[1]).filter((v) => {
+                return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
+            }).isVisibleToUser(true).exists();
+        } else {
+            tags = Common.id(V.Video.isLiving[0]).textContains(V.Video.isLiving[1]).filter((v) => {
+                return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
+            }).isVisibleToUser(true).exists();
+        }
         if (tags) {
             return true;
         }

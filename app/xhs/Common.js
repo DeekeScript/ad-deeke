@@ -63,6 +63,11 @@ let Common = {
         return true;
     },
 
+    gClick(x, y) {
+        Log.log('点击位置：', x, y);
+        Gesture.click(x, y);
+    },
+
     clickRange(tag, top, bottom) {
         if (tag.bounds().top + tag.bounds().height() <= top) {
             return false;
@@ -80,13 +85,13 @@ let Common = {
         //卡在top的上下
         if (tag.bounds().top <= top && tag.bounds().top + tag.bounds().height() > top) {
             let topY = tag.bounds().top + tag.bounds().height() - top;
-            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), (tag.bounds().top + 1) + (topY - 1) * Math.random());
+            this.gClick(tag.bounds().left + tag.bounds().width() * Math.random(), (tag.bounds().top + 1) + (topY - 1) * Math.random());
             return true;
         }
 
         if (tag.bounds().top < bottom && tag.bounds().top + tag.bounds().height() >= bottom) {
             let topY = bottom - tag.bounds().top;
-            Gesture.click(tag.bounds().left + tag.bounds().width() * Math.random(), tag.bounds().top + (topY - 1) * Math.random());
+            this.gClick(tag.bounds().left + tag.bounds().width() * Math.random(), tag.bounds().top + (topY - 1) * Math.random());
             return true;
         }
         return false;
@@ -232,7 +237,11 @@ let Common = {
 
 
     //关闭弹窗
-    closeAlert() {
+    closeAlert(type) {
+        if (type == undefined) {
+            type = 0;
+        }
+
         this.log('开启线程监听弹窗');
         let k = 0;
 
@@ -256,6 +265,10 @@ let Common = {
             } catch (e) {
                 this.log("close dialog 异常了");
                 this.log(e);
+            }
+
+            if (type) {
+                break;
             }
         }
     },

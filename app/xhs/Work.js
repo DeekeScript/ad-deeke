@@ -210,7 +210,7 @@ let Work = {
     },
 
     getContent() {
-        let tag = Common.id(V.Work.title).isVisibleToUser(true).findOne();
+        let tag = Common.id(V.Work.title).isVisibleToUser(true).findOne() || Common.id(V.Work.videoTitle).isVisibleToUser(true).findOne();
         return tag ? tag.text() : '';
     },
 

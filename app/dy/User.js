@@ -11,10 +11,19 @@ const User = {
             return false;
         }
 
-        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
-        if (!settingTag) {
-            Log.log('找不到setting按钮');
-            return false;
+        let settingTag;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+            if (!settingTag) {
+                Log.log('找不到setting按钮');
+                return false;
+            }
+        } else {
+            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+            if (!settingTag) {
+                Log.log('找不到setting按钮');
+                return false;
+            }
         }
 
         Common.click(settingTag);
@@ -78,7 +87,7 @@ const User = {
         while (i--) {
             let nickname = Common.id(V.User.getNickname[0]).isVisibleToUser(true).findOnce();
             if (nickname && nickname.text()) {
-                if (290701 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+                if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
                     return nickname.text();
                 }
                 return nickname.text().replace(V.User.getNickname[1], '');
@@ -107,9 +116,21 @@ const User = {
         }
 
         //官方账号等等
-        douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
-        if (douyin && douyin.text()) {
-            return douyin.text();
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
+            if (douyin && douyin.text()) {
+                return douyin.text();
+            }
+        } else {
+            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
+            if (douyin) {
+                Log.log(douyin);
+                douyin = douyin.findOne(UiSelector().textMatches("[\\s\\S]+"));
+                Log.log(douyin);
+                if (douyin && douyin.text()) {
+                    return douyin.text();
+                }
+            }
         }
 
         return this.getNickname();
@@ -624,8 +645,9 @@ const User = {
                 //查看是否头像点赞 id=pgn
                 this.fansIncListOp(contents, account, nickname, machine);
 
+                //注意31.7.0已经取消了头像赞
                 Log.log("点击头像概率：" + settingData.task_dy_fans_inc_head_zan_rate);
-                if (rateCurrent <= settingData.task_dy_fans_inc_head_zan_rate * 1) {
+                if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701 && rateCurrent <= settingData.task_dy_fans_inc_head_zan_rate * 1) {
                     Log.log("准备点击头像");
                     let header = Common.id(V.User.fansIncList[5]).isVisibleToUser(true).findOne();
                     Log.log(header);
@@ -1076,7 +1098,7 @@ const User = {
     },
 
     hasAlertInput() {
-        if (290701 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+        if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
             return false;
         }
 
@@ -1117,10 +1139,19 @@ const User = {
             return false;
         }
 
-        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
-        if (!settingTag) {
-            Log.log('找不到setting按钮');
-            return false;
+        let settingTag;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+            if (!settingTag) {
+                Log.log('找不到setting按钮');
+                return false;
+            }
+        } else {
+            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+            if (!settingTag) {
+                Log.log('找不到setting按钮');
+                return false;
+            }
         }
 
         Common.click(settingTag);

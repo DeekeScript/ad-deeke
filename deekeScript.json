@@ -3,23 +3,54 @@
   "icon": "logo/dke.png",
   "head": "img/robot.png",
   "settingTopBg": "img/setting-top.png",
+  "host": "https://home.deeke.top",
+  "switchSetting": {
+    "alipay": true
+  },
   "cate": {
     "columnCount": 3,
-    "data": [{
-      "count": 3,
-      "title": "万能引流"
-    },
-    {
-      "count": 6,
-      "title": "同行截流"
-    },
-    {
-      "count": 3,
-      "title": "养号涨粉"
-    },{
-      "count": 3,
-      "title": "其他功能"
-    }]
+    "data": [
+      {
+        "count": 3,
+        "title": "DY·万能引流"
+      },
+      {
+        "count": 6,
+        "title": "DY·同行截流"
+      },
+      {
+        "count": 3,
+        "title": "DY·养号涨粉"
+      },
+      {
+        "count": 3,
+        "title": "DY·精准拓客"
+      },
+      {
+        "count": 3,
+        "title": "DY·UID拓客"
+      },
+      {
+        "count": 3,
+        "title": "DY·其他功能"
+      },
+      {
+        "count": 3,
+        "title": "小红薯·万能引流"
+      },
+      {
+        "count": 3,
+        "title": "小红薯·其他功能"
+      },
+      {
+        "count": 3,
+        "title": "视频号·万能引流"
+      },
+      {
+        "count": 3,
+        "title": "某手·万能引流"
+      }
+    ]
   },
   "methods": [
     {
@@ -51,7 +82,7 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 25
+            "value": 100
           },
           {
             "type": "numberRange",
@@ -60,7 +91,7 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 20
+            "value": 100
           },
           {
             "type": "numberRange",
@@ -87,7 +118,41 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 25
+            "value": 100
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 60
           },
           {
             "type": "checkboxGroup",
@@ -121,15 +186,30 @@
               "23时"
             ],
             "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
               "10",
               "11",
               "12",
+              "13",
+              "14",
               "15",
+              "16",
               "17",
               "18",
+              "19",
               "20",
               "21",
-              "22"
+              "22",
+              "23"
             ]
           }
         ]
@@ -146,7 +226,7 @@
             "label": "观看时长（秒）",
             "name": "toker_city_view_video_second",
             "max": 30,
-            "min": 0,
+            "min": 5,
             "value": 12,
             "step": 1
           },
@@ -164,7 +244,7 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 25
+            "value": 100
           },
           {
             "type": "numberRange",
@@ -173,7 +253,7 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 20
+            "value": 100
           },
           {
             "type": "numberRange",
@@ -200,7 +280,50 @@
             "max": 100,
             "min": 0,
             "step": 1,
-            "value": 25
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "同城距离（公里内）",
+            "name": "toker_city_distance",
+            "max": 100,
+            "min": 1,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_city_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_city_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_city_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
           },
           {
             "type": "checkboxGroup",
@@ -234,15 +357,30 @@
               "23时"
             ],
             "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
               "10",
               "11",
               "12",
+              "13",
+              "14",
               "15",
+              "16",
               "17",
               "18",
+              "19",
               "20",
               "21",
-              "22"
+              "22",
+              "23"
             ]
           }
         ]
@@ -252,7 +390,61 @@
       "title": "工具箱",
       "hidden": false,
       "icon": "img/tool.png",
-      "jsFile": "tasks/tool.js"
+      "jsFile": "tasks/tool.js",
+      "activity": {
+        "notice": "暂无功能~",
+        "title": "工具箱",
+        "minVersion": 290700,
+        "methods": [
+          {
+            "title": "一键取赞",
+            "hidden": false,
+            "icon": "img/cancel_zan.png",
+            "jsFile": "tasks/task_dy_cancel_zan.js",
+            "settingPage": {
+              "params": [
+                {
+                  "type": "notice",
+                  "title": "帮助你快速取消视频点赞~"
+                }
+              ]
+            }
+          },
+          {
+            "title": "一键取关",
+            "hidden": false,
+            "icon": "img/cancel_focus.png",
+            "jsFile": "tasks/task_dy_cancel_focus.js",
+            "settingPage": {
+              "params": [
+                {
+                  "type": "notice",
+                  "title": "帮助你快速取消单向关注（你关注他，他没有关注你）的用户~"
+                },
+                {
+                  "type": "switch",
+                  "label": "互相关注取关",
+                  "name": "task_dy_cancel_focus_mutual_switch"
+                }
+              ]
+            }
+          },
+          {
+            "title": "粉丝回访",
+            "hidden": false,
+            "icon": "img/view_back.png",
+            "jsFile": "tasks/task_dy_fans_back_view.js",
+            "settingPage": {
+              "params": [
+                {
+                  "type": "notice",
+                  "title": "粉丝回访，能增加粉丝粘性~"
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     {
       "title": "粉丝截流",
@@ -326,7 +518,8 @@
             "type": "text",
             "label": "操作账号",
             "name": "fansSetting_account",
-            "value": ""
+            "value": "",
+            "notice": "*可以输入UID，需要在UID前面加上“#”"
           }
         ]
       }
@@ -404,7 +597,8 @@
             "type": "text",
             "label": "操作账号",
             "name": "focusSetting_account",
-            "value": ""
+            "value": "",
+            "notice": "*可以输入UID，需要在UID前面加上“#”"
           }
         ]
       }
@@ -420,7 +614,8 @@
             "type": "textArea",
             "label": "输入账号（多账号使用逗号隔开）",
             "name": "task_dy_toker_comment_account",
-            "value": ""
+            "value": "",
+            "notice": "*可以输入UID，需要在输入框前面加上“#”"
           },
           {
             "type": "textArea",
@@ -449,9 +644,10 @@
         "params": [
           {
             "type": "textArea",
-            "label": "正在直播的直播间主播账号",
+            "label": "输入账号（正在直播）",
             "value": "",
-            "name": "task_dy_toker_live_account"
+            "name": "task_dy_toker_live_account",
+            "notice": "*可以输入UID，需要在UID前面加上“#”"
           },
           {
             "type": "numberRange",
@@ -461,6 +657,34 @@
             "max": 100,
             "min": 0,
             "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞/评论视频概率",
+            "name": "task_dy_toker_live_comment_user_video_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "switch",
+            "label": "直播间关注用户",
+            "name": "task_dy_toker_live_focus_switch"
+          },
+          {
+            "type": "switch",
+            "label": "直播间私信用户",
+            "name": "task_dy_toker_live_private_switch"
+          },
+          {
+            "type": "numberRange",
+            "label": "用户操作间隔（秒）",
+            "name": "task_dy_toker_live_focus_rate",
+            "value": 0,
+            "max": 100,
+            "min": 5,
+            "step": 5
           }
         ]
       }
@@ -536,6 +760,33 @@
           },
           {
             "type": "numberRange",
+            "label": "点赞概率",
+            "name": "task_dy_search_zan_rate",
+            "value": 10,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论概率",
+            "name": "task_dy_search_comment_rate",
+            "value": 10,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "关注概率",
+            "name": "task_dy_search_focus_rate",
+            "value": 10,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
             "label": "刷视频数量",
             "name": "task_dy_search_count",
             "value": 10,
@@ -553,25 +804,18 @@
       "settingPage": {
         "params": [
           {
-            "type": "textArea",
-            "label": "输入账号（不输入则使用内置账号）",
-            "name": "task_dy_fans_inc_account",
-            "value": "123456",
-            "hidden": true
+            "type": "text",
+            "label": "输入账号（多账号每行输入一个）",
+            "name": "task_dy_fans_inc_accounts",
+            "value": "",
+            "lines": 5,
+            "hidden": false,
+            "notice": "*可以输入UID，需要在输入框前面加上“#”"
           },
           {
             "type": "notice",
-            "title": "头像赞概率+视频赞概率+评论赞概率+收藏概率=100%",
+            "title": "视频赞概率+评论赞概率+收藏概率=100%",
             "hidden": true
-          },
-          {
-            "type": "numberRange",
-            "label": "头像赞频率（%）",
-            "name": "task_dy_fans_inc_head_zan_rate",
-            "value": 5,
-            "max": 100,
-            "min": 0,
-            "step": 1
           },
           {
             "type": "numberRange",
@@ -648,6 +892,364 @@
             "max": 5000,
             "min": 10,
             "step": 10
+          }
+        ]
+      }
+    },
+    {
+      "title": "轻松拓客",
+      "icon": "img/qingsong.png",
+      "jsFile": "tasks/task_dy_qingsong_tuoke.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "运行次数",
+            "name": "task_dy_qingsong_tuoke_run_count",
+            "value": 10,
+            "max": 1000,
+            "min": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_dy_qingsong_tuoke_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "主页平均停留时间（秒）",
+            "name": "task_dy_qingsong_tuoke_home_wait",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "hidden": true,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "作品平均停留时间（秒）",
+            "name": "task_dy_qingsong_tuoke_work_wait",
+            "value": 5,
+            "max": 100,
+            "min": 2,
+            "hidden": true,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不少于",
+            "name": "task_dy_qingsong_tuoke_min_fans",
+            "value": 0,
+            "hidden": true
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不大于",
+            "name": "task_dy_qingsong_tuoke_max_fans",
+            "value": 10000,
+            "hidden": true
+          },
+          {
+            "type": "number",
+            "label": "作品数大于",
+            "name": "task_dy_qingsong_tuoke_min_work",
+            "value": 1,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_dy_qingsong_tuoke_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信",
+              "首作品点赞"
+            ],
+            "values": [
+              "0",
+              "2"
+            ],
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "私信模式",
+            "name": "task_dy_qingsong_tuoke_private_type",
+            "children": [
+              "对普通用户私信",
+              "对蓝V用户私信"
+            ],
+            "values": [],
+            "hidden": true
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：在其他账号的 “粉丝” 或者 “关注” 界面运行，系统会对用户首作品点赞。"
+          }
+        ]
+      }
+    },
+    {
+      "title": "赞回访",
+      "icon": "img/zan.png",
+      "jsFile": "tasks/task_dy_zan_back.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "运行次数",
+            "name": "task_dy_zan_back_run_count",
+            "value": 10,
+            "max": 300,
+            "min": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_dy_zan_back_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "主页平均停留时间（秒）",
+            "name": "task_dy_zan_back_home_wait",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1,
+            "hidden": true
+          },
+          {
+            "type": "numberRange",
+            "label": "作品平均停留时间（秒）",
+            "name": "task_dy_zan_back_work_wait",
+            "value": 5,
+            "max": 100,
+            "min": 2,
+            "step": 1,
+            "hidden": true
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不少于",
+            "name": "task_dy_zan_back_min_fans",
+            "value": 0,
+            "hidden": true
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不大于",
+            "name": "task_dy_zan_back_max_fans",
+            "value": 10000,
+            "hidden": true
+          },
+          {
+            "type": "number",
+            "label": "作品数大于",
+            "name": "task_dy_zan_back_min_work",
+            "value": 1,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_dy_zan_back_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信",
+              "首作品点赞"
+            ],
+            "values": [
+              "0",
+              "2"
+            ]
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：在我的 “作品” -> “评论” 页的 “点赞” 列表界面运行，对列表用户的作品回赞。"
+          }
+        ]
+      }
+    },
+    {
+      "title": "好友转化",
+      "icon": "img/friend.png",
+      "jsFile": "tasks/task_dy_friend_change.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "运行次数",
+            "name": "task_dy_friend_change_run_count",
+            "value": 10,
+            "max": 300,
+            "min": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_dy_friend_change_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "主页平均停留时间（秒）",
+            "name": "task_dy_friend_change_home_wait",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "作品平均停留时间（秒）",
+            "name": "task_dy_friend_change_work_wait",
+            "value": 5,
+            "max": 100,
+            "min": 2,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不少于",
+            "name": "task_dy_friend_change_min_fans",
+            "value": 0
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不大于",
+            "name": "task_dy_friend_change_max_fans",
+            "value": 10000
+          },
+          {
+            "type": "number",
+            "label": "作品数大于",
+            "name": "task_dy_friend_change_min_work",
+            "value": 1
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_dy_friend_change_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信",
+              "首作品点赞"
+            ],
+            "values": [
+              "0",
+              "2"
+            ]
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "私信模式",
+            "name": "task_dy_friend_change_private_type",
+            "children": [
+              "对普通用户私信",
+              "对蓝V用户私信"
+            ],
+            "values": []
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：在其他账号的 “粉丝” 或者 “关注” 界面运行，系统会根据相关筛选条件执行相应的任务。（适用于寻找客户，对同行的精准粉丝进行推广引流）"
+          }
+        ]
+      }
+    },
+    {
+      "title": "UID私信",
+      "columns": 2,
+      "icon": "img/private-2.png",
+      "jsFile": "tasks/task_dy_toker_uid.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "text",
+            "label": "UID（每行一个）",
+            "name": "task_dy_toker_uid_account",
+            "value": "",
+            "lines": 5
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_dy_toker_uid_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_dy_toker_uid_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信"
+            ],
+            "values": [
+              "0",
+              "1"
+            ]
+          },
+          {
+            "type": "notice",
+            "title": "请确保后台弹窗权限已打开"
+          }
+        ]
+      }
+    },
+    {
+      "title": "UID邀约",
+      "icon": "img/invite.png",
+      "jsFile": "tasks/task_dy_toker_invite.js",
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "text",
+            "label": "UID（每行一个）",
+            "name": "task_dy_toker_invite_account",
+            "value": "",
+            "lines": 5
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_dy_toker_invite_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：蓝V账号，需要创建卡片，这个功能将会自动分享第一个卡片"
           }
         ]
       }
@@ -735,35 +1337,189 @@
       }
     },
     {
-      "title": "直播间弹幕",
+      "title": "团购营销",
       "hidden": true,
-      "icon": "img/barrage.png",
-      "jsFile": "tasks/task_dy_toker_fans.js"
-    },
-    {
-      "title": "粉丝回访",
-      "hidden": false,
-      "icon": "img/view_back.png",
-      "jsFile": "tasks/task_dy_fans_back_view.js",
+      "icon": "img/team-buy.png",
+      "jsFile": "tasks/task_dy_team_buy.js",
+      "minVersion": 290700,
       "settingPage": {
         "params": [
           {
             "type": "notice",
-            "title": "粉丝回访，能增加粉丝粘性~"
+            "title": "1.团购功能可能需要多次授权位置服务，请先手动操作一遍流程，再使用软件运行~\n\n2.每次启动该功能，请确保DY界面在首页或者团购页~\n\n3.确保用户列表可以被操作"
+          },
+          {
+            "type": "textArea",
+            "label": "门店名称",
+            "name": "task_dy_team_buy_text",
+            "value": ""
+          },
+          {
+            "type": "textArea",
+            "label": "操作次数",
+            "name": "task_dy_team_buy_op_count",
+            "value": "10"
+          },
+          {
+            "type": "numberRange",
+            "label": "赞频率（%）",
+            "name": "task_dy_team_buy_zan_rate",
+            "max": 100,
+            "value": 50,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "task_dy_team_buy_comment_rate",
+            "max": 100,
+            "value": 50,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "task_dy_team_buy_private_rate",
+            "max": 100,
+            "value": 50,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作间隔",
+            "name": "task_dy_team_buy_wait",
+            "max": 100,
+            "value": 5,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "滑动灵敏度",
+            "name": "task_dy_team_buy_swipe",
+            "max": 100,
+            "value": 50,
+            "min": 20,
+            "step": 1
           }
         ]
       }
     },
     {
-      "title": "一键取关",
+      "title": "直播间弹幕",
       "hidden": false,
-      "icon": "img/cancel_focus.png",
-      "jsFile": "tasks/task_dy_cancel_focus.js",
+      "icon": "img/barrage.png",
+      "jsFile": "tasks/task_dy_live_barrage.js",
+      "columns": 1,
       "settingPage": {
         "params": [
           {
+            "type": "textArea",
+            "label": "输入账号（正在直播中）",
+            "name": "task_dy_live_barrage_account",
+            "value": "",
+            "notice": "*可以输入UID，需要在UID前面加上“#”"
+          },
+          {
+            "type": "numberRange",
+            "label": "操作最大间隔时间（秒）",
+            "name": "task_dy_live_barrage_second",
+            "value": 5,
+            "max": 300,
+            "min": 5,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "task_dy_live_barrage_zan_rate",
+            "value": 5,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "弹幕频率（%）",
+            "name": "task_dy_live_barrage_comment_rate",
+            "value": 5,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "弹幕内容（一行为一条弹幕）",
+            "name": "task_dy_live_barrage_comments",
+            "value": "六六六\n厉害了\n😄😄"
+          },
+          {
+            "type": "switch",
+            "label": "弹幕带表情",
+            "name": "task_dy_live_barrage_comment_emoji_switch"
+          }
+        ]
+      }
+    },
+    {
+      "title": "评论截流II",
+      "hidden": false,
+      "columns": 1,
+      "icon": "img/comment-2.png",
+      "jsFile": "tasks/task_dy_toker_video.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "评论关键词（多关键词使用逗号隔开）",
+            "value": "",
+            "name": "task_dy_toker_live_video_comment_keyword"
+          },
+          {
+            "type": "numberRange",
+            "label": "评论赞频率",
+            "name": "task_dy_toker_live_video_zan_comment_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率",
+            "name": "task_dy_toker_live_video_focus_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "回复作品首评概率",
+            "name": "task_dy_toker_live_video_comment_first_comment_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作间隔（秒）",
+            "name": "task_dy_toker_live_video_second",
+            "value": 0,
+            "max": 100,
+            "min": 5,
+            "step": 5
+          },
+          {
             "type": "notice",
-            "title": "帮助你快速取消单向关注（你关注他，他没有关注你）的用户~"
+            "title": "1.点击“保存并运行”后，请先进入视频搜索页，手动输入关键词、筛选时间，切换到“视频”选项；然后再点击右侧“启动”按钮执行\n\n2.关注、评论赞，三者会按照概率执行，并且只执行其中一个"
           }
         ]
       }
@@ -773,11 +1529,392 @@
       "hidden": true,
       "icon": "img/show.png",
       "jsFile": "tasks/task_dy_toker_fans.js"
+    },
+    {
+      "title": "万能营销",
+      "icon": "img/xhs-wanneng.png",
+      "jsFile": "tasks/task_xhs_toker.js",
+      "columns": 1,
+      "settingPage": {
+        "params": [
+          {
+            "type": "switch",
+            "label": "同城营销",
+            "name": "toker_xhs_is_city",
+            "value": false
+          },
+          {
+            "type": "numberRange",
+            "label": "操作间隔（秒）",
+            "name": "toker_xhs_op_second",
+            "max": 60,
+            "min": 1,
+            "value": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "观看时长（秒）",
+            "name": "toker_xhs_view_video_second",
+            "max": 60,
+            "min": 5,
+            "value": 12,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "关键词筛选（多个使用逗号隔开）",
+            "name": "toker_xhs_view_video_keywords",
+            "value": "",
+            "notice": "* 关键词不填则操作所有"
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "toker_xhs_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 25
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "toker_xhs_comment_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 20
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "toker_focus_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "toker_xhs_private_msg_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1,
+            "hidden": true
+          },
+          {
+            "type": "numberRange",
+            "label": "评论区点赞频率（%）",
+            "name": "toker_comment_area_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 25,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_xhs_run_sex",
+            "columnCount": 6,
+            "hidden": true,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_xhs_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 18,
+            "hidden": true
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_xhs_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 60,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "运行时间",
+            "name": "toker_xhs_run_hour",
+            "columnCount": 6,
+            "children": [
+              "0时",
+              "1时",
+              "2时",
+              "3时",
+              "4时",
+              "5时",
+              "6时",
+              "7时",
+              "8时",
+              "9时",
+              "10时",
+              "11时",
+              "12时",
+              "13时",
+              "14时",
+              "15时",
+              "16时",
+              "17时",
+              "18时",
+              "19时",
+              "20时",
+              "21时",
+              "22时",
+              "23时"
+            ],
+            "values": [
+              "10",
+              "11",
+              "12",
+              "15",
+              "17",
+              "18",
+              "20",
+              "21",
+              "22"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "同行拓客",
+      "icon": "img/xhs-fans.png",
+      "jsFile": "tasks/task_xhs_fans.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "columns": 1,
+      "packageName": "com.xingin.xhs",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "运行次数",
+            "name": "task_xhs_fans_run_count",
+            "value": 10,
+            "max": 300,
+            "min": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_xhs_fans_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "主页平均停留时间（秒）",
+            "name": "task_xhs_fans_home_wait",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "作品平均停留时间（秒）",
+            "name": "task_xhs_fans_work_wait",
+            "value": 5,
+            "max": 100,
+            "min": 2,
+            "step": 1
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不少于",
+            "name": "task_xhs_fans_min_fans",
+            "value": 0
+          },
+          {
+            "type": "number",
+            "label": "粉丝数量不大于",
+            "name": "task_xhs_fans_max_fans",
+            "value": 10000
+          },
+          {
+            "type": "number",
+            "label": "作品数大于",
+            "name": "task_xhs_fans_min_work",
+            "value": 1
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_xhs_fans_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信",
+              "首作品点赞"
+            ],
+            "values": [
+              "0",
+              "2"
+            ]
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：在其他账号的 “粉丝” 或者 “关注” 或者“推荐”界面运行，系统会根据相关筛选条件执行相应的任务。作品数限制，只针对“粉丝”界面。（适用于寻找客户，对同行的精准粉丝进行推广引流）"
+          }
+        ]
+      }
+    },
+    {
+      "title": "赞回访",
+      "icon": "img/xhs-zan.png",
+      "jsFile": "tasks/task_xhs_zan_back.js",
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "columns": 1,
+      "packageName": "com.xingin.xhs",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "运行次数",
+            "name": "task_xhs_zan_back_run_count",
+            "value": 10,
+            "max": 300,
+            "min": 1
+          }
+        ]
+      }
+    },
+    {
+      "title": "USER_ID私信",
+      "columns": 2,
+      "icon": "img/private-2.png",
+      "jsFile": "tasks/task_xhs_toker_uid.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "text",
+            "label": "USER_ID（每行一个）",
+            "name": "task_xhs_toker_uid_account",
+            "value": "",
+            "lines": 5
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_xhs_toker_uid_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "功能",
+            "name": "task_xhs_toker_uid_op",
+            "columnCount": 6,
+            "children": [
+              "关注",
+              "私信"
+            ],
+            "values": [
+              "0",
+              "1"
+            ]
+          },
+          {
+            "type": "notice",
+            "title": "请确保后台弹窗权限已打开"
+          }
+        ]
+      }
+    },
+    {
+      "title": "垂直养号",
+      "columns": 2,
+      "icon": "img/vertical.png",
+      "jsFile": "tasks/task_xhs_yanghao.js",
+      "packageName": "com.ss.android.ugc.aweme",
+      "settingPage": {
+        "params": [
+          {
+            "type": "text",
+            "label": "关键词",
+            "name": "task_xhs_yanghao_keyword",
+            "value": "",
+            "lines": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "操作平均间隔（秒）",
+            "name": "task_xhs_yanghao_interval",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论概率",
+            "name": "task_xhs_yanghao_comment_rate",
+            "value": 15,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞概率",
+            "name": "task_xhs_yanghao_zan_rate",
+            "value": 20,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "收藏概率",
+            "name": "task_xhs_yanghao_collect_rate",
+            "value": 5,
+            "max": 100,
+            "min": 1,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "刷作品总数",
+            "name": "task_xhs_yanghao_count",
+            "value": 100,
+            "max": 3000,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      }
     }
   ],
   "bottomMenus": [
     {
-      "title": "Deeke",
+      "title": "{NAME}",
       "icon": "img/home.png",
       "banner": "img/home-top.png",
       "type": "home"
@@ -798,82 +1935,162 @@
       "title": "联系客服",
       "icon": "img/kefu.png",
       "type": "customerService",
-      "description": "客服微信：ccl_tec",
-      "hidden": true
+      "description": "客服微信：DeekeScript",
+      "hidden": false
     },
     {
-      "title": "其他设置",
-      "icon": "img/sett.png",
+      "title": "功能说明",
+      "icon": "img/manual.png",
+      "type": "notice",
+      "file": "task.html"
+    },
+    {
+      "title": "智能话术",
+      "icon": "img/ai.png",
       "type": "settingService",
       "settingPage": {
         "params": [
           {
-            "type": "notice",
-            "title": "请确保配置正确"
-          },
-          {
             "type": "switch",
-            "label": "开启文心",
+            "label": "开启{NAME}智能AI话术",
             "value": false,
             "name": "setting_baidu_wenxin_switch"
           },
           {
+            "type": "radio",
+            "label": "请选择角色",
+            "name": "setting_baidu_wenxin_role",
+            "value": "1",
+            "dataFrom": "role",
+            "options": []
+          },
+          {
             "type": "text",
-            "label": "文心Key",
+            "label": "{NAME} Key",
             "value": "如：NZmgn5urWoHhKWe8XbGMdbUp",
             "name": "setting_baidu_wenxin_key"
           },
           {
             "type": "text",
-            "label": "文心Secret",
+            "label": "{NAME} Secret",
             "name": "setting_baidu_wenxin_secret",
             "value": "如：brIq133KaAPNEkn109avxl7MXUHHW0kg"
           },
           {
             "type": "notice",
-            "title": "如果开启评论带图，请配置账号收藏的表情图",
+            "title": "如果开启超级霸屏，请配置账号收藏的表情图",
             "hidden": true
           },
           {
             "type": "numberRange",
-            "label": "评论带图概率(%)",
+            "label": "超级霸屏(%)",
             "name": "setting_comment_with_photo",
             "value": 0,
             "min": 0,
             "max": 100,
             "hidden": false
+          },
+          {
+            "type": "notice",
+            "title": "* 开启后，将使用{NAME}官方AI角色（可自定义）进行评论和私信，让拓客变得更简单~",
+            "textColor": "#AA0000",
+            "textSize": 16
           }
         ]
       },
       "hidden": false
     },
     {
+      "title": "数据统计",
+      "icon": "img/statistics.png",
+      "type": "statistics",
+      "jsFile": "statistics/statistics.js"
+    },
+    {
       "title": "上传日志",
       "icon": "img/upload.png",
       "type": "uploadLog",
-      "url": "https://home.deeke.top/dke/uploadLog"
+      "url": "/dke/uploadLog"
     },
     {
       "title": "系统升级",
       "icon": "img/update.png",
       "type": "updateApp",
-      "url": "https://home.deeke.top/dke/updateApp"
+      "url": "/dke/updateApp"
     },
     {
       "title": "清理数据",
       "icon": "img/clear.png",
       "description": "确定清理嘛？",
       "type": "clear"
+    },
+    {
+      "title": "举报中心",
+      "icon": "img/jubao.png",
+      "type": "qiwei",
+      "url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=910d7c7c-d74a-4ce5-a070-0f3383b1f6ee",
+      "hidden": false,
+      "settingPage": {
+        "params": [
+          {
+            "type": "notice",
+            "title": "如果我们的代理商有侵犯到你的权益，请立即举报！",
+            "hidden": false
+          },
+          {
+            "type": "text",
+            "label": "举报人",
+            "value": "",
+            "name": "qiwei_name"
+          },
+          {
+            "type": "text",
+            "label": "举报人手机号",
+            "value": "",
+            "name": "qiwei_mobile"
+          },
+          {
+            "type": "text",
+            "label": "举报人身份证号码",
+            "value": "",
+            "name": "qiwei_card_no"
+          },
+          {
+            "type": "text",
+            "label": "举报内容",
+            "value": "",
+            "hint": "请详细描述你举报该软件的原因，请不要恶意举报！",
+            "name": "qiwei_content",
+            "lines": 3
+          }
+        ]
+      }
     }
   ],
   "apis": [
     {
       "type": "bind",
-      "url": "https://home.deeke.top/dke/login"
+      "url": "/dke/login"
     },
     {
       "type": "checkBind",
-      "url": "https://home.deeke.top/dke/checkBind"
+      "url": "/dke/checkBind"
+    },
+    {
+      "type": "aiSpeechToken",
+      "url": "/dke/getBaiduToken"
+    },
+    {
+      "type": "config",
+      "url": "/dkee/config"
+    },
+    {
+      "type": "getToken",
+      "url": "/alipay/getToken"
+    },
+    {
+      "type": "createOrder",
+      "url": "/alipay/createOrder"
     }
   ]
 }

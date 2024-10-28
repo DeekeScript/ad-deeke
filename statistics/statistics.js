@@ -26,14 +26,14 @@ var deekeStatistics = {
                 'title': '今日点赞',
                 'weight': 8,
                 'value': data['s_zan'],
-                'data': weekData['s_viewTargetVideo'],
+                'data': weekData['s_zan'],
             },
             {
                 'title': '今日评论',
                 'count': 1,
                 'weight': 8,
                 'value': data['s_comment'],
-                'data': weekData['s_viewTargetVideo'],
+                'data': weekData['s_comment'],
             },
             {
                 'title': '今日赞评论',
@@ -45,7 +45,7 @@ var deekeStatistics = {
                 'title': '今日私信',
                 'weight': 8,
                 'value': data['s_privateMsg'],
-                'data': weekData['s_viewTargetVideo'],
+                'data': weekData['s_privateMsg'],
             },
             {
                 'title': '今日关注',

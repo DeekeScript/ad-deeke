@@ -154,7 +154,7 @@ let Message = {
         }
 
         iptTag.setText(account);
-        Common.sleep(1000);
+        Common.sleep(2000 + 1000 * Math.random());
     },
 
     intoFansGroup(account, index) {
@@ -217,7 +217,12 @@ let Message = {
     },
 
     intoGroupUserList(contents, getMsg, machineInclude, machineSet) {
-        let tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
+        let tag;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
+        } else {
+            tag = UiSelector().className(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).clickable(true).findOnce();
+        }
 
         if (!tag) {
             throw new Error('找不到“更多“');
@@ -225,32 +230,48 @@ let Message = {
         tag.click();
         Common.sleep(2000 + 2000 * Math.random());
 
-        let groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).isVisibleToUser(true).findOnce();
-
-        if (!groupTag) {
-            groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).findOnce();
+        let groupTag;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).isVisibleToUser(true).findOnce();
 
             if (!groupTag) {
-                throw new Error('找不到“groupTag“');
+                groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).findOnce();
+
+                if (!groupTag) {
+                    throw new Error('找不到“groupTag“');
+                }
             }
-        }
 
-        groupTag.click();
-        Common.sleep(2300);
-        Log.log(groupTag);
+            groupTag.click();
+            Common.sleep(2300);
+            Log.log(groupTag);
 
-        let groupTag2 = UiSelector().textContains(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOnce();
+            let groupTag2 = UiSelector().textContains(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOnce();
 
-        if (groupTag2) {
-            Common.click(groupTag2);
-            Common.sleep(3000);
+            if (groupTag2) {
+                Common.click(groupTag2);
+                Common.sleep(3000);
+            }
+        } else {
+            let tag = Common.id(V.Message.intoGroupUserList[2]).text(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOne();
+            if (!tag) {
+                tag = Common.id(V.Message.intoGroupUserList[2]).text(V.Message.intoGroupUserList[3]).findOne();
+                if (!tag) {
+                    throw new Error('找不到“groupTag“');
+                }
+            }
+
+            Common.click(tag);
+            Common.sleep(2300);
+            Log.log(tag);
+
+            groupTag = Common.id(V.Message.intoGroupUserListAdd[0]).text(V.Message.intoGroupUserListAdd[1]).findOne();
         }
 
         let rpCount = 0;
         let rpContains = [];
         while (true) {
-            let contains = Common.id(V.Message.intoGroupUserList[4]).isVisibleToUser(true).find();
-
+            let contains = Common.id(V.Message.intoGroupUserList[4]).clickable(true).isVisibleToUser(true).find();
             if (0 == contains.length) {
                 return true;
             }
@@ -261,6 +282,7 @@ let Message = {
                     continue;
                 }
 
+                Log.log('第几个：' + i);
                 if (contains[i].bounds().top < groupTag.bounds().top) {
                     continue;
                 }
@@ -269,9 +291,29 @@ let Message = {
                     continue;
                 }
 
-                let titleTag = contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[5])) || contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[6]));
-                if (!titleTag || !titleTag.text()) {
+                if (contains[i].bounds().top + contains[i].bounds().height() > Device.height()) {
                     continue;
+                }
+
+                let titleTag;
+                if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+                    titleTag = contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[5])) || contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[6]));
+                    if (!titleTag || !titleTag.text()) {
+                        Log.log('无内容');
+                        continue;
+                    }
+                } else {
+                    let t = contains[i].bounds().top;
+                    let h = contains[i].bounds().height();
+                    titleTag = Common.id(V.Message.intoGroupUserList[5]).filter(v => {
+                        return v && v.bounds() && v.bounds().top > t && v.bounds().top + v.bounds().height() < t + h && v.bounds().left >= 0;
+                    }).findOne() || Common.id(V.Message.intoGroupUserList[6]).filter(v => {
+                        return v && v.bounds() && v.bounds().top > t && v.bounds().top + v.bounds().height() < t + h && v.bounds().left >= 0;
+                    }).findOne();
+                    if (!titleTag || !titleTag.text()) {
+                        Log.log('无内容');
+                        continue;
+                    }
                 }
 
                 if (!isAddFirst) {
@@ -293,7 +335,8 @@ let Message = {
                     continue;
                 }
 
-                contains[i].click();
+                Log.log('点击元素，准备进入个人中心');
+                Common.click(contains[i]);
                 Common.sleep(2000 + 2000 * Math.random());
                 statistics.viewUser();
                 let isPrivateAccount = User.isPrivate();
@@ -331,6 +374,7 @@ let Message = {
                 machineSet(titleTag.text());
                 contents.push(titleTag.text());
                 Common.back();
+                Common.sleep(1500);
             }
 
             if (rpCount >= 3) {

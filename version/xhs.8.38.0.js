@@ -42,6 +42,7 @@ const C8380 = {
         nickname: 'nickNameTV',
         VideoNickname: 'jzg',//desc：作者 XXX
         title: 'gfd',
+        videoTitle: 'noteContentText',
     },
 
     Index: {
@@ -57,7 +58,7 @@ const C8380 = {
         container: 'fhj',//可滑动
         intoSearchList: ['fhw', 'fi1', '搜索'],
         intoSearchVideo: ['gfb', 'ge2', 'a8t'],//标题，封面，昵称和头像整体
-        searchTop: 'e30',
+        searchTop: 'fgz',
     }
 }
 

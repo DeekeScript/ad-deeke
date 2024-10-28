@@ -56,7 +56,10 @@ const Comment = {
     },
 
     isAuthor() {
-        return this.tag.children().findOne(Common.id(V.Comment.isAuthor[0]).descContains(V.Comment.isAuthor[1])) ? true : false;
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            return this.tag.children().findOne(Common.id(V.Comment.isAuthor[0]).descContains(V.Comment.isAuthor[1])) ? true : false;
+        }
+        return this.tag.children().findOne(Common.id(V.Comment.isAuthor[0]).textContains(V.Comment.isAuthor[1])) ? true : false;
     },
 
     getNickname() {
@@ -76,7 +79,7 @@ const Comment = {
 
         let str = tag.desc().split(V.Comment.getContent[0])[1];
 
-        if (290701 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+        if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
             return str;
         }
 
@@ -110,6 +113,10 @@ const Comment = {
         }
 
         time = time.text();
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 310701) {
+            time = time.split('  ');
+            time = time[0];
+        }
 
         if (time.indexOf('分钟前') !== -1) {
             incSecond = time.replace('分钟前', '') * 60;
@@ -651,11 +658,20 @@ const Comment = {
         DyCommon.back();
         //漏洞修复  如果此时还在评论页面，则再一次返回
         DyCommon.sleep(1000);
-        if (DyCommon.id(V.Comment.zanComment[0]).textContains(V.Comment.zanComment[1]).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-        }).findOnce()) {
-            DyCommon.back();
-            Log.log('再次返回');
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+            if (DyCommon.id(V.Comment.zanComment[0]).textContains(V.Comment.zanComment[1]).filter((v) => {
+                return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().top + v.bounds().height() < Device.height();
+            }).findOnce()) {
+                DyCommon.back();
+                Log.log('再次返回');
+            }
+        } else {
+            if (DyCommon.id(V.Comment.zanComment[0]).descContains(V.Comment.zanComment[1]).filter((v) => {
+                return v && v.bounds() && v.bounds().top > 0 && v.bounds().left > 0 && v.bounds().width() > 0 && v.bounds().top + v.bounds().height() < Device.height();
+            }).findOnce()) {
+                DyCommon.back();
+                Log.log('再次返回');
+            }
         }
 
         DyCommon.sleep(500 + 500 * Math.random());

@@ -17,6 +17,10 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        if (type == 1 && machine.get('task_dy_team_buy_private_share_rate', 'bool')) {
+            return { msg: '' };
+        }
+
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -87,7 +91,10 @@ let task = {
         let i = 12;
         let commentTag;
         while (i-- > 0) {
-            commentTag = UiSelector().textContains(V.GroupBuy.shopContainer[1]).textContains(V.GroupBuy.shopContainer[2]).isVisibleToUser(true).findOne();
+            commentTag = UiSelector().textContains(V.GroupBuy.shopContainer[2]).isVisibleToUser(true).filter(v => {
+                return v && v.bounds() && v.bounds().left > Device.width() * 0.6 && v.bounds().top + v.bounds().height() < Device.height() - 150;
+            }).findOne();
+            Log.log('评论内容：', commentTag);
             if (commentTag) {
                 break;
             }
@@ -96,8 +103,9 @@ let task = {
                 return v && v.bounds() && v.bounds().top > Device.height() - v.bounds().height();
             }).findOne();
             if (!shopContainer) {
-                tCommon.swipe(0, 0.5);//慢慢滑动
-                tCommon.sleep(1000 + 500 * Math.random());
+                Log.log('滑动灵敏度：', machine.get('task_dy_team_buy_swipe', 'int') / 100);
+                tCommon.swipe(0, machine.get('task_dy_team_buy_swipe', 'int') / 100);//慢慢滑动
+                tCommon.sleep(1500 + 500 * Math.random());
             } else {
                 Log.log('没有找到shopContainer');
             }
@@ -108,11 +116,11 @@ let task = {
             return -1;
         }
 
-        Gesture.click(commentTag.bounds().left + 200 + 400 * Math.random(), commentTag.bounds().top + 20 * Math.random());
+        tCommon.click(commentTag);
         tCommon.sleep(3000 + 2000 * Math.random());
 
         //最新点击
-        let newTag = new UiSelector().textContains('最新').className('com.lynx.tasm.behavior.ui.text.UIText').findOne() || new UiSelector().textContains('最新').className('com.lynx.tasm.behavior.ui.text.FlattenUIText').findOne();;
+        let newTag = new UiSelector().textContains('最新').className('com.lynx.tasm.behavior.ui.text.UIText').findOne() || new UiSelector().textContains('最新').className('com.lynx.tasm.behavior.ui.text.FlattenUIText').findOne() || new UiSelector().textContains('最新').className('com.lynx.tasm.behavior.ui.LynxFlattenUI').findOne();
         if (newTag) {
             tCommon.click(newTag);
             tCommon.sleep(3000 + 2000 * Math.random());
@@ -151,7 +159,7 @@ let task = {
         while (true) {
             try {
                 // ntoUser = UiSelector().textContains('帮助更多用户决策').isVisibleToUser(true).findOne() ? false : true;
-                let tags = UiSelector().textMatches("[\\s\\S]+").isVisibleToUser(true).clickable(true).filter(v => {
+                let tags = UiSelector().textMatches("[\\s\\S]+").clickable(true).filter(v => {
                     return v && v.bounds() && v.bounds().width() == Device.width() && v.bounds().height() > 0 && v.bounds().left == 0 && v.bounds().top + v.bounds().height() < Device.height();
                 }).find();
 
@@ -161,7 +169,7 @@ let task = {
                 }
 
                 if (containers.length >= 3) {
-                    if (tags[0].text() == containers[0]) {
+                    if (tags[0].text() == containers[0] && tags[0].text() == containers[1]) {
                         Log.log('完成');
                         return true;
                     }
@@ -182,26 +190,22 @@ let task = {
                         rpContainers.shift();
                     }
 
+                    Log.log('内容：', tags[i].text());
                     if (tags[i].text() && (tags[i].text().indexOf('**') !== -1 || tags[i].text().indexOf('帮助更多用户决策') !== -1) || !tags[i].desc()) {
                         Log.log('隐私或者底部');
                         continue;
                     }
-
-                    if(tags[i].text().indexOf('写评价，吃喝玩乐免费体验') !== -1){
-                        Log.log('评价');
-                        continue;
-                    }
-
+                    
                     Log.log('进入用户中心', tags[i], tags[i].bounds().top, tags[i].bounds().height());
                     //tags[i].click();
-                    let top = tags[i].bounds().top;
-                    if (top < 0) {
-                        top = tags[i].bounds().top + tags[i].bounds().height() - 10 * Math.random();
+                    let tops = tags[i].bounds().top;
+                    if (tops < 0) {
+                        tops = tags[i].bounds().top + tags[i].bounds().height() - 10 * Math.random();
                     } else {
-                        top += 20 * Math.random();
+                        tops += 20 * Math.random();
                     }
 
-                    Gesture.click(tags[i].bounds().left + 20 * Math.random(), top);
+                    Gesture.click(tags[i].bounds().left + 20 * Math.random(), tops);
                     tCommon.sleep(3000 + 1000 * Math.random());
 
                     let commentDetailHead = UiSelector().className('com.lynx.tasm.ui.image.FlattenUIImage').clickable(false).filter(v => {
@@ -259,7 +263,7 @@ let task = {
                         rpContainers.push(douyin);
 
                         if (!DyVideo.intoUserVideo()) {
-                            tCommon.back(2);
+                            tCommon.back(3);
                             tCommon.sleep(1000);
                             Log.log('没有进入视频，返回3次')
                             continue;
@@ -292,6 +296,7 @@ let task = {
                         }
 
                         opCount -= opC;
+                        Log.log('opCount', opCount);
                         if (opCount <= 0) {
                             Log.log('opCount', opCount);
                             return true;
@@ -316,7 +321,8 @@ let task = {
                 Log.log('下一页评论');
                 let l = 300 * Math.random();
                 let rd = Device.height() * 0.1;
-                Gesture.swipe(l + 200, Device.height() * 0.6 + rd, l + 200, Device.height() * (0.2 + 0.1 * Math.random()), 200);
+                Log.log('滑动灵敏度：', machine.get('task_dy_team_buy_swipe', 'int') / 100);
+                Gesture.swipe(l + 200, Device.height() * machine.get('task_dy_team_buy_swipe', 'int') / 100 + rd, l + 200, Device.height() * (0.2 + 0.1 * Math.random()), 200);
                 tCommon.sleep(1500 + 500 * Math.random());
             } catch (e) {
                 Log.log('报错了', e);
@@ -359,7 +365,6 @@ while (true) {
         }
 
         if (r) {
-            FloatDialogs.show('提示', '完成');
             break;
         }
 
@@ -370,3 +375,4 @@ while (true) {
         tCommon.backHome(10);
     }
 }
+FloatDialogs.show('提示', '已完成');
