@@ -49,7 +49,7 @@ let task = {
         this.me = {
             nickname: DyUser.isCompany() ? DyUser.getDouyin() : DyUser.getNickname(),
             douyin: DyUser.getDouyin(),
-            focusCount: DyUser.getFocusCount(),
+           // focusCount: DyUser.getFocusCount(),
         }
 
         tCommon.toast(JSON.stringify({

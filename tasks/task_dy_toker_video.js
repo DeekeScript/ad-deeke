@@ -1,3 +1,4 @@
+let V = require('version/V.js');
 let tCommon = require("app/dy/Common");
 let DyUser = require("app/dy/User");
 let DySearch = require("app/dy/Search");
@@ -25,7 +26,7 @@ let task = {
     log() {
         let d = new Date();
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-        let allFile = "log/log-comment-" + file + ".txt";
+        let allFile = "log/log-dy-toker-video-" + file + ".txt";
         Log.setFile(allFile);
     },
 
@@ -57,6 +58,13 @@ let task = {
 
         while (true) {
             tCommon.sleep(4000 + Math.random() * 2000);
+            //看看是不是直播
+            if (tCommon.id(V.Live.getUserCountTag[0]).isVisibleToUser(true).findOne()) {
+                Log.log('直播，下一个');
+                DyVideo.next();
+                continue;
+            }
+
             let title = DyVideo.getContent();
             let commentCount = DyVideo.getCommentCount();
             statistics.viewVideo();
@@ -127,6 +135,7 @@ let task = {
 
                     Log.log('找到了关键词', comments[k]['content']);
                     let opRate = Math.random();
+                    //赞头像暂时没有
                     if (opRate <= zanHeadRate) {
                         DyComment.intoUserPage(comments[k]);
                         if (DyUser.isPrivate()) {
@@ -167,6 +176,17 @@ let task = {
                 Log.log('下一页评论');
                 tCommon.swipeCommentListOp();
                 tCommon.sleep(1500 + 500 * Math.random());
+            }
+            //判断是不是在视频页，不是则返回
+            let retryCount = 3;
+            while (retryCount-- > 0) {
+                if (!tCommon.id(V.Video.header[0]).textContains(V.Video.header[1]).findOne()) {
+                    Log.log('找不到视频的搜索，返回');
+                    tCommon.back();
+                    tCommon.sleep(1500 + 500 * Math.random());
+                    continue;
+                }
+                break;
             }
             Log.log('下一个视频');
             this.contents.push(title);

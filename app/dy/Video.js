@@ -17,9 +17,13 @@ const Video = {
     },
 
     getZanTag() {
-        let tag = Common.id(V.Video.getZanTag[0]).isVisibleToUser(true).findOnce();
+        let tag = Common.id(V.Video.getZanTag[0]).filter((v) => {
+            return v && v.bounds() && v.bounds().left > 0 && v.bounds().top > 0 && v.bounds().left + v.bounds().width() <= Device.width() && v.bounds().top + v.bounds().height() < Device.height();
+        }).isVisibleToUser(true).findOnce();
         console.log(tag);
         if (tag) {
+            //900 1208 180 201
+            console.log(tag.bounds().left, tag.bounds().top, tag.bounds().width(), tag.bounds().height());
             return tag;
         }
 
@@ -368,7 +372,7 @@ const Video = {
 
     intoUserVideo() {
         let workTag = UiSelector().id(V.Video.intoUserVideo[0]).descContains(V.Video.intoUserVideo[1]).findOnce();
-        if (Common.numDeal(workTag.text()) === 0) {
+        if (!workTag || Common.numDeal(workTag.text()) === 0) {
             return false;
         }
 

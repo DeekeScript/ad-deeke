@@ -73,14 +73,26 @@ let User = {
         return true;
     },
 
+    dealNum(str) {
+        if (str.indexOf('万') !== -1) {
+            str = str.replace('万', '') * 10000;
+        }else if (str.indexOf('W') !== -1) {
+            str = str.replace('W', '') * 10000;
+        }else if (str.indexOf('w') !== -1) {
+            str = str.replace('w', '') * 10000;
+        }
+
+        return str * 1 || 0;
+    },
+
     getListWorkCount(tag) {
         let workCountTag = tag.children().findOne(Common.id(V.User.fans[8]));//笔记·44|粉丝·38
         if (!workCountTag) {
             return 0;
         }
 
-        let workCount = workCountTag.text().split('|')[0].replace('笔记·', '').replace('万', '0000').replace('w', '0000').replace('W', '0000');
-        return workCount * 1 || 0;
+        let workCount = workCountTag.text().split('|')[0].replace('笔记', '').replace('·', '').replace(' ', '');
+        return this.dealNum(workCount);
     },
 
     getListFansCount(tag) {
@@ -89,8 +101,8 @@ let User = {
             return 0;
         }
 
-        let workCount = workCountTag.text().split('|')[1].replace('粉丝·', '').replace('万', '0000').replace('w', '0000').replace('W', '0000');
-        return workCount * 1 || 0;
+        let workCount = workCountTag.text().split('|')[1].replace('粉丝', '').replace('·', '').replace(' ', '');
+        return this.dealNum(workCount);
     },
 
     getFansCount() {
@@ -99,8 +111,8 @@ let User = {
             return 0;
         }
 
-        let fansCount = fansCountTag.text().replace('万', '0000').replace('w', '0000').replace('W', '0000');
-        return fansCount * 1 || 0;
+        let fansCount = fansCountTag.text();
+        return this.dealNum(fansCount);
     }
 }
 

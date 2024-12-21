@@ -35,6 +35,7 @@ let task = {
             }
 
             try {
+                Log.log('数据：', i, this.index, accounts[i]);
                 //进入用户主页，私信，关注
                 App.gotoIntent('snssdk1128://user/profile/' + accounts[i]);
                 tCommon.sleep(5000 + 3000 * Math.random());

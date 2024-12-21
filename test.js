@@ -39,4 +39,18 @@
 
 // log(id('eu=').findOne());
 
-log(id('ebl').find());
+// log(id('ebl').find());
+// let a = desc('更多').findOne();
+// log(a.parent());//ut7
+// log(a.parent().parent());//r9+
+
+// click(id('r9+').findOne().bounds().centerX(), id('r9+').findOne().bounds().centerY());
+// click(id('ut7').findOne().bounds().centerX(), id('ut7').findOne().bounds().centerY());
+
+// log(descContains('搜索').findOne());
+// log(textContains('搜索').findOne());
+
+// log(id('1l8').textContains('搜索').findOne());
+
+log(descContains('8').findOne());
+

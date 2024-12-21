@@ -69,7 +69,7 @@ const C310701 = {
         ////D0150  D0151  D0152  D0153  //D0154  D0155  D0156  D0157
         fansIncList: [C.userMainTag[1], C.userListTop, C.rootLayout, C.fansNickTag, 'tj8', 'rkr', 'XXX', 'XXX'],//XXX表示不再使用，只是占位
         ////D0160  D0161  D0162  D0163  //D0164  D0165  D0166
-        focusUserList: [C.userMainTag[0], C.userMainTag[1], C.userListTop, C.rootLayout, C.fansNickTag, 'XXX', 'xct'],
+        focusUserList: [C.userMainTag[0], C.userMainTag[1], C.userListTop, C.rootLayout, C.fansNickTag, 'XXX', 'tdj'],
         intoFocusList: [C.userMainTag[1], '17e'],//D0170 D0171
         focusListSearch: ['fsa', C.fansNickTag, 'txt_desc'],//搜索框，昵称 ，账号 //D0180   D0181   D0182
         viewFansList: ['2pz', '0o0', C.rootLayout, C.fansNickTag, 'title_bar'], //D0190   D0191   D0192  D0193   D0194
@@ -151,7 +151,8 @@ const C310701 = {
         getInTimeTag: ['1c7'],//I0170
         intoUserVideo: ['android:id/text1', '作品', 'container', '1x3'],//I0180  I0181  I0182
         isFocus: ['XXX'],//I0190  暂未使用
-        zanList: ['10n']  //点赞列表昵称
+        zanList: ['10n'],  //点赞列表昵称
+        header: ['1l8', '搜索'], //视频搜索页的视频最上面的 搜索按钮
     },
 
     GroupBuy: {

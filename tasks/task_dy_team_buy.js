@@ -30,7 +30,7 @@ let task = {
     log() {
         let d = new Date();
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-        let allFile = "log/log-comment-" + file + ".txt";
+        let allFile = "log/log-team-buy-" + file + ".txt";
         Log.setFile(allFile);
     },
 
@@ -159,7 +159,7 @@ let task = {
         while (true) {
             try {
                 // ntoUser = UiSelector().textContains('帮助更多用户决策').isVisibleToUser(true).findOne() ? false : true;
-                let tags = UiSelector().textMatches("[\\s\\S]+").clickable(true).filter(v => {
+                let tags = UiSelector().textMatches("[\\s\\S]+").clickable(true).isVisibleToUser(true).filter(v => {
                     return v && v.bounds() && v.bounds().width() == Device.width() && v.bounds().height() > 0 && v.bounds().left == 0 && v.bounds().top + v.bounds().height() < Device.height();
                 }).find();
 
@@ -203,6 +203,11 @@ let task = {
                         tops = tags[i].bounds().top + tags[i].bounds().height() - 10 * Math.random();
                     } else {
                         tops += 20 * Math.random();
+                    }
+
+                    if (tops < 0) {
+                        Log.log('顶部小于0', tops);
+                        continue;
                     }
 
                     Gesture.click(tags[i].bounds().left + 20 * Math.random(), tops);

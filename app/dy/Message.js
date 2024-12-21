@@ -217,17 +217,31 @@ let Message = {
     },
 
     intoGroupUserList(contents, getMsg, machineInclude, machineSet) {
-        let tag;
+        let tag = undefined;
         if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
             tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
         } else {
             tag = UiSelector().className(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).clickable(true).findOnce();
         }
 
+        tag = undefined;
+        let tag2 = undefined;
         if (!tag) {
+            tag2 = UiSelector().className(V.Message.intoGroupUserList[0]).clickable(true).isVisibleToUser(true).filter(v => {
+                return v && v.bounds() && v.bounds().left + v.bounds().width() == Device.width() && v.bounds().top < Device.height() / 5;
+            }).findOne();
+        }
+
+        if (tag) {
+            tag.click();
+            console.log('进群1');
+        } else if (tag2) {
+            tag2.click();
+            console.log('进群2');
+        } else {
             throw new Error('找不到“更多“');
         }
-        tag.click();
+
         Common.sleep(2000 + 2000 * Math.random());
 
         let groupTag;

@@ -3,6 +3,89 @@ let statistics = require('common/statistics.js');
 let V = require('version/V.js');
 
 const User = {
+    //蓝V发送卡片
+    privateMsgCard() {
+        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
+            Log.log('私密账号');
+            return false;
+        }
+
+        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+        if (!settingTag) {
+            Log.log('找不到setting按钮');
+            return false;
+        }
+
+        Common.click(settingTag);
+        Log.log("私信");
+        Common.sleep(1000);
+
+        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
+        if (!sendTag) {
+            Log.log('找不到发私信按钮');
+            return false;
+        }
+
+        Common.click(sendTag.parent());
+        Common.sleep(2000);
+
+        let moreTag = Common.id(V.User.privateMsgMore[0]).descContains(V.User.privateMsgMore[1]).findOnce();
+        if (!moreTag) {
+            Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
+            Common.back();
+            return false;
+        }
+        Common.click(moreTag);
+        Common.sleep(1000);
+
+        let toolTag = Common.id(V.User.privateMsgMore[2]).textContains(V.User.privateMsgMore[3]).findOnce();
+        if (!toolTag) {
+            Log.log('找不到发私信toolTag');//可能是企业号，输入框被隐藏了
+            Common.back(2);
+            return false;
+        }
+        Common.click(toolTag);
+        Common.sleep(4000 + 2000 * Math.random());
+
+        let higherTag = UiSelector().textContains(V.User.privateMsgMore[4]).findOnce();
+        if (!higherTag) {
+            Log.log('找不到发私信higherTag');
+            Common.back(2);
+            return false;
+        }
+
+        Common.click(higherTag);
+        Common.sleep(2000 + 2000 * Math.random());
+
+        let previewTag = UiSelector().textContains(V.User.privateMsgMore[5]).isVisibleToUser(true).find();
+        if (!previewTag) {
+            Log.log('找不到发私信higherTag');
+            Common.back(3);
+            return false;
+        }
+
+        let count = Common.getRandomInt(0, previewTag.length - 1);
+        Log.log('点击第几个：', count, previewTag[count]);
+        Gesture.click(previewTag[count].bounds().left - 200 * Math.random(), previewTag[count].bounds().top + 50 * Math.random());
+        Common.sleep(2000 + 2000 * Math.random());
+
+
+        let sendsTag = UiSelector().textContains(V.User.privateMsgMore[6]).findOne();
+        Log.log("私信被关闭了么？");
+        if (!sendsTag) {
+            Common.sleep(Math.random() * 1000);
+            Common.back(3);
+            Log.log("返回两次");
+            return false;
+        }
+
+        statistics.privateMsg();
+        Common.click(sendsTag);
+        Common.sleep(Math.random() * 1000);
+        Log.log("成功：返回1次");
+        Common.back(2);
+        return true;
+    },
     //保证执行的时候在哪个页面，执行完成也是哪个界面
     //返回false是失败，true是成功，-1是被封禁
     privateMsg(msg) {
@@ -314,15 +397,18 @@ const User = {
         let hasFocusTag = Common.id(V.User.cancelFocus[0]).findOnce();//text(已关注) || text(互相关注)
         if (hasFocusTag) {
             hasFocusTag.click();
-            Common.sleep(500);
-
+            Log.log('点击了已关注')
+            Common.sleep(1500);
             //真正地点击取消
             let cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
-            if (!cancelTag || cancelTag.bounds().top > Device.height() - 200) {
+            Log.log('cancelTag', cancelTag);
+            if (!cancelTag || cancelTag.bounds().top + cancelTag.bounds().height() > Device.height()) {
                 let x = Math.random() * 500 + 100;
                 Gesture.swipe(x, Device.height() / 2, x, 200, 200);
-                Common.sleep(1000);
+                Common.sleep(1500);
+                Log.log(V.User.cancelFocus[1], V.User.cancelFocus[2]);
                 cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
+                Log.log('cancelTag', cancelTag);
                 if (!cancelTag) {
                     throw new Error('取消关注的核心按钮找不到');
                 }
@@ -458,7 +544,7 @@ const User = {
 
                 //第一种机型
                 Log.log(machine.get('task_dy_cancel_focus_mutual_switch', 'bool'), hasFocusTag.text());
-                if (hasFocusTag.text() === '已关注' || (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && hasFocusTag.text() === '互相关注')) {
+                if ((hasFocusTag.text() === '已关注' || hasFocusTag.desc() === '已关注') || (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && (hasFocusTag.text() === '互相关注' || hasFocusTag.desc() === '互相关注'))) {
                     let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
                     Log.log('setting', setting);
                     if (!setting) {
@@ -468,12 +554,14 @@ const User = {
                     }
 
                     setting.click();
-                    Common.sleep(1000);
+                    Common.sleep(2000);
 
                     let cancelTag = Common.id(V.User.cancelFocusList[7]).text(V.User.cancelFocusList[8]).filter((v) => {
                         return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
                     }).findOnce();
                     Common.click(cancelTag);
+                } else if (!machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && (hasFocusTag.text() === '互相关注' || hasFocusTag.desc() === '互相关注')) {
+                    continue;
                 } else if (hasFocusTag.text() !== V.User.cancelFocusList[9] && hasFocusTag.text() !== V.User.cancelFocusList[10]) {
                     //既不是“已关注”也不是“相互关注” 还不是“关注”  适配老机型
                     let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
@@ -484,7 +572,7 @@ const User = {
                     }
 
                     Common.click(titleTag);
-                    Common.sleep(1000);
+                    Common.sleep(3000 + 1000 * Math.random());
 
                     let focusTag = UiSelector().text(V.User.cancelFocusList[11]).findOnce();
                     if (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && !focusTag) {
@@ -585,6 +673,10 @@ const User = {
                 }
 
                 let titleTag = containers[i].children().findOne(Common.id(V.User.fansIncList[3]));
+                if (!titleTag || !titleTag.bounds()) {
+                    continue;
+                }
+
                 if (titleTag.bounds().top < topTag.bounds().top + topTag.bounds().height()) {
                     continue;
                 }
@@ -790,6 +882,7 @@ const User = {
         }
 
         let topTag = Common.id(V.User.focusUserList[2]).isVisibleToUser(true).findOnce();
+        let topTagTop = topTag.bounds().top + topTag.bounds().height();
         let errorCount = 0;
         let loop = 0;
         let arr = [];
@@ -816,7 +909,11 @@ const User = {
                 }
 
                 let titleTag = containers[i].children().findOne(Common.id(V.User.focusUserList[4]));
-                if (titleTag.bounds().top < topTag.bounds().top + topTag.bounds().height()) {
+                if (!titleTag) {
+                    continue;
+                }
+
+                if (titleTag.bounds().top < topTagTop) {
                     continue;
                 }
 
@@ -930,7 +1027,10 @@ const User = {
 
                 Common.back(1, 800);
                 contents.push(nickname);
-                if (Common.id(V.User.focusUserList[6]).isVisibleToUser(true).findOnce()) {
+                if (UiSelector().descContains('更多').clickable(true).filter((v) => {
+                    return v && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() / 3;
+                }).isVisibleToUser(true).findOnce()) {
+                    Log.log('识别到更多，返回');
                     Common.back(1, 800);//偶尔会出现没有返回回来的情况，这里加一个判断
                 }
                 Common.sleep(500 + 500 * Math.random());

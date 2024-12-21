@@ -31,7 +31,7 @@
         "title": "DY·UID拓客"
       },
       {
-        "count": 3,
+        "count": 6,
         "title": "DY·其他功能"
       },
       {
@@ -1259,6 +1259,7 @@
       "hidden": false,
       "icon": "img/rocket.png",
       "jsFile": "tasks/task_dy_search_user.js",
+      "columns": 2,
       "settingPage": {
         "params": [
           {
@@ -1338,7 +1339,8 @@
     },
     {
       "title": "团购营销",
-      "hidden": true,
+      "hidden": false,
+      "columns": 1,
       "icon": "img/team-buy.png",
       "jsFile": "tasks/task_dy_team_buy.js",
       "minVersion": 290700,
@@ -1413,7 +1415,7 @@
       "hidden": false,
       "icon": "img/barrage.png",
       "jsFile": "tasks/task_dy_live_barrage.js",
-      "columns": 1,
+      "columns": 2,
       "settingPage": {
         "params": [
           {
@@ -1778,7 +1780,7 @@
           },
           {
             "type": "notice",
-            "title": "功能说明：在其他账号的 “粉丝” 或者 “关注” 或者“推荐”界面运行，系统会根据相关筛选条件执行相应的任务。作品数限制，只针对“粉丝”界面。（适用于寻找客户，对同行的精准粉丝进行推广引流）"
+            "title": "功能说明：在其他账号的 “粉丝” 或者 “关注” 界面运行，系统会根据相关筛选条件执行相应的任务。作品数限制，只针对“粉丝”界面。（适用于寻找客户，对同行的精准粉丝进行推广引流）"
           }
         ]
       }
