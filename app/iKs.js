@@ -1,14 +1,15 @@
-let DyCommon = require('app/dy/Common.js');
-let DyVideo = require('app/dy/Video.js');
-let DyUser = require('app/dy/User.js');
-let DyIndex = require('app/dy/Index.js');
-let DyComment = require('app/dy/Comment.js');
+let KsCommon = require('app/ks/Common.js');
+let KsVideo = require('app/ks/Video.js');
+let KsUser = require('app/ks/User.js');
+let KsIndex = require('app/ks/Index.js');
+let KsComment = require('app/ks/Comment.js');
 let storage = require('common/storage.js');
 let machine = require('common/machine.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 let statistics = require('common/statistics.js');
+let V = require('version/KsV.js');
 
-let iDy = {
+let iKs = {
     me: {},//当前账号的信息
     taskConfig: {},
     titles: [],//今日刷视频的所有标题  标题+'@@@'+昵称   保证唯一，从而减少请求后台接口
@@ -73,7 +74,7 @@ let iDy = {
     //检测标题是否正常
     videoRulesCheckTitle(rule, title) {
         if (rule.toker_view_video_keywords) {
-            let containWord = DyCommon.containsWord(rule.toker_view_video_keywords, title);
+            let containWord = KsCommon.containsWord(rule.toker_view_video_keywords, title);
             Log.log(containWord);
             if (containWord) {
                 return true;
@@ -86,7 +87,7 @@ let iDy = {
     //视频规则是否符合条件
     videoRulesCheck(rule, videoData) {
         if (rule.toker_view_video_keywords) {
-            let containWord = DyCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
+            let containWord = KsCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
             if (containWord) {
                 return true;
@@ -103,34 +104,24 @@ let iDy = {
     },
 
     refreshVideo(videoRules, isCity) {
-        DyCommon.toast('现在是刷视频');
+        KsCommon.toast('现在是刷视频');
         let videoData;
         let errorCount = 0;
         let noTitleCount = 5;
         let rpVideoCount = 0;//5重复就报错
 
         while (true) {
-            DyVideo.next();
-            DyCommon.toast('-------------------滑动视频----------------');
-
-            // //判断是否在同城  不能使用，一段时间之后，无法识别到
-            let inRecommend = DyIndex.inRecommend();
-            if (isCity && inRecommend) {
-                throw new Error('在推荐页，异常');
-            }
-            // else if (!isCity && !inRecommend) {
-            //     throw new Error('不在推荐页，异常');
-            // }
-
+            KsVideo.next();
+            KsCommon.toast('---滑动视频---');
             Log.log('-标题获取');
-            let vContent = DyVideo.getContent();
-            console.log("---", vContent);
+            let vContent = KsVideo.getContent();
+            Log.log("vContent", vContent);
             if (!vContent) {
                 if (noTitleCount-- <= 0) {
                     throw new Error('可能异常！');
                 }
-                DyVideo.videoSlow();
-                DyCommon.sleep(1000 + 1000 * Math.random());
+                KsVideo.videoSlow();
+                KsCommon.sleep(1000 + 1000 * Math.random());
                 continue;
             }
             statistics.viewVideo();//刷视频数量加1
@@ -138,33 +129,33 @@ let iDy = {
             Log.log('-标题检查');
             if (!this.videoRulesCheckTitle(videoRules, vContent)) {
                 Log.log('不包含关键词', '随机休眠1-2秒');
-                DyVideo.videoSlow();
+                KsVideo.videoSlow();
                 continue;
             }
 
             Log.log('-是否直播');
-            if (DyVideo.isLiving()) {
-                DyCommon.toast('直播中，切换下一个视频');
-                DyVideo.videoSlow();
+            if (KsVideo.isLiving()) {
+                KsCommon.toast('直播中，切换下一个视频');
+                KsVideo.videoSlow();
                 continue;
             }
 
             Log.log('-昵称获取');
-            let vNickname = DyVideo.getNickname();
+            let vNickname = KsVideo.getNickname();
             //同类型的
             let nicknames = storage.getExcNicknames();
             if (nicknames) {
                 nicknames = nicknames.split(/[,|，]/);
                 if (nicknames.includes(vNickname)) {
-                    DyCommon.toast('排除的昵称');
-                    DyVideo.videoSlow();
+                    KsCommon.toast('排除的昵称');
+                    KsVideo.videoSlow();
                     continue;
                 }
             }
 
             let unique = vNickname + '_' + vContent;
             if (this.titles.includes(unique)) {
-                DyCommon.toast('重复视频');
+                KsCommon.toast('重复视频');
                 rpVideoCount++;
                 if (rpVideoCount >= 5) {
                     throw new Error('5次重复，报错');
@@ -181,11 +172,11 @@ let iDy = {
             this.titles.push(unique);
 
             if (this.nicknames.includes(vNickname) || this.accountFreGt(vNickname)) {
-                DyCommon.toast(vNickname + '：重复或频率超出');
+                KsCommon.toast(vNickname + '：重复或频率超出');
                 continue;
             }
 
-            videoData = DyVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
+            videoData = KsVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
 
 
             errorCount = 0;
@@ -202,7 +193,7 @@ let iDy = {
 
         statistics.viewTargetVideo();//目标视频数量加1
         Log.log('休眠' + videoRules.toker_view_video_second + 's');
-        DyCommon.sleep(videoRules.toker_view_video_second * 1000);
+        KsCommon.sleep(videoRules.toker_view_video_second * 1000);
 
         if (!this.nicknames.includes(videoData.nickname)) {
             this.nicknames.push(videoData.nickname);
@@ -223,10 +214,10 @@ let iDy = {
             let msg = this.getMsg(0, videoData.title);
             Log.log('commentDeal', msg, videoData.commentCount);
             if (msg) {
-                DyVideo.openComment(!!videoData.commentCount);
+                KsVideo.openComment(!!videoData.commentCount);
                 Log.log('开启评论窗口-1');
                 windowOpen = true;
-                DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                KsComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
                 Log.log('评论了');
             }
         }
@@ -236,9 +227,9 @@ let iDy = {
         //如果一开始没有评论 这里直接返回到视频
         if (videoData.commentCount === 0 || this.configData.toker_comment_area_zan_rate < Math.random() * 100) {
             if (windowOpen) {
-                DyCommon.sleep(300);
-                DyCommon.back();
-                DyCommon.sleep(1000);
+                KsCommon.sleep(300);
+                KsCommon.back();
+                KsCommon.sleep(1000);
             }
 
             return true;
@@ -246,7 +237,7 @@ let iDy = {
 
         if (!windowOpen) {
             Log.log('打开评论窗口-');
-            DyVideo.openComment(!!videoData.commentCount);
+            KsVideo.openComment(!!videoData.commentCount);
         }
 
         //随机点赞 评论回复
@@ -256,7 +247,7 @@ let iDy = {
 
         while (rps-- > 0) {
             Log.log('获取评论列表-开始');
-            let comments = DyComment.getList();
+            let comments = KsComment.getList();
             Log.log('获取到了评论列表：' + comments.length);
             if (comments.length === 0) {
                 break;
@@ -277,12 +268,12 @@ let iDy = {
                 contains.push(comment.nickname);
                 try {
                     Log.log("点赞");
-                    //判断IP
-                    if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, comment.ip)) {
-                        Log.log('IP不符合规范', comment.ip);
+                    if (this.configData.toker_view_video_ip && !KsCommon.containsWord(this.configData.toker_view_video_ip, comment.ip)) {
+                        Log.log('IP不符合', comment.ip, this.configData.toker_view_video_ip);
                         continue;
                     }
-                    DyComment.clickZan(comment);//////////////////////操作
+                    
+                    KsComment.clickZan(comment);//////////////////////操作
                     Log.log("点赞2");
                     opCount--;
                 } catch (e) {
@@ -300,39 +291,42 @@ let iDy = {
             }
 
             Log.log('滑动评论');
-            DyComment.swipeTop();
-            DyCommon.sleep(1000 + 1000 * Math.random());
+            KsComment.swipeTop();
+            KsCommon.sleep(1000 + 1000 * Math.random());
         }
 
         Log.log('返回了哦');
-        DyCommon.sleep(300);
-        DyCommon.back();
+        KsCommon.sleep(300);
+        KsCommon.back();
         //漏洞修复  如果此时还在评论页面，则再一次返回
-        DyCommon.sleep(1000);
-        DyComment.closeCommentWindow();
-        DyCommon.sleep(500 + 500 * Math.random());
+        KsCommon.sleep(1000);
+        KsComment.closeCommentWindow();
+        KsCommon.sleep(500 + 500 * Math.random());
     },
 
     run(type) {
         this.isCity = type == 1 ? true : false;
-        this.configData = machine.getTokerData(type);
+        this.configData = machine.getKsTokerData(type);
         Log.log(this.configData);
         return this.runTask();//返回指定编码
     },
 
     runTask() {
         //进入主页，获取个人的账号信息 然后进入视频界面
-        DyCommon.toast('进入了主页', 1000);
-        DyCommon.toast(JSON.stringify({
+        KsCommon.toast('进入了主页', 1000);
+        Log.log(JSON.stringify({
             '账号：': this.me.douyin,
             '昵称：': this.me.nickname,
         }));
 
-        DyIndex.intoHome();
+
         if (this.isCity) {
-            DyIndex.intoLocal();
+            KsIndex.intoLocal();
+        } else {
+            KsIndex.intoHome();
         }
 
+        KsCommon.sleep(3000 + 2000 * Math.random());
         //开始刷视频
         while (true) {
             let code = this.taskCheck();
@@ -345,19 +339,7 @@ let iDy = {
             let videoData = this.refreshVideo(this.configData, this.isCity);
             Log.log('看看是不是广告');
             //看看是不是广告，是的话，不操作作者
-            if (DyVideo.viewDetail()) {
-                let clickRePlayTag = UiSelector().text('点击重播').clickable(true).className('android.widget.Button').isVisibleToUser(true).findOnce();
-                if (clickRePlayTag) {
-                    Log.log('点击重播');
-                    clickRePlayTag.click();
-                    DyCommon.sleep(1000);
-                }
-                Gesture.click(500 + Math.random() * 200, 500 + Math.random() * 300);
-                DyCommon.sleep(500);
-                Log.log('广告，开始处理评论区了');
-
-                this.commentDeal(videoData);
-                Log.log('开始下个视频');
+            if (KsVideo.viewDetail()) {
                 continue;
             } else {
                 Log.log('不是广告，准备进入主页');
@@ -365,9 +347,9 @@ let iDy = {
 
             this.targetVideoCount++;
             //看看是否可以点赞了
-            if (this.configData.toker_zan_rate / 100 >= Math.random() && !DyVideo.isZan()) {
+            if (this.configData.toker_zan_rate / 100 >= Math.random() && !KsVideo.isZan()) {
                 Log.log('点赞了');
-                DyVideo.clickZan();///////////////////////////////////操作  视频点赞
+                KsVideo.clickZan();///////////////////////////////////操作  视频点赞
             }
 
             //现在决定是否对视频作者作者进行操作
@@ -376,39 +358,32 @@ let iDy = {
             let private_rate = Math.random() * 100;
             let focus_rate = Math.random() * 100;
             if (this.configData.toker_private_msg_rate > private_rate || this.configData.toker_focus_rate > focus_rate) {
-                DyCommon.sleep(1000);
-                DyVideo.intoUserPage();
+                KsCommon.sleep(1000);
+                KsVideo.intoUserPage();
                 let userData;
                 try {
                     Log.log("查看用户数据");
-                    userData = DyUser.getUserInfo();///////////操作  进入用户主页
+                    userData = KsUser.getUserInfo();///////////操作  进入用户主页
                     Log.log("查看用户数据-2");
                 } catch (e) {
                     //看看是不是进入了广告
                     Log.log('用户数据异常', e);
-                    DyCommon.sleep(2000);
-                    if (UiSelector().text('反馈').desc('反馈').clickable(true).filter((v) => {
-                        return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
-                    }).exists()) {
+                    KsCommon.sleep(2000);
+                    if (UiSelector().text(V.Video.ad[0]).isVisibleToUser(true).exists()) {
                         Log.log('存在“反馈”字眼');
-                        DyCommon.back();
-                        if (text('确定').filter((v) => {
-                            return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
-                        }).exists()) {
-                            let a = UiSelector().text('确定').filter((v) => {
-                                return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
-                            });
-                            a.click();
-                            DyCommon.sleep(2000);
+                        KsCommon.back();
+                        KsCommon.sleep(500 + 500 * Math.random());
+                        //有些用户页面，会弹出广告对话框，返回后还是在用户页面，这个时候需要返回
+                        try {
+                            if (KsUser.getNickname()) {
+                                KsCommon.back();
+                                KsCommon.sleep(500 + 500 * Math.random());
+                            }
+                        } catch (e) {
+                            Log.log('找不到用户，不用管');
                         }
-                        continue;
-                    }
 
-                    //查看是不是有弹窗
-                    if (DyUser.hasAlertInput()) {
-                        DyCommon.back();
-                        DyCommon.sleep(1000);
-                        userData = DyUser.getUserInfo();///////////操作  进入用户主页
+                        continue;
                     }
                 }
 
@@ -416,16 +391,16 @@ let iDy = {
                 if (userData) {
                     Log.log('看到了用户数据了哦');
                 } else {
-                    DyCommon.back();
+                    KsCommon.back();
                     Log.log('异常，返回回去');
-                    DyCommon.sleep(1000);
+                    KsCommon.sleep(1000);
                     continue;
                 }
 
                 //判断IP
-                if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
-                    DyCommon.back();
-                    DyCommon.sleep(1000);
+                if (this.configData.toker_view_video_ip && !KsCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
+                    KsCommon.back();
+                    KsCommon.sleep(1000);
                     Log.log('IP不符合', userData.ip, this.configData.toker_view_video_ip);
                     continue;
                 }
@@ -435,8 +410,8 @@ let iDy = {
                     Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
                     if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
                         Log.log('关注了哦');
-                        DyUser.focus();///////////////////////////////////操作  关注视频作者
-                        DyCommon.sleep(3000);
+                        KsUser.focus();///////////////////////////////////操作  关注视频作者
+                        KsCommon.sleep(3000);
                     }
                 }
 
@@ -447,19 +422,19 @@ let iDy = {
                             let msg = this.getMsg(1, userData.nickname);
                             Log.log('要私信了哦');
                             if (msg) {
-                                DyUser.privateMsg(msg.msg);///////////////////////////////////操作  私信视频作者
+                                KsUser.privateMsg(msg.msg);///////////////////////////////////操作  私信视频作者
                             }
                         }
                     }
                 }
 
-                DyCommon.back();
+                KsCommon.back();
                 Log.log('返回首页了哦');
-                DyCommon.sleep(2000 * Math.random());
+                KsCommon.sleep(2000 * Math.random());
             }
 
             //看看是否可以操作评论区了
-            DyCommon.sleep(1000);
+            KsCommon.sleep(1000);
             Log.log('开始处理评论区了');
             this.commentDeal(videoData);
             Log.log('开始下个视频');
@@ -467,4 +442,4 @@ let iDy = {
     },
 }
 
-module.exports = iDy;
+module.exports = iKs;

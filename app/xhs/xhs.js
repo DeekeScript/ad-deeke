@@ -11,6 +11,7 @@ let xhs = {
         opWait: storage.get('toker_xhs_op_second', 'int') * 1000,//操作间隔
         workWait: storage.get('toker_xhs_view_video_second', 'int') * 1000,
         keywords: storage.get('toker_xhs_view_video_keywords', 'string'),
+        toker_view_video_ip: storage.get('toker_xhs_view_video_ip', 'string'),
         zanRate: storage.get('toker_xhs_zan_rate', 'int') / 100,
         commentRate: storage.get('toker_xhs_comment_rate', 'int') / 100,
         focusRate: storage.get('toker_focus_rate', 'int') / 100,
@@ -22,6 +23,7 @@ let xhs = {
         op: storage.getArray('toker_xhs_run_hour'),//运行时间
     },
     run(getMsg) {
+        Log.log(this.config);
         if (this.config.isCity) {
             Index.intoCity();
         } else {
@@ -103,6 +105,18 @@ let xhs = {
                             while (swipeNodeCount-- > 0) {
                                 Common.swipe(0, 1 / (swipeNodeCount + 1));
                                 Common.sleep(wait);
+                            }
+                        }
+
+                        //笔记需要筛选IP
+                        if (this.config.toker_view_video_ip) {
+                            let ipTag = Common.id(V.Work.ip[0]).findOne();//可能不可见
+                            Log.log('ipTag', ipTag);
+                            if (!ipTag || !Common.containsWord(this.config.toker_view_video_ip, ipTag.desc())) {
+                                Common.back();
+                                Common.sleep(1000);
+                                Log.log('IP不符合', this.config.toker_view_video_ip, ipTag ? ipTag.desc() : '无');
+                                continue;
                             }
                         }
                     } else {

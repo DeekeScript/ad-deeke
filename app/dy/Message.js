@@ -4,6 +4,7 @@ let User = require('app/dy/User.js');
 let Video = require('app/dy/Video.js');
 let statistics = require('common/statistics');
 let V = require('version/V.js');
+let storage = require('common/storage.js');
 
 let Message = {
     showAll() {
@@ -147,9 +148,9 @@ let Message = {
         Common.click(searchTag);
         Common.sleep(2000);
 
-        let iptTag = Common.id(V.Message.search[2]).clickable(true).text(V.Message.search[1]).isVisibleToUser(true).findOnce();
+        let iptTag = Common.id(V.Message.search[2]).clickable(true).textContains(V.Message.search[1]).isVisibleToUser(true).findOnce();
         if (!iptTag) {
-            Log.log(Common.id(V.Message.search[2]).clickable(true).text(V.Message.search[1]).isVisibleToUser(true).findOne());
+            Log.log(Common.id(V.Message.search[2]).clickable(true).textContains(V.Message.search[1]).isVisibleToUser(true).findOne());
             throw new Error('遇到错误，找不到输入框-2');
         }
 
@@ -218,6 +219,28 @@ let Message = {
 
     intoGroupUserList(contents, getMsg, machineInclude, machineSet) {
         let tag = undefined;
+        let config = {
+            begin: storage.get('task_dy_fans_group_begin', 'int'),
+            zanRate: storage.get('task_dy_fans_group_zan_rate', 'int'),
+            commentRate: storage.get('task_dy_fans_group_comment_rate', 'int'),
+            collectRate: storage.get('task_dy_fans_group_collect_rate', 'int'),
+            focusRate: storage.get('task_dy_fans_group_focus_rate', 'int'),
+            privateRate: storage.get('task_dy_fans_group_private_rate', 'int'),
+            privateLanv: storage.get('task_dy_fans_group_private_lanv', 'bool'),
+
+            zanWait: storage.get('task_dy_fans_group_zan_wait_', 'int') * 1000,
+            commentWait: storage.get('task_dy_fans_group_comment_wait_', 'int') * 1000,
+            collectWait: storage.get('task_dy_fans_group_collect_wait_', 'int') * 1000,
+            privateWait: storage.get('task_dy_fans_group_private_wait_', 'int') * 1000,
+            focusWait: storage.get('task_dy_fans_group_focus_wait_', 'int') * 1000,
+            accountWait: storage.get('task_dy_fans_group_account_wait_', 'int') * 1000,
+        };
+
+        let base = Math.random();
+        let iBase = 1 - base;
+
+        Log.log('config', config);
+
         if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
             tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
         } else {
@@ -284,6 +307,7 @@ let Message = {
 
         let rpCount = 0;
         let rpContains = [];
+        let runIndex = 0;
         while (true) {
             let contains = Common.id(V.Message.intoGroupUserList[4]).clickable(true).isVisibleToUser(true).find();
             if (0 == contains.length) {
@@ -345,7 +369,13 @@ let Message = {
                     isAddFirst = true;
                 }
 
+                runIndex++;
                 if (contents.includes(titleTag.text()) || machineInclude(titleTag.text())) {
+                    continue;
+                }
+
+                if (config.begin >= runIndex) {
+                    Log.log('前多少名不操作', runIndex);
                     continue;
                 }
 
@@ -365,30 +395,67 @@ let Message = {
                 Log.log('即将进入视频');
                 if (Video.intoUserVideo()) {
                     //点赞
-                    if (Math.random() < 0.7) {
+                    if (Math.random() * 100 <= config.zanRate) {
+                        Common.sleep(base * config.zanWait);
                         Video.clickZan();
+                        Log.log('点赞了');
+                        Common.sleep(iBase * config.zanWait);
                     }
-                    Common.sleep(5000 + 5000 * Math.random());
 
-                    //随机评论视频
-                    let msg = getMsg(0, Video.getContent());
-                    if (msg) {
-                        Video.openComment(!!Video.getCommentCount());
-                        Log.log('开启评论窗口');
-                        Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                        Log.log('评论了');
-                        Common.back(2, 800);
+                    if (Math.random() * 100 <= config.collectRate && !User.isFocus()) {
+                        Common.sleep(base * config.collectWait);
+                        Video.collect();
+                        Log.log('收藏了');
+                        Common.sleep(iBase * config.collectWait);
+                    }
+
+                    if (Math.random() * 100 <= config.commentRate) {
+                        let msg = getMsg(0, Video.getContent());
+                        if (msg) {
+                            Common.sleep(base * config.commentWait);
+                            Video.openComment(!!Video.getCommentCount());
+                            Log.log('开启评论窗口');
+                            Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                            Log.log('评论了');
+                            Common.sleep(iBase * config.commentWait);
+                            Common.back(2, 800);
+                        } else {
+                            Common.back();//从视频页面到用户页面
+                        }
                     } else {
-                        Common.back();//从视频页面到用户页面
+                        Common.back();//返回
                     }
                 } else {
                     Log.log('未进入视频');
                 }
 
+                Common.sleep(500);
+                Common.swipe(1, 0.6);
+                Common.sleep(1500);
+                if (Math.random() * 100 <= config.focusRate) {
+                    Common.sleep(base * config.focusWait);
+                    User.focus();
+                    Common.sleep(iBase * config.focusWait);
+                }
+
+                if (Math.random() * 100 <= config.privateRate) {
+                    Common.sleep(base * config.privateWait);
+                    if (config.privateLanv) {
+                        Log.log('私信卡片');
+                        User.privateMsgCard();
+                        Common.sleep(1500);
+                        Common.back(2);
+                    } else {
+                        User.privateMsg(getMsg(1, titleTag.text()).msg);
+                    }
+                    Common.sleep(iBase * config.privateWait);
+                }
+
+                Log.log('设置已经操作的账号：' + titleTag.text());
                 machineSet(titleTag.text());
                 contents.push(titleTag.text());
                 Common.back();
-                Common.sleep(1500);
+                Common.sleep(config.accountWait);
             }
 
             if (rpCount >= 3) {

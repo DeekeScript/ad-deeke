@@ -43,6 +43,7 @@ const C8380 = {
         VideoNickname: 'jzg',//desc：作者 XXX
         title: 'gfd',
         videoTitle: 'noteContentText',
+        ip: ['gf8'],
     },
 
     Index: {
@@ -52,6 +53,8 @@ const C8380 = {
         zan: ['ecs'],//主页笔记视频点赞
         swipe: ['fcc', 'f09'], //分别是“发现”、“武汉” 两个类目中的滑动
         intoSearchPage: ['hw4', '搜索'],
+        intoMyMessage: ['dzq', '消息', '条未读'],
+        home: ['dzo', '首页'],
     },
 
     Search: {
@@ -59,6 +62,15 @@ const C8380 = {
         intoSearchList: ['fhw', 'fi1', '搜索'],
         intoSearchVideo: ['gfb', 'ge2', 'a8t'],//标题，封面，昵称和头像整体
         searchTop: 'fgz',
+    },
+
+    Message: {
+        scroll: ['fyd'],
+        readMessage: ['android.widget.RelativeLayout', 'fya', 'a1j'],
+        stranger: ['ijr', 'ju5', '陌生人消息', 'a1j'],
+        chat: ['aw7'],
+        interact: ['android.widget.RelativeLayout', 'fzr', '评论了你的笔记', 'fzg', 'fzl', '回复', 'f9d', 'fif', 'fzu', 'g0s'],
+        messageCount: ['ena', 'cd0', 'b9d'], //赞和收藏消息数，新增关注消息数，评论和@数量
     }
 }
 

@@ -330,6 +330,21 @@ let machine = {
         }
     },
 
+    getKsSearchUserSettingRate() {
+        return {
+            privateRate: this.get('ks_searchUserSetting_privateRate', "int"),
+            focusRate: this.get('ks_searchUserSetting_focusRate', "int"),
+            zanRate: this.get('ks_searchUserSetting_zanRate', "int"),
+            commentRate: this.get('ks_searchUserSetting_commentRate', "int"),
+            fansMinCount: this.get('ks_searchUserSetting_fansMinCount', "int"),
+            fansMaxCount: this.get('ks_searchUserSetting_fansMaxCount', "int"),
+            worksMinCount: this.get('ks_searchUserSetting_worksMinCount', "int"),
+            worksMaxCount: this.get('ks_searchUserSetting_worksMaxCount', "int"),
+            opCount: this.get('ks_searchUserSetting_opCount', "int"),
+            keyword: this.get('ks_searchUserSetting_keyword'),
+        }
+    },
+
     setSearchUserSettingRate(item) {
         return this.set('searchUserSetting_privateRate', item.privateRate)
             && this.set('searchUserSetting_focusRate', item.focusRate)
@@ -372,6 +387,7 @@ let machine = {
             return {
                 toker_view_video_second: this.get('toker_view_video_second', 'int'),
                 toker_view_video_keywords: this.get('toker_view_video_keywords'),
+                toker_view_video_ip: this.get('toker_view_video_ip'),
                 toker_zan_rate: this.get('toker_zan_rate', 'int'),
                 toker_comment_rate: this.get('toker_comment_rate', 'int'),
                 toker_focus_rate: this.get('toker_focus_rate', 'int'),
@@ -387,6 +403,7 @@ let machine = {
         return {
             toker_view_video_second: this.get('toker_city_view_video_second', 'int'),
             toker_view_video_keywords: this.get('toker_city_view_video_keywords'),
+            toker_view_video_ip: this.get('toker_city_view_video_ip'),
             toker_zan_rate: this.get('toker_city_zan_rate', 'int'),
             toker_comment_rate: this.get('toker_city_comment_rate', 'int'),
             toker_focus_rate: this.get('toker_city_focus_rate', 'int'),
@@ -397,6 +414,76 @@ let machine = {
             toker_run_sex: this.getArray('toker_city_run_sex'),//0,1,2分别表示  女，男，未知
             toker_run_min_age: this.get('toker_city_run_min_age', 'int'),
             toker_run_max_age: this.get('toker_city_run_max_age', 'int'),
+        }
+    },
+
+    getKsTokerData(type) {
+        if (!type) {
+            return {
+                toker_view_video_second: this.get('toker_ks_view_video_second', 'int'),
+                toker_view_video_keywords: this.get('toker_ks_view_video_keywords'),
+                toker_view_video_ip: this.get('toker_ks_view_video_ip'),
+                toker_zan_rate: this.get('toker_ks_zan_rate', 'int'),
+                toker_comment_rate: this.get('toker_ks_comment_rate', 'int'),
+                toker_focus_rate: this.get('toker_ks_focus_rate', 'int'),
+                toker_private_msg_rate: this.get('toker_ks_private_msg_rate', 'int'),
+                toker_comment_area_zan_rate: this.get('toker_ks_comment_area_zan_rate', 'int'),
+                toker_run_hour: this.getArray('toker_ks_run_hour'),
+                toker_run_sex: this.getArray('toker_ks_run_sex'),//0,1,2分别表示  女，男，未知
+                toker_run_min_age: this.get('toker_ks_run_min_age', 'int'),
+                toker_run_max_age: this.get('toker_ks_run_max_age', 'int'),
+            }
+        }
+
+        return {
+            toker_view_video_second: this.get('toker_ks_city_view_video_second', 'int'),
+            toker_view_video_keywords: this.get('toker_ks_city_view_video_keywords'),
+            toker_view_video_ip: this.get('toker_ks_city_view_video_ip'),
+            toker_zan_rate: this.get('toker_ks_city_zan_rate', 'int'),
+            toker_comment_rate: this.get('toker_ks_city_comment_rate', 'int'),
+            toker_focus_rate: this.get('toker_ks_city_focus_rate', 'int'),
+            toker_private_msg_rate: this.get('toker_ks_city_private_msg_rate', 'int'),
+            toker_comment_area_zan_rate: this.get('toker_ks_city_comment_area_zan_rate', 'int'),
+            toker_run_hour: this.getArray('toker_ks_city_run_hour'),
+            toker_distance: this.get('toker_ks_city_distance', 'int'),
+            toker_run_sex: this.getArray('toker_ks_city_run_sex'),//0,1,2分别表示  女，男，未知
+            toker_run_min_age: this.get('toker_ks_city_run_min_age', 'int'),
+            toker_run_max_age: this.get('toker_ks_city_run_max_age', 'int'),
+        }
+    },
+
+    getWxTokerData(type) {
+        if (!type) {
+            return {
+                toker_view_video_second: this.get('toker_wx_view_video_second', 'int'),
+                toker_view_video_keywords: this.get('toker_wx_view_video_keywords'),
+                toker_view_video_ip: this.get('toker_wx_view_video_ip'),
+                toker_zan_rate: this.get('toker_wx_zan_rate', 'int'),
+                toker_comment_rate: this.get('toker_wx_comment_rate', 'int'),
+                toker_focus_rate: this.get('toker_wx_focus_rate', 'int'),
+                toker_private_msg_rate: this.get('toker_wx_private_msg_rate', 'int'),
+                toker_comment_area_zan_rate: this.get('toker_wx_comment_area_zan_rate', 'int'),
+                toker_run_hour: this.getArray('toker_wx_run_hour'),
+                toker_run_sex: this.getArray('toker_wx_run_sex'),//0,1,2分别表示  女，男，未知
+                toker_run_min_age: this.get('toker_wx_run_min_age', 'int'),
+                toker_run_max_age: this.get('toker_wx_run_max_age', 'int'),
+            }
+        }
+
+        return {
+            toker_view_video_second: this.get('toker_wx_city_view_video_second', 'int'),
+            toker_view_video_keywords: this.get('toker_wx_city_view_video_keywords'),
+            toker_view_video_ip: this.get('toker_wx_city_view_video_ip'),
+            toker_zan_rate: this.get('toker_wx_city_zan_rate', 'int'),
+            toker_comment_rate: this.get('toker_wx_city_comment_rate', 'int'),
+            toker_focus_rate: this.get('toker_wx_city_focus_rate', 'int'),
+            toker_private_msg_rate: this.get('toker_wx_city_private_msg_rate', 'int'),
+            toker_comment_area_zan_rate: this.get('toker_wx_city_comment_area_zan_rate', 'int'),
+            toker_run_hour: this.getArray('toker_wx_city_run_hour'),
+            toker_distance: this.get('toker_wx_city_distance', 'int'),
+            toker_run_sex: this.getArray('toker_wx_city_run_sex'),//0,1,2分别表示  女，男，未知
+            toker_run_min_age: this.get('toker_wx_city_run_min_age', 'int'),
+            toker_run_max_age: this.get('toker_wx_city_run_max_age', 'int'),
         }
     },
 

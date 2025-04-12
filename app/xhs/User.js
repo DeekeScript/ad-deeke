@@ -54,6 +54,25 @@ let User = {
         Common.back();
     },
 
+    privateMsgTwo(msg) {
+        let sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
+        Common.click(sendIptTag);
+        Common.sleep(500 + 1000 * Math.random());
+
+        sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
+        Log.log('开始设置私信', msg);
+        sendIptTag.setText(msg);
+        Common.sleep(500 + 500 * Math.random());
+
+        //发送
+        let sendBtnTag = Common.id(V.User.sendBtn[0]).findOne();
+        Common.click(sendBtnTag);
+        Log.log('点击发送');
+
+        Common.back();
+        Common.sleep(500 + 500 * Math.random());
+    },
+
     isFocus() {
         let focusTag = Common.id(V.User.focus[0]).findOne();
         if (focusTag && focusTag.text() == V.User.focus[2]) {
@@ -76,9 +95,9 @@ let User = {
     dealNum(str) {
         if (str.indexOf('万') !== -1) {
             str = str.replace('万', '') * 10000;
-        }else if (str.indexOf('W') !== -1) {
+        } else if (str.indexOf('W') !== -1) {
             str = str.replace('W', '') * 10000;
-        }else if (str.indexOf('w') !== -1) {
+        } else if (str.indexOf('w') !== -1) {
             str = str.replace('w', '') * 10000;
         }
 

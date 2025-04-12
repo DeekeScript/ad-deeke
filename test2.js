@@ -1,6 +1,6 @@
 // let user = textContains('用户').id('android:id/text1').findOne();
 
-// log(user);
+// log(user); 
 
 // click(user.bounds().centerX(), user.bounds().centerY());
 
@@ -15,4 +15,6 @@
 // log(descContains('更多').find()[1]);
 // log(descContains('更多').find()[1].parent());
 
-log(id('2p7').findOne());
+sleep(10*1000);
+log(id('ua5').find());
+

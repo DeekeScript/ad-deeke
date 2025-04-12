@@ -102,7 +102,7 @@ const User = {
                 return false;
             }
         } else {
-            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce() || UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).findOnce();
             if (!settingTag) {
                 Log.log('找不到setting按钮');
                 return false;
@@ -122,6 +122,50 @@ const User = {
         Common.click(sendTag.parent());
         Common.sleep(2000);
 
+        let textTag = Common.id(V.User.privateMsg[6]).findOnce();
+        if (!textTag) {
+            Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
+            Common.back();
+            return false;
+        }
+        Common.click(textTag);
+        Common.sleep(500);
+
+        textTag = Common.id(V.User.privateMsg[6]).findOnce();
+        let iText = '';
+        for (let i = 0; i < msg.length; i++) {
+            iText = msg.substring(0, i + 1);
+            textTag.setText(iText);
+            Common.sleep(200 + 300 * Math.random());
+        }
+
+        Common.sleep(500);
+        let sendTextTag = Common.id(V.User.privateMsg[7]).findOnce();
+        if (!sendTextTag) {
+            Log.log('发送消息失败');
+            return false;
+        }
+
+        Common.click(sendTextTag);
+        Common.sleep(1000);
+        Log.log("私信发送完成");
+        let closePrivateMsg = UiSelector().textContains(V.User.privateMsg[8]).findOneBy(1000);
+        Log.log("私信被关闭了么？");
+        if (closePrivateMsg) {
+            Common.sleep(Math.random() * 1000);
+            Common.back(2);
+            Log.log("返回两次");
+            return -1;
+        }
+        statistics.privateMsg();
+        Common.sleep(Math.random() * 1000);
+        Log.log("成功：返回2次");
+        Common.back(2);
+        return true;
+    },
+
+    //代码完全复制上面的，这个是已经进入了用户页开始私信
+    privateMsgTwo(msg) {
         let textTag = Common.id(V.User.privateMsg[6]).findOnce();
         if (!textTag) {
             Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
@@ -456,7 +500,7 @@ const User = {
             worksCount: 0,
             // openWindow: 0,//开启橱窗
             // tuangouTalent: this.isTuangouTalent(),
-            // ip: this.getIp(),
+            ip: this.getIp(),
             // isCompany: this.isCompany(),//是否是机构 公司
             gender: this.getGender(),
             isPrivate: this.isPrivate(),

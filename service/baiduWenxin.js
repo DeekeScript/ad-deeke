@@ -162,6 +162,48 @@ let baiduWenxin = {
             }
         }
         return result['result'] || false;
+    },
+
+    //type为1表示评论，0私信
+    getChatByMsg(type, msg, platform) {
+        let res = this.getToken();
+        let access_token = res['access_token'];
+        if (!platform) {
+            platform = 0;
+        }
+        let platforms = ['抖音', '小红书'];
+        let params = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "我现在使用的是" + (platforms[platform]) + "平台的APP，我现在需要回复一条" + (type ? '评论' : '私信') + "，请给出一段有趣或者吸引人的回复，并且字数不超过30个",
+                },
+                {
+                    "role": "assistant",
+                    "content": '好的，我会努力让评论有趣并且足以吸引人，请给出对方的' + (type ? '评论' : '私信') + '内容'
+                },
+                {
+                    "role": "user",
+                    "content": msg
+                },
+            ],
+            "system": System.getDataFrom(this.key, this.dataFrom, 'content'),
+            "max_output_tokens": 90,//最大输出长度90
+        }
+
+        res = Http.post('https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions?access_token=' + access_token, params);
+        //res = Http.post('https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=' + access_token, params);
+        if (res == null) {
+            return false;
+        }
+        let result = JSON.parse(res);
+        Log.log('百度文心返回话术', content + '请结合你的角色，写一条字数小于' + len + '字的吸引人的打招呼话术', result);
+        if (result && result['result']) {
+            if (result['result'].substring(0, 1) === '"' && result['result'].substring(result['result'].length - 1) === '"') {
+                result['result'] = result['result'].substring(1, result['result'].length - 1);
+            }
+        }
+        return result['result'] || false;
     }
 }
 

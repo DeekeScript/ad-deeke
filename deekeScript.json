@@ -44,11 +44,11 @@
       },
       {
         "count": 3,
-        "title": "视频号·万能引流"
+        "title": "KS·万能引流"
       },
       {
         "count": 3,
-        "title": "某手·万能引流"
+        "title": "视频号·万能引流"
       }
     ]
   },
@@ -119,6 +119,13 @@
             "min": 0,
             "step": 1,
             "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "用户IP筛选（多个使用逗号隔开）",
+            "name": "toker_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
           },
           {
             "type": "checkboxGroup",
@@ -290,6 +297,13 @@
             "min": 1,
             "step": 1,
             "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "用户IP筛选（多个使用逗号隔开）",
+            "name": "toker_city_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
           },
           {
             "type": "checkboxGroup",
@@ -710,6 +724,84 @@
             "max": 8,
             "min": 1,
             "step": 1
+          },
+          {
+            "type": "number",
+            "label": "前多少名不操作",
+            "name": "task_dy_fans_group_begin",
+            "value": 0
+          },
+          {
+            "type": "numberRange",
+            "label": "首作品点赞频率",
+            "name": "task_dy_fans_group_zan_rate",
+            "value": 25,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "首作品评论频率",
+            "name": "task_dy_fans_group_comment_rate",
+            "value": 25,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率",
+            "name": "task_dy_fans_group_focus_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率",
+            "name": "task_dy_fans_group_private_rate",
+            "value": 0,
+            "max": 100,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "switch",
+            "label": "私信蓝V卡片（仅限蓝V账号）",
+            "name": "task_dy_fans_group_private_lanv",
+            "value": false
+          },
+          {
+            "type": "number",
+            "label": "点赞停留（秒）",
+            "name": "task_dy_fans_group_zan_wait_",
+            "value": 5
+          },
+          {
+            "type": "number",
+            "label": "评论停留（秒）",
+            "name": "task_dy_fans_group_comment_wait_",
+            "value": 5
+          },
+          {
+            "type": "number",
+            "label": "私信停留（秒）",
+            "name": "task_dy_fans_group_private_wait_",
+            "value": 5
+          },
+          {
+            "type": "number",
+            "label": "关注停留（秒）",
+            "name": "task_dy_fans_group_focus_wait_",
+            "value": 5
+          },
+          {
+            "type": "number",
+            "label": "账号操作间隔（秒）",
+            "name": "task_dy_fans_group_account_wait_",
+            "value": 5
           }
         ]
       }
@@ -1259,7 +1351,7 @@
       "hidden": false,
       "icon": "img/rocket.png",
       "jsFile": "tasks/task_dy_search_user.js",
-      "columns": 2,
+      "columns": 1,
       "settingPage": {
         "params": [
           {
@@ -1333,6 +1425,70 @@
             "label": "行业关键词",
             "name": "searchUserSetting_keyword",
             "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "title": "AI回复",
+      "hidden": false,
+      "icon": "img/ai-back.png",
+      "jsFile": "tasks/task_dy_ai_back.js",
+      "columns": 1,
+      "settingPage": {
+        "params": [
+          {
+            "type": "radio",
+            "name": "ai_back_comment_run_other_fun",
+            "label": "同时启动功能",
+            "value": "0",
+            "options": [
+              {
+                "label": "--请选择--",
+                "value": 0
+              },
+              {
+                "label": "推荐营销",
+                "value": 1
+              },
+              {
+                "label": "同城营销",
+                "value": 2
+              },
+              {
+                "label": "垂直养号",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "type": "switch",
+            "label": "评论回复",
+            "name": "ai_back_comment_switch",
+            "value": true
+          },
+          {
+            "type": "switch",
+            "label": "私信回复",
+            "name": "ai_back_friend_private_switch",
+            "value": true,
+            "notice": "* 不包含陌生人私信"
+          },
+          {
+            "type": "switch",
+            "label": "陌生人私信回复",
+            "name": "ai_back_private_switch",
+            "value": true
+          },
+          {
+            "type": "number",
+            "label": "操作间隔（分钟）",
+            "name": "ai_back_minitue",
+            "value": 5
+          },
+          {
+            "type": "notice",
+            "title": "* 默认为5分钟，表示每间隔5分钟处理一次回复\n* 注意，消息量越大，操作间隔也应该设置的越小 \n * 如果开启了“其他功能”，则表示其他功能运行时间"
           }
         ]
       }
@@ -1571,6 +1727,13 @@
             "notice": "* 关键词不填则操作所有"
           },
           {
+            "type": "textArea",
+            "label": "笔记IP筛选（多个使用逗号隔开）",
+            "name": "toker_xhs_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有，视频则不筛选"
+          },
+          {
             "type": "numberRange",
             "label": "点赞频率（%）",
             "name": "toker_xhs_zan_rate",
@@ -1807,8 +1970,8 @@
       }
     },
     {
-      "title": "USER_ID私信",
-      "columns": 2,
+      "title": "用户ID私信",
+      "columns": 1,
       "icon": "img/private-2.png",
       "jsFile": "tasks/task_xhs_toker_uid.js",
       "settingPage": {
@@ -1851,8 +2014,67 @@
       }
     },
     {
+      "title": "AI回复",
+      "columns": 1,
+      "icon": "img/ai-back.png",
+      "jsFile": "tasks/task_xhs_ai_back.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "radio",
+            "name": "ai_xhs_back_comment_run_other_fun",
+            "label": "同时启动功能",
+            "value": "0",
+            "options": [
+              {
+                "label": "--请选择--",
+                "value": 0
+              },
+              {
+                "label": "万能营销",
+                "value": 1
+              },
+              {
+                "label": "垂直养号",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "type": "switch",
+            "label": "评论回复",
+            "name": "ai_xhs_back_comment_switch",
+            "value": true
+          },
+          {
+            "type": "switch",
+            "label": "私信回复",
+            "name": "ai_xhs_back_friend_private_switch",
+            "value": true,
+            "notice": "* 不包含陌生人私信"
+          },
+          {
+            "type": "switch",
+            "label": "陌生人私信回复",
+            "name": "ai_xhs_back_private_switch",
+            "value": true
+          },
+          {
+            "type": "number",
+            "label": "操作间隔（分钟）",
+            "name": "ai_xhs_back_minitue",
+            "value": 5
+          },
+          {
+            "type": "notice",
+            "title": "* 默认为5分钟，表示每间隔5分钟处理一次回复\n* 注意，消息量越大，操作间隔也应该设置的越小 \n * 如果开启了“其他功能”，则表示其他功能运行时间"
+          }
+        ]
+      }
+    },
+    {
       "title": "垂直养号",
-      "columns": 2,
+      "columns": 1,
       "icon": "img/vertical.png",
       "jsFile": "tasks/task_xhs_yanghao.js",
       "packageName": "com.ss.android.ugc.aweme",
@@ -1880,7 +2102,7 @@
             "name": "task_xhs_yanghao_comment_rate",
             "value": 15,
             "max": 100,
-            "min": 1,
+            "min": 0,
             "step": 1
           },
           {
@@ -1889,7 +2111,7 @@
             "name": "task_xhs_yanghao_zan_rate",
             "value": 20,
             "max": 100,
-            "min": 1,
+            "min": 0,
             "step": 1
           },
           {
@@ -1898,7 +2120,7 @@
             "name": "task_xhs_yanghao_collect_rate",
             "value": 5,
             "max": 100,
-            "min": 1,
+            "min": 0,
             "step": 1
           },
           {
@@ -1909,6 +2131,792 @@
             "max": 3000,
             "min": 1,
             "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "title": "推荐营销",
+      "icon": "img/finger.png",
+      "jsFile": "tasks/task_ks_toker.js",
+      "columns": 1,
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "观看时长（秒）",
+            "name": "toker_ks_view_video_second",
+            "max": 60,
+            "min": 5,
+            "value": 12,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "关键词筛选（多个使用逗号隔开）",
+            "name": "toker_ks_view_video_keywords",
+            "value": "",
+            "notice": "* 关键词不填则操作所有"
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "toker_ks_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "toker_ks_comment_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "toker_ks_focus_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "toker_ks_private_msg_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论区五连赞频率（%）",
+            "name": "toker_ks_comment_area_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "IP筛选（多个使用逗号隔开）",
+            "name": "toker_ks_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_ks_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_ks_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_ks_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 60
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "运行时间",
+            "name": "toker_ks_run_hour",
+            "columnCount": 6,
+            "children": [
+              "0时",
+              "1时",
+              "2时",
+              "3时",
+              "4时",
+              "5时",
+              "6时",
+              "7时",
+              "8时",
+              "9时",
+              "10时",
+              "11时",
+              "12时",
+              "13时",
+              "14时",
+              "15时",
+              "16时",
+              "17时",
+              "18时",
+              "19时",
+              "20时",
+              "21时",
+              "22时",
+              "23时"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "同城营销",
+      "icon": "img/city.png",
+      "columns": 1,
+      "jsFile": "tasks/task_ks_toker_city.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "观看时长（秒）",
+            "name": "toker_ks_city_view_video_second",
+            "max": 30,
+            "min": 5,
+            "value": 12,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "关键词筛选（多个使用逗号隔开）",
+            "name": "toker_ks_city_view_video_keywords",
+            "value": "",
+            "notice": "* 关键词不填则操作所有"
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "toker_ks_city_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "toker_ks_city_comment_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "toker_ks_city_focus_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "toker_ks_city_private_msg_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论区五连赞频率（%）",
+            "name": "toker_ks_city_comment_area_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "同城距离（公里内）",
+            "name": "toker_ks_city_distance",
+            "max": 100,
+            "min": 1,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "IP筛选（多个使用逗号隔开）",
+            "name": "toker_ks_city_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_ks_city_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_ks_city_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_ks_city_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "运行时间",
+            "name": "toker_ks_city_run_hour",
+            "columnCount": 6,
+            "children": [
+              "0时",
+              "1时",
+              "2时",
+              "3时",
+              "4时",
+              "5时",
+              "6时",
+              "7时",
+              "8时",
+              "9时",
+              "10时",
+              "11时",
+              "12时",
+              "13时",
+              "14时",
+              "15时",
+              "16时",
+              "17时",
+              "18时",
+              "19时",
+              "20时",
+              "21时",
+              "22时",
+              "23时"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "精准行业",
+      "hidden": false,
+      "runType": "floatSwitch",
+      "packageName": "com.smile.gifmaker",
+      "autoOpen": true,
+      "icon": "img/rocket.png",
+      "jsFile": "tasks/task_ks_search_user.js",
+      "columns": 1,
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "ks_searchUserSetting_privateRate",
+            "max": 100,
+            "min": 0,
+            "value": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "ks_searchUserSetting_focusRate",
+            "max": 100,
+            "min": 0,
+            "value": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "ks_searchUserSetting_zanRate",
+            "max": 100,
+            "value": 40,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "ks_searchUserSetting_commentRate",
+            "max": 100,
+            "value": 25,
+            "min": 0,
+            "step": 1
+          },
+          {
+            "type": "digit",
+            "label": "粉丝数（不低于）",
+            "name": "ks_searchUserSetting_fansMinCount",
+            "value": 0
+          },
+          {
+            "type": "digit",
+            "label": "粉丝数（不超过）",
+            "name": "ks_searchUserSetting_fansMaxCount",
+            "value": 50000
+          },
+          {
+            "type": "digit",
+            "label": "作品数（不低于）",
+            "name": "ks_searchUserSetting_worksMinCount",
+            "value": 0
+          },
+          {
+            "type": "digit",
+            "label": "作品数（不超过）",
+            "name": "ks_searchUserSetting_worksMaxCount",
+            "value": 10000
+          },
+          {
+            "type": "number",
+            "label": "操作次数",
+            "name": "ks_searchUserSetting_opCount",
+            "value": 2000
+          },
+          {
+            "type": "notice",
+            "title": "功能说明：点击“保存并运行”进入软件搜索页，切换到“用户列表”，然后再点击右侧按钮执行"
+          }
+        ]
+      }
+    },
+    {
+      "title": "推荐营销",
+      "icon": "img/finger.png",
+      "jsFile": "tasks/task_wx_toker.js",
+      "columns": 1,
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "观看时长（秒）",
+            "name": "toker_wx_view_video_second",
+            "max": 60,
+            "min": 5,
+            "value": 12,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "关键词筛选（多个使用逗号隔开）",
+            "name": "toker_wx_view_video_keywords",
+            "value": "",
+            "notice": "* 关键词不填则操作所有"
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "toker_wx_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "toker_wx_comment_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "toker_wx_focus_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "toker_wx_private_msg_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论区五连赞频率（%）",
+            "name": "toker_wx_comment_area_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "IP筛选（多个使用逗号隔开）",
+            "name": "toker_wx_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_wx_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_wx_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0,
+            "hidden": true
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_wx_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "运行时间",
+            "name": "toker_wx_run_hour",
+            "columnCount": 6,
+            "children": [
+              "0时",
+              "1时",
+              "2时",
+              "3时",
+              "4时",
+              "5时",
+              "6时",
+              "7时",
+              "8时",
+              "9时",
+              "10时",
+              "11时",
+              "12时",
+              "13时",
+              "14时",
+              "15时",
+              "16时",
+              "17时",
+              "18时",
+              "19时",
+              "20时",
+              "21时",
+              "22时",
+              "23时"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "同城营销",
+      "icon": "img/city.png",
+      "columns": 1,
+      "jsFile": "tasks/task_wx_toker_city.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "numberRange",
+            "label": "观看时长（秒）",
+            "name": "toker_wx_city_view_video_second",
+            "max": 30,
+            "min": 5,
+            "value": 12,
+            "step": 1
+          },
+          {
+            "type": "textArea",
+            "label": "关键词筛选（多个使用逗号隔开）",
+            "name": "toker_wx_city_view_video_keywords",
+            "value": "",
+            "notice": "* 关键词不填则操作所有"
+          },
+          {
+            "type": "numberRange",
+            "label": "点赞频率（%）",
+            "name": "toker_wx_city_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "评论频率（%）",
+            "name": "toker_wx_city_comment_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "关注频率（%）",
+            "name": "toker_wx_city_focus_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "私信频率（%）",
+            "name": "toker_wx_city_private_msg_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 1
+          },
+          {
+            "type": "numberRange",
+            "label": "评论区五连赞频率（%）",
+            "name": "toker_wx_city_comment_area_zan_rate",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "numberRange",
+            "label": "同城距离（公里内）",
+            "name": "toker_wx_city_distance",
+            "max": 100,
+            "min": 1,
+            "step": 1,
+            "value": 100
+          },
+          {
+            "type": "textArea",
+            "label": "IP筛选（多个使用逗号隔开）",
+            "name": "toker_wx_city_view_video_ip",
+            "value": "",
+            "notice": "* 如：湖北；IP不填则操作所有"
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "性别",
+            "name": "toker_wx_city_run_sex",
+            "columnCount": 6,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "numberRange",
+            "label": "最小年龄",
+            "name": "toker_wx_city_run_min_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 0,
+            "hidden": true
+          },
+          {
+            "type": "numberRange",
+            "label": "最大年龄",
+            "name": "toker_wx_city_run_max_age",
+            "max": 100,
+            "min": 0,
+            "step": 1,
+            "value": 100,
+            "hidden": true
+          },
+          {
+            "type": "checkboxGroup",
+            "label": "运行时间",
+            "name": "toker_wx_city_run_hour",
+            "columnCount": 6,
+            "children": [
+              "0时",
+              "1时",
+              "2时",
+              "3时",
+              "4时",
+              "5时",
+              "6时",
+              "7时",
+              "8时",
+              "9时",
+              "10时",
+              "11时",
+              "12时",
+              "13时",
+              "14时",
+              "15时",
+              "16时",
+              "17时",
+              "18时",
+              "19时",
+              "20时",
+              "21时",
+              "22时",
+              "23时"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23"
+            ]
           }
         ]
       }
@@ -1964,6 +2972,7 @@
             "name": "setting_baidu_wenxin_role",
             "value": "1",
             "dataFrom": "role",
+            "hidden": true,
             "options": []
           },
           {

@@ -45,6 +45,15 @@ const C310701 = {
         intoGroupUserList: ['android.widget.Button', '更多', 'title', '群聊成员', 'content', 'tv_name', 'qki'],//C0040  C0041  C0042  C0043 // C0044  C0045  C0046
         fansSwipe: ['pnn'],//C0050
         intoGroupUserListAdd: ['voi', '搜索'], //C0060  C0061
+
+        //消息和私信回复相关控件信息
+        hasMessage: ['x90'],
+        scroll: ['wal'], //消息页面滑动
+        chat: ['content_layout'], //用户聊天页面，消息内容
+        stranger: ['xox', 'v4o', '陌生人消息', 'wat', 'ua5', 'c_-'], //陌生人消息列表滚动控件
+        interact: ['q26', 'q3f', 'q2l', '回复: ', '评论了你: ', 'q1-', C.iptTag, 'dqq', 'q24'],//互动消息页面
+        readMessage: ['wat', 'tv_title', 'ua5', 'red_tips_count_view', 'red_tips_dot_view'],
+        tag: ['钱包通知', '新关注我的', '服务通知', '互动消息', '陌生人消息'],//消息页的消息类型
     },
 
     User: {

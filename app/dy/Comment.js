@@ -4,7 +4,7 @@ let statistics = require('common/statistics.js');
 let V = require('version/V.js');
 
 const Comment = {
-    tag: undefined,//当前的tag标签
+    tag: undefined,//当前的tag标签 
     containers: [],//本次遍历的内容  主要用于去重
     getAvatarTag(tag) {
         if (tag) {
@@ -160,7 +160,10 @@ const Comment = {
 
     getList() {
         let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
-            return v && v.bounds() && v.bounds().left <= 10;//过滤评论回复内容
+            if (v && v.bounds()) {
+                Log.log('位置', v.bounds().top, v.bounds().height(), v.bounds().left, Device.height());
+            }
+            return v && v.bounds() && v.bounds().left <= 10 && v.bounds().top + v.bounds().height() < Device.height();//过滤评论回复内容
         }).find();
         Log.log("数量：", contains.length);
         let contents = [];
@@ -182,6 +185,7 @@ const Comment = {
                 zanCount: this.getZanCount(),
                 isZan: this.isZan(),
                 isAuthor: this.isAuthor(),
+                ip: this.getIp(),
             }
             Log.log("Data", data);
             if (data.nickname === false) {
@@ -235,7 +239,9 @@ const Comment = {
         Common.click(backTag);
         Common.sleep(1000 + 2000 * Math.random());
 
-        iptTag = Common.id(V.Comment.backMsg[0]).find();
+        iptTag = Common.id(V.Comment.backMsg[0]).filter(v => {
+            return v && v.bounds() && v.bounds().top < Device.height() * 2 / 3;
+        }).find();
         if (iptTag.length === 2) {
             iptTag = iptTag[1];
         } else {
@@ -302,7 +308,7 @@ const Comment = {
                 let submitTags = Common.id(V.Comment.commentMsg[1]).isVisibleToUser(true).find();
                 Log.log('按钮到底有几个');
                 Log.log(Common.id(V.Comment.commentMsg[1]).isVisibleToUser(true).find());
-                if (!submitTags) {
+                if (!submitTags || submitTags.length == 0) {
                     Common.sleep(300);
                     continue;
                 }
@@ -313,13 +319,14 @@ const Comment = {
                     submitTags[1].click() && submitTags[0].click();
                 }
 
-                statistics.comment();
                 Common.sleep(1000);
                 break;
             } catch (e) {
                 Log.log(e);
             }
         }
+
+        statistics.comment();
 
         //查看dg0位置有没有下来
         iptTag = Common.id(V.Comment.commentMsg[0]).isVisibleToUser(true).find();
