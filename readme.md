@@ -27,25 +27,25 @@ Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，�
 ## 以下是Deeke的截图：
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke图标展示" src="photo/2-1.jpg" width="30%">
-<img alt="Deeke主界面" src="photo/2-2.jpg" width="30%">
-<img alt="Deeke主界面" src="photo/2-2-1.jpg" width="30%">
+<img alt="Deeke图标展示" src="photo/1-2-6.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/1-2-2.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/1-2-3.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/1-2-4.jpg" width="24%">
 
-<img alt="Deeke主界面" src="photo/2-3.jpg" width="30%">
-<img alt="Deeke主界面" src="photo/2-3-1.jpg" width="30%">
-<img alt="Deeke主界面" src="photo/2-3-2.jpg" width="30%">
+<img alt="Deeke主界面" src="photo/1-2-5.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/2-3-1.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/2-3-2.jpg" width="24%">
+<img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="24%">
 
-<img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="30%">
-<img alt="Deeke话术界面" src="photo/4.jpg" width="30%">
-<img alt="Deeke话术添加界面" src="photo/6.jpg" width="30%">
+<img alt="Deeke话术界面" src="photo/4.jpg" width="24%">
+<img alt="Deeke话术添加界面" src="photo/6.jpg" width="24%">
+<img alt="Deeke设置界面" src="photo/5.jpg" width="24%">
+<img alt="Deeke百度文心设置界面" src="photo/7.jpg" width="24%">
 
-<img alt="Deeke设置界面" src="photo/5.jpg" width="30%">
-<img alt="Deeke百度文心设置界面" src="photo/7.jpg" width="30%">
-<img alt="Deeke推荐营销设置界面" src="photo/8.jpg" width="30%">
-
-<img alt="Deeke推荐营销设置界面" src="photo/9.jpg" width="30%">
-<img alt="Deeke推荐营销设置界面" src="photo/10.jpg" width="30%">
-<img alt="Deeke推荐营销设置界面" src="photo/1.jpg" width="30%">
+<img alt="Deeke推荐营销设置界面" src="photo/8.jpg" width="24%">
+<img alt="Deeke推荐营销设置界面" src="photo/9.jpg" width="24%">
+<img alt="Deeke推荐营销设置界面" src="photo/10.jpg" width="24%">
+<img alt="Deeke推荐营销设置界面" src="photo/1.jpg" width="24%">
 </div>
 
 ## 后台还是沿用之前的，截图：
