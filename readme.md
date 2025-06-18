@@ -1,61 +1,112 @@
-# Deeke抖音黑科技
+# 🚀 Deeke抖音黑科技 · 颠覆你的引流方式！
 <img src='https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke' width=0 height=0 />
-<p style="background-color:#000;padding:12px;">
-<span style="color:#ff0;text-shadow:0 0 10px #00ff00;">我们是全国唯一一家，实现贴牌自动化的科技公司！！！</span>
-</p>
 
-<h3 style="color:#66F;">联系方式：请下拉到页面末尾！！！</h3>
+<span style="font-size:18px;">
+🎉 全国屈指可数的自研底层框架的黑科技软件研发公司！🎉
+</span>
 
-Deeke作为“嘀客”的升级版本，稳定性等方面有较大提升；软件的用户体验也有许多的提升。这个版本总体来说有以下几大改变：
+### 👇 联系方式请见页面底部！ 👇
 
-> 摒弃原Autojs框架，采用我们自主研发的DeekeScript框架；稳定性有较大提升
+---
 
-> 贴牌支持自定义主题（配色整体变更）
+## ✨ 为什么选择Deeke？
 
-> 功能进行全面的简化，只保留用户最关心的功能
+作为“嘀客”升级版，**Deeke黑科技**从性能到体验全面革新！  
 
-> 支持支付宝在线支付
+✅ 稳定性拉升（目前业顶级水平）
+✅ 功能更纯粹，操作更简单
+✅ 用户体验更顺滑（领先绝大多数市场软件）
+✅ 持续更新升级
+✅ 源码购买通道已开启（自研框架）
 
-> 支持智能评论、角色评论
+🔥 核心变化亮点：
 
-> 支持功能定制（包括群控等）
+- 🚀 **自主研发核心内核！摒弃传统Auto.js框架！**  
+  完全自研 [DeekeScript框架](https://doc.deeke.cn) ，稳定性、兼容性全线提升！
 
-Deeke支持后台一键贴牌，你不需要懂技术，只需要提供logo，后台就能给你自动生成一个和Deeke一模一样的黑科技软件，并且自带后台。我们的技术通过不断努力，终于把市场价几万的贴牌干到几千👍🏻👍🏻👍🏻，有兴趣从事这个行业的；可以相互交流😄～
+- 🎨 **支持贴牌主题定制（logo、配色全改）**  
+  不懂技术也能拥有属于你的专属“黑科技”APP！
 
-<span style="color: #f99;">tips: 如果你想加入我们，或者成为我们的兼职销售，请和我们联系～</span>
+- 🧹 **功能极简，只留客户最关心的核心功能**  
+  让复杂的操作统统消失，任何人都能轻松使用！
 
-## 以下是Deeke的截图：
+- 💰 **完美集成支付宝在线支付**  
+  购买、续费、支付一站式完成，安全快捷！
+
+- 🤖 **智能评论系统全新升级！**  
+  支持DeepSeek-V3大模型、角色评论（虚拟AI智能体），人机难辨！
+
+- 🛠️ **支持专属定制（群控/营销自动化/私域流量）**  
+  满足不同场景的特殊需求，企业专属方案也OK！
+
+---
+
+## 🏆 Deeke，做贴牌就是这么简单！
+
+> 只需提供logo，其余全部交给我们。后台一键自动生成专属版本，带后台管理，连非技术人员也能轻松拥有“自家黑科技”软件！  
+
+💸 **市场价几万甚至十几万？我们只卖几千元！👍👍👍**  
+想低成本创业、拓展副业、做代理？这就是你的机会！🚀
+
+😄 欢迎交流合作，加入Deeke，轻松做软件老板！
+
+> 📝 **温馨提示：** 购买年卡即可申请成为我们的兼职销售，享受推广返佣收益，轻松开启副业之路！💼
+
+---
+
+## 📸 软件实景截图展示
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke图标展示" src="photo/1-2-6.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/1-2-2.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/1-2-3.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/1-2-4.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/1.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/2.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/3.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/4.jpg" width="24%">
 
-<img alt="Deeke主界面" src="photo/1-2-5.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/2-3-1.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/2-3-2.jpg" width="24%">
-<img alt="Deeke主界面隐藏菜单" src="photo/3.jpg" width="24%">
+<img alt="Deeke设置" src="photo/setting.jpg" width="24%">
+<img alt="Deeke智能评论" src="photo/speech.jpg" width="24%">
+<img alt="Deeke评论应用" src="photo/speech-app.jpg" width="24%">
+<img alt="Deeke设置页面" src="photo/1-setting.jpg" width="24%">
 
-<img alt="Deeke话术界面" src="photo/4.jpg" width="24%">
-<img alt="Deeke话术添加界面" src="photo/6.jpg" width="24%">
-<img alt="Deeke设置界面" src="photo/5.jpg" width="24%">
-<img alt="Deeke百度文心设置界面" src="photo/7.jpg" width="24%">
+<img alt="Deeke功能文档说明" src="photo/document.jpg" width="24%">
+<img alt="Deeke支付界面" src="photo/pay.jpg" width="24%">
+<img alt="Deeke扫码设置" src="photo/scan.jpg" width="24%">
+<img alt="Deeke推荐营销设置页" src="photo/function.jpg" width="24%">
 
-<img alt="Deeke推荐营销设置界面" src="photo/8.jpg" width="24%">
-<img alt="Deeke推荐营销设置界面" src="photo/9.jpg" width="24%">
-<img alt="Deeke推荐营销设置界面" src="photo/10.jpg" width="24%">
-<img alt="Deeke推荐营销设置界面" src="photo/1.jpg" width="24%">
+<img alt="Deeke推荐营销设置页" src="photo/function2.jpg" width="24%">
+<img alt="Deeke图标" src="photo/icon.jpg" width="24%">
 </div>
 
-## 后台还是沿用之前的，截图：
-<div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke后台登录界面" src="photo/backend-1.png" width="100%">
-<img alt="Deeke后台主界面" src="photo/backend-1-1.png" width="100%">
-</div>
+---
 
-### 贴牌或者其他定制需求以及想加入团队的销售，请联系作者
+## 💻 后台系统展示（功能强大，一应俱全）
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke技术" src="photo/weixin.jpg" width="30%">
+<img alt="Deeke后台" src="photo/backend-main.png" width="100%">
+<img alt="Deeke代理后台" src="photo/backend-agent.png" width="100%">
+<img alt="Deeke后台登录界面" src="photo/backend-login.png" width="100%">
+<img alt="Deeke后台数据" src="photo/backend-data.png" width="100%">
 </div>
+
+---
+
+## 🌟 我们的优势，远超同行！
+
+1️⃣ 💡 **自主研发，源头技术团队，底层框架自控** —— 行业领先稳定性！  
+2️⃣ 🎯 **界面简洁友好、极易上手** —— 推广无压力，用户秒懂！  
+3️⃣ 🛠️ **支持任意App自动化脚本定制** —— 无论什么需求，都可为您私人定制！  
+
+---
+
+## 🤝 想贴牌、定制、合作、成为销售？  
+立即联系我们！
+
+<div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
+<img alt="Deeke技术支持" src="photo/weixin.jpg" width="30%">
+</div>
+
+---
+
+## ❤️ 还在等什么？  
+加入Deeke，一起开启智能引流新纪元吧！🚀✨  
+
+---
