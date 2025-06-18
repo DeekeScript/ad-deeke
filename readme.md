@@ -74,6 +74,7 @@
 
 <img alt="Deeke推荐营销设置页" src="photo/function2.jpg" width="24%">
 <img alt="Deeke图标" src="photo/icon.jpg" width="24%">
+<img alt="Deeke演示" src="photo/demo.gif" width="24%"/>
 </div>
 
 ---
