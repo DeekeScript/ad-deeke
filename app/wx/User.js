@@ -17,7 +17,7 @@ let User = {
         }
 
         Common.click(sendTag.parent());
-        Common.sleep(2000);
+        Common.sleep(2000 + 2000 * Math.random());
 
         let textTag = Common.id(V.User.privateMsg[2]).isVisibleToUser(true).findOnce();
         if (!textTag) {
@@ -26,37 +26,37 @@ let User = {
             return false;
         }
         Common.click(textTag);
-        Common.sleep(500);
+        Common.sleep(500 + 500 * Math.random());
 
         textTag = Common.id(V.User.privateMsg[2]).isVisibleToUser(true).filter(v => {
             return v && v.children().length() === 0;
         }).findOnce();
-        
-        let iText = '';
-        for (let i = 0; i < msg.length; i++) {
-            iText = msg.substring(0, i + 1);
-            textTag.setText(iText);
-            Common.sleep(200 + 300 * Math.random());
-        }
 
-        Common.sleep(500);
+        textTag.setText(msg);
+        Common.sleep(2000 + 1000 * Math.random());
         let sendTextTag = Common.id(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
         if (!sendTextTag) {
             Log.log('发送消息失败');
             return false;
         }
 
-        Common.click(sendTextTag);
-        Common.sleep(1000);
+        Common.click(sendTextTag, 0.2);
+        Common.sleep(1000 + 1000 * Math.random());
         Log.log("私信发送完成");
         statistics.privateMsg();
-        Common.sleep(Math.random() * 1000);
         Log.log("成功：返回2次");
         Common.back(2);
         return true;
     },
 
     getNickname() {
+        if (App.getAppVersionCode('com.tencent.mm') >= "2841") {
+            let tag = Common.id(V.User.getNickname[1]).findOne();
+            let r = tag.bounds();
+            let title = Images.findTextInRegion(Images.capture(), r.left - 20, r.top, r.width() * 2.5, r.height());
+            return title ? title[0] : false;
+        }
+
         //一般用户
         let i = 3;
         while (i--) {
@@ -268,6 +268,34 @@ let User = {
             res[i] = newRes[i];
         }
         return res;
+    },
+
+    intoVideo() {
+        let videoTag = UiSelector().desc('视频').className('androidx.appcompat.app.a').isVisibleToUser(true).findOne();
+        if (videoTag) {
+            if (!videoTag.isSelected()) {
+                Log.log('视频标签未选中');
+                Common.click(videoTag, 0.2);
+                Common.sleep(3000 + 2000 * Math.random());
+                Log.log('点击了视频标签');
+            } else {
+                Log.log('视频标签已选中');
+            }
+        } else {
+            Log.log('没有找到视频标签');
+        }
+
+        let intoVideoTag = UiSelector().className('android.widget.FrameLayout').filter(v => {
+            return v.parent() != null && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView' && v.getChildCount() >= 1;//最少是2个子项
+        }).isVisibleToUser(true).findOne();
+        if (!intoVideoTag) {
+            Log.log('没有找到视频标签');
+            return false;
+        }
+
+        Common.click(intoVideoTag, 0.18);
+        Common.sleep(5000 + 3000 * Math.random());
+        return true;
     },
 }
 

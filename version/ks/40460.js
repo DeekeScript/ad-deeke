@@ -14,6 +14,10 @@ const C40460 = {
         local: ['follow_tab_text', '同城', 'container', 'live_cover_icon_text', 'recycler_view'],//live_mark 换成了 live_cover_icon_text
     },
 
+    Live: {
+        viewCount: ['live_audience_count_text'],//多少人观看,
+    },
+
     User: {
         getNickname: ['user_name_tv'],
         getDouyin: ['profile_user_kwai_id', '快手号：', 'header_vip_tv'],
@@ -36,7 +40,7 @@ const C40460 = {
         ad: ['广告详情页'],
         viewDetail: ['广告详情页'],
         getZanTag: ['like_icon', 'like_count_view'],
-        getCommentTag: ['comment_icon', 'comment_count_view'],
+        getCommentTag: ['comment_icon', 'comment_count_view', 'comment_count_view2'],
         getCollectTag: ['collect_icon', 'collect_text'],
         getShareTag: ['forward_icon', 'forward_count'],
         getContentTag: ['element_caption_label'],
@@ -57,12 +61,20 @@ const C40460 = {
         isAuthor: ['comment_author_tag', '作者'],
         getAvatarTag: ['avatar', '头像'],
         getNicknameTag: ['name'],
-        getZanTag: ['cl_like'],
+        getZanTag: ['iv_comment_like'],
         getZanCountTag: ['tv_like_count'],
         getContentTag: ['comment'],
         //commentMsg: ['text', 'editor', 'finish_button'],
         commentMsg: ['editor_holder_text', 'editor', 'finish_button'],
         commentImage: ['emotion_button', 'tabIndicator', 'emotion_img', '表情'],
+    },
+    Message: {
+        scroll: ['recycler_view'],
+        readMessage: ['android.widget.LinearLayout', 'box_avatar_circle', 'title', '互动消息', 'right_avatar_notify', 'red_dot', 'notify'],
+        readMessageName: ['name', 'sliding_layout'],
+        chat: ['message'],
+        tabs: ['tabs', '消息'],
+        interact: ['androidx.recyclerview.widget.RecyclerView', 'android.widget.TextView', '评论了你: ', '回复了你: ', '了你: ', 'android.view.ViewGroup', '回复评论', 'editor', 'finish_button', '赞了你的作品'],
     }
 }
 

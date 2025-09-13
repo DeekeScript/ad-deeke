@@ -35,9 +35,9 @@ let Comment = {
 
     getZanTag(tag) {
         if (tag) {
-            return tag.children().findOne(Common.id(V.Comment.getZanTag[0]).isVisibleToUser(true));
+            return tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/' + V.Comment.getZanTag[0]).isVisibleToUser(true));
         }
-        return this.tag.children().findOne(Common.id(V.Comment.getZanTag[0]).isVisibleToUser(true));
+        return this.tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/' + V.Comment.getZanTag[0]).isVisibleToUser(true));
     },
 
     isAuthor() {
@@ -70,7 +70,11 @@ let Comment = {
     },
 
     isZan() {
-        return this.getZanTag().isSelected();
+        let tag = this.getZanTag();
+        if (!tag) {
+            return false;
+        }
+        return tag.isSelected();
     },
 
     //data 是getList返回的参数
@@ -208,6 +212,11 @@ let Comment = {
 
     //视频评论
     commentMsg(msg) {
+        if (UiSelector().className('android.widget.TextView').descContains('仅作者的好友可评论').isVisibleToUser(true).findOne()) {
+            Log.log('仅作者的好友可评论');
+            return;
+        }
+
         let iptTag = Common.id(V.Comment.commentMsg[0]).isVisibleToUser(true).findOnce();
 
         try {

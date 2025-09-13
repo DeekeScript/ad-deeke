@@ -119,6 +119,7 @@ const Video = {
     },
 
     getContentTag() {
+        Log.log('getContentTag', V.Video.getContentTag[0]);
         let tag = Common.id(V.Video.getContentTag[0]).isVisibleToUser(true).findOnce();
         if (tag) {
             console.log("视频标题内容：", tag);
@@ -154,6 +155,9 @@ const Video = {
     },
 
     getTime() {
+        if (330901 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
+            this.getTimeTag().text().split(V.Video.getTimeTag[1])[0];
+        }
         return this.getTimeTag().text();
     },
 

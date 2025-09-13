@@ -1,5 +1,5 @@
 let tCommon = require("app/dy/Common");
-let DyIndex = require("app/dy/Index");
+// let DyIndex = require("app/dy/Index");
 let DyUser = require("app/dy/User");
 let DyVideo = require("app/dy/Video");
 let DyComment = require("app/dy/Comment");
@@ -70,12 +70,16 @@ let task = {
         tCommon.click(submitTag);
         tCommon.sleep(5000);
 
-        let containerTag = UiSelector().textContains(keyword).className('com.lynx.tasm.behavior.ui.text.FlattenUIText').isVisibleToUser(true).findOne();
+        let containerTag = UiSelector().textContains(keyword).filter(v => {
+            return v && v.className() != 'android.widget.EditText';
+        }).isVisibleToUser(true).findOne();
 
         Log.log('神器：', containerTag);
 
         if (!containerTag) {
-            containerTag = UiSelector().textContains(keyword.substring(0, 6)).className('com.lynx.tasm.behavior.ui.text.FlattenUIText').isVisibleToUser(true).findOne();
+            containerTag = UiSelector().textContains(keyword.substring(0, 6)).filter(v => {
+                return v && v.className() != 'android.widget.EditText';
+            }).isVisibleToUser(true).findOne();
             if (!containerTag) {
                 Log.log('没有找到店铺');
                 FloatDialogs.show('提示', '没有找到门店，请确保名称完全一致~');
@@ -99,16 +103,9 @@ let task = {
                 break;
             }
 
-            let shopContainer = tCommon.id(V.GroupBuy.shopContainer[0]).isVisibleToUser(true).filter(v => {
-                return v && v.bounds() && v.bounds().top > Device.height() - v.bounds().height();
-            }).findOne();
-            if (!shopContainer) {
-                Log.log('滑动灵敏度：', machine.get('task_dy_team_buy_swipe', 'int') / 100);
-                tCommon.swipe(0, machine.get('task_dy_team_buy_swipe', 'int') / 100);//慢慢滑动
-                tCommon.sleep(1500 + 500 * Math.random());
-            } else {
-                Log.log('没有找到shopContainer');
-            }
+            Log.log('滑动灵敏度：', machine.get('task_dy_team_buy_swipe', 'int') / 100);
+            tCommon.swipe(0, machine.get('task_dy_team_buy_swipe', 'int') / 100);//慢慢滑动
+            tCommon.sleep(1500 + 500 * Math.random());
         }
 
         if (!commentTag) {
@@ -141,17 +138,17 @@ let task = {
             keyword, zanRate, privateRate, commentRate, opCount, waitSecond
         ]);
 
-        //首先进入页面
-        let res = DyIndex.intoGroupBuy(keyword);
-        if (!res) {
-            return res;
-        }
+        // //首先进入页面
+        // let res = DyIndex.intoGroupBuy(keyword);
+        // if (!res) {
+        //     return res;
+        // }
 
-        tCommon.sleep(3000);
-        res = this.search(keyword);
-        if (true !== res) {
-            return res;
-        }
+        // tCommon.sleep(3000);
+        // res = this.search(keyword);
+        // if (true !== res) {
+        //     return res;
+        // }
 
         let containers = [];
         let rpContainers = [];
@@ -159,8 +156,8 @@ let task = {
         while (true) {
             try {
                 // ntoUser = UiSelector().textContains('帮助更多用户决策').isVisibleToUser(true).findOne() ? false : true;
-                let tags = UiSelector().textMatches("[\\s\\S]+").clickable(true).isVisibleToUser(true).filter(v => {
-                    return v && v.bounds() && v.bounds().width() == Device.width() && v.bounds().height() > 0 && v.bounds().left == 0 && v.bounds().top + v.bounds().height() < Device.height();
+                let tags = UiSelector().className('com.lynx.tasm.behavior.ui.view.UIView').textMatches("[\\s\\S]+").clickable(true).filter(v => {
+                    return v && v.bounds() && v.bounds().width() == Device.width() && v.bounds().height() > 0 && v.bounds().left == 0 && v.bounds().top + 250 < Device.height();
                 }).find();
 
                 if (tags.length == 0) {
@@ -195,68 +192,41 @@ let task = {
                         Log.log('隐私或者底部');
                         continue;
                     }
-                    
-                    Log.log('进入用户中心', tags[i], tags[i].bounds().top, tags[i].bounds().height());
-                    //tags[i].click();
-                    let tops = tags[i].bounds().top;
-                    if (tops < 0) {
-                        tops = tags[i].bounds().top + tags[i].bounds().height() - 10 * Math.random();
-                    } else {
-                        tops += 20 * Math.random();
-                    }
 
-                    if (tops < 0) {
-                        Log.log('顶部小于0', tops);
+                    Log.log('进入用户中心', tags[i], tags[i].bounds().top, tags[i].bounds().height());
+                    // Gesture.click(tags[i].bounds().left + 20 * Math.random(), tags[i].bounds().top + 20 * Math.random());
+                    let intoHeader = UiSelector().className('com.lynx.tasm.ui.image.FlattenUIImage').filter(v => {
+                        return v && v.bounds().left > tags[i].bounds().left && v.bounds().top > tags[i].bounds().top;
+                    }).findOne();
+
+                    tCommon.click(intoHeader);
+                    tCommon.sleep(3000 + 1000 * Math.random());
+                    intoUser = UiSelector().textContains('评价数').descContains('评价数').isVisibleToUser(true).findOne() ? true : false;
+                    if (!intoUser) {
+                        Log.log('没有进入到主页，可能是设置隐私了-1');
                         continue;
                     }
 
-                    Gesture.click(tags[i].bounds().left + 20 * Math.random(), tops);
-                    tCommon.sleep(3000 + 1000 * Math.random());
-
                     let commentDetailHead = UiSelector().className('com.lynx.tasm.ui.image.FlattenUIImage').clickable(false).filter(v => {
-                        return v && v.bounds() && v.bounds().left < Device.width() * 0.3 && v.bounds().height() == v.bounds().width();
+                        return v && v.bounds() && v.bounds().left > Device.width() * 0.5 && v.bounds().height() == v.bounds().width();
                     }).findOne();
 
                     if (!commentDetailHead) {
                         Log.log('没有头像，返回');
                         tCommon.back();
+                        tCommon.sleep(600);
                         continue;
                     }
 
                     tCommon.click(commentDetailHead);
                     tCommon.sleep(3000 + 1000 * Math.random());
-                    if (UiSelector().textContains('用户评价').descContains('用户评价').isVisibleToUser(true).findOne()) {
-                        Log.log('点击失效');
-                        continue;
-                    }
 
-                    intoUser = UiSelector().textContains('评价数').descContains('评价数').isVisibleToUser(true).findOne() ? true : false;
-                    if (!intoUser) {
-                        tCommon.back();
-                        Log.log('没有进入到主页，可能是设置隐私了-1');
-                        continue;
-                    }
-
+                    Log.log('进入主页留痕了');
                     let currentCommentRate = Math.random() * 100;
                     let currentPrivateRate = Math.random() * 100;
                     let currentZanRate = Math.random() * 100;
 
                     if (zanRate >= currentZanRate || commentRate >= currentCommentRate || privateRate >= currentPrivateRate) {
-                        Log.log('进入主页留痕了');
-                        let header = UiSelector().className('com.lynx.tasm.ui.image.FlattenUIImage').clickable(false).filter(v => {
-                            return v && v.bounds() && v.bounds().left > Device.width() * 0.6 && v.bounds().height() == v.bounds().width();
-                        }).findOne();
-
-                        Log.log('头像', header);
-                        if (!header) {
-                            tCommon.back();
-                            Log.log('没有看见头，返回');
-                            continue;
-                        }
-
-                        tCommon.click(header);
-                        tCommon.sleep(3000 + 1000 * Math.random());
-
                         let douyin = DyUser.getDouyin();
                         if (rpContainers.indexOf(douyin) != -1) {
                             tCommon.back(2);
@@ -268,35 +238,41 @@ let task = {
                         rpContainers.push(douyin);
 
                         if (!DyVideo.intoUserVideo()) {
-                            tCommon.back(3);
+                            tCommon.back(2);
                             tCommon.sleep(1000);
-                            Log.log('没有进入视频，返回3次')
+                            Log.log('没有进入视频，返回2次')
                             continue;
                         }
+                        Log.log('进入视频');
 
                         let opC = 0;
                         tCommon.sleep(5000 + 5000 * Math.random());
                         if (zanRate >= currentZanRate) {
                             DyVideo.clickZan();
-                            tCommon.sleep(1000 + Math.random() * 3000);
+                            tCommon.sleep(1500 + Math.random() * 2000);
                             opC = 1;
                         }
 
                         if (commentRate >= currentCommentRate) {
+                            DyVideo.openComment(!!DyVideo.getCommentCount());
                             DyComment.commentMsg(this.getMsg(0, DyVideo.getContent()).msg);
+                            tCommon.back(1);//返回到用户界面
                             tCommon.sleep(1000 + Math.random() * 3000);
                             opC = 1;
                         }
 
-                        tCommon.back();//返回到用户界面
+                        if (opC) {
+                            Log.log('返回到用户界面');
+                            tCommon.back(1);//返回到用户界面
+                        }
 
                         if (privateRate >= currentPrivateRate) {
-                            tCommon.sleep(500);
+                            tCommon.sleep(1000);
                             Log.log('滑动');
                             tCommon.swipe(1, 0.8);
                             //Gesture.swipe(200, Device.height() * 0.3, 200, Device.height() * 0.7, 100);
                             tCommon.sleep(500);
-                            DyUser.privateMsg(this.getMsg(1, DyUser.getNickname()).msg);
+                            DyUser.privateMsg(this.getMsg(1).msg);
                             opC = 1;
                         }
 
@@ -309,7 +285,8 @@ let task = {
 
                         tCommon.sleep(waitSecond * 1000);
                         Log.log('操作完了，返回')
-                        tCommon.back(3);//用户评论主页，再返回一次，才是列表页
+                        tCommon.back(2);//用户评论主页，再返回一次，才是列表页
+                        tCommon.sleep(1000 + 1000 * Math.random());
                     }
 
                     //用户评论页，回到列表页
@@ -317,7 +294,7 @@ let task = {
                         Log.log('进入了用户-');
                         let isTrueIntoUserTag = UiSelector().textContains('评价数').descContains('评价数').isVisibleToUser(true).findOne();
                         if (isTrueIntoUserTag) {
-                            tCommon.back(2);
+                            tCommon.back(1);
                             tCommon.sleep(1000);
                         }
                     }
@@ -334,7 +311,7 @@ let task = {
                 let runTimes = 5;
                 let resolve = false;
                 do {
-                    let bottomTag = UiSelector().textContains('用户评价').descContains('用户评价').isVisibleToUser(true).findOne();//底部栏
+                    let bottomTag = UiSelector().className('com.lynx.tasm.behavior.ui.text.FlattenUIText').text('好评').desc('好评').isVisibleToUser(true).findOne();//底部栏
                     if (bottomTag) {
                         resolve = true;
                         break;
@@ -357,27 +334,16 @@ let task = {
     },
 }
 
-tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 
-while (true) {
-    task.log();
-    try {
-        let r = task.run();
-        if (r == -1 || r == false) {
-            break;//异常的情况
-        }
-
-        if (r) {
-            break;
-        }
-
-        tCommon.sleep(3000);
-    } catch (e) {
-        Log.log(e);
-        tCommon.closeAlert(1);
-        tCommon.backHome(10);
-    }
+task.log();
+try {
+    task.run();
+    tCommon.sleep(3000);
+} catch (e) {
+    Log.log(e);
+    tCommon.closeAlert(1);
+    tCommon.backHome(10);
 }
 FloatDialogs.show('提示', '已完成');

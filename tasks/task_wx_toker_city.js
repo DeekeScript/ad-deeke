@@ -21,6 +21,11 @@ let task = {
     },
 }
 
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    System.exit();
+}
+
 //开启线程  自动关闭弹窗
 // Engines.executeScript("unit/dialogClose.js");
 task.log();

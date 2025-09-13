@@ -43,7 +43,7 @@ let task = {
             return false;
         }
 
-        return DyMessage.intoGroupUserList(this.contents, (type, title, age, gender) => this.getMsg(type, this.lib_id, title, age, gender), (v) => machine.get('task_dy_fans_group_' + keyword + '_' + v, 'bool'), (v) => machine.set('task_dy_fans_group_' + keyword + '_' + v, true));
+        return DyMessage.intoGroupUserList(this.contents, (type, title, age, gender) => this.getMsg(type, this.lib_id, title, age, gender), (v) => machine.get('task_dy_fans_group_' + keyword + '_' + v, 'bool'), (v) => machine.set('task_dy_fans_group_' + keyword + '_' + v, 'bool'));
     },
 }
 

@@ -12,7 +12,14 @@ const C2760 = {
     Index: {
         home: ['微信', '通讯录', '发现', '我', 'icon_tv'],//
         local: ['title', '附近', 'ebv'],//'live_cover_icon_text', 'recycler_view'
-        intoVideo: ['title', '视频号'],//
+        intoVideo: ['title', '视频号', 'o58', 'pnq', 'kts'],// 视频号id，视频号入口，视频号消息数量，进入视频默认的窗口关闭按钮，视频号进入后视频页面右上角账号图标
+    },
+
+    Account: {
+        interact: ['qck', '视频号消息', 'qci', 'hhj', 'kbq', 'jt2', 'lz3', 'c6v', 'lz3', '回复'], //视频号消息入口id，视频号消息入口text，视频号消息数量，视频号消息列表，昵称，消息内容，回复按钮，输入框，回复按钮id，回复按钮text
+        privateDeal: ['视频号私信', 'qch', 'civ', '打招呼消息', 'eb8', 'o_4', 'civ', '视频号团队', 'bkl', 'bkk', 'bql', '发送'], //视频号私信入口，私信数量，打招呼入口id，打招呼入口，私信列表每个消息数，昵称，视频号团队内容（需要过滤），最后一次消息内容，输入框，发送按钮，发送按钮text
+        privateDealT: ['qci'],//真正的私信消息
+        comment: ['nuw', '评论', 'nuu'],
     },
 
     User: {
@@ -47,6 +54,7 @@ const C2760 = {
         getNickname: ['a8p'], //
         getDistanceTag: ['edj', ' · '],//
         intoUserVideo: ['tab_text', '作品', 'player_cover_container', 'profilegrid_showTop'],//暂时没有使用
+        close: ['b1k', '我知道了'],
     },
 
     Comment: {

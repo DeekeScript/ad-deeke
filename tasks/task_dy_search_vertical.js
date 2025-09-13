@@ -8,6 +8,7 @@ let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require("service/baiduWenxin");
 let statistics = require("common/statistics");
 let DyUser = require('app/dy/User.js');
+let V = require('version/V.js');
 
 // let dy = require('app/iDy');
 // let config = require('config/config');
@@ -92,6 +93,15 @@ let task = {
                 tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
 
                 Log.log('看看是不是广告');
+                if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                    let tag = tCommon.id(V.Video.getAvatar[1]).isVisibleToUser(true).findOne();
+                    if (tag) {
+                        Log.log('广告~');
+                        DyVideo.next();
+                        tCommon.sleep(2000);
+                        continue;
+                    }
+                }
                 //看看是不是广告，是的话，不操作作者
                 if (DyVideo.viewDetail()) {
                     let clickRePlayTag = UiSelector().textContains('点击重播').filter((v) => {
@@ -118,7 +128,7 @@ let task = {
                     let msg = this.getMsg(0, videoTitle);
                     DyComment.commentMsg(msg.msg);
                     tCommon.sleep(2000 + 2000 * Math.random());
-                    tCommon.back();
+                    DyComment.closeCommentWindow();
                     tCommon.sleep(500);
                 }
 

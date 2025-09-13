@@ -64,9 +64,12 @@ let Index = {
         }
     },
 
+    //全版本支持
     intoSearchPage() {
-        
-    }
+        let tag = UiSelector().className('android.widget.ImageView').desc('查找').isVisibleToUser(true).findOne();
+        Common.click(tag);
+        Common.sleep(3000 + Math.random() * 3000);
+    },
 }
 
 module.exports = Index;

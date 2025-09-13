@@ -13,7 +13,7 @@ let Video = {
 
         Log.log("滑动参数：" + left + ":" + bottom + ":" + left2 + ":" + top + ":" + duration);
         Gesture.swipe(left, bottom, left2, top, duration);
-        Common.sleep(1500);
+        Common.sleep(1000 + 1000 * Math.random());
     },
 
     getZanTag(index) {
@@ -186,6 +186,15 @@ let Video = {
     },
 
     getTitleTag() {
+        if (App.getAppVersionCode('com.tencent.mm') >= "2841") {
+            let tag = Common.id(V.Video.getTitleTag[1]).findOne();
+            let r = tag.bounds();
+            let title = Images.findTextInRegion(Images.capture(), r.left - 20, r.top, r.width() * 2.5, r.height());
+            return {
+                text: title ? title[0] : false
+            };
+        }
+
         let tag = Common.id(V.Video.getTitleTag[0]).isVisibleToUser(true).findOne();
         if (tag) {
             return tag;
@@ -231,7 +240,7 @@ let Video = {
         }
         try {
             let name = V.Video.getAvatar[0];
-            let tag = Common.id(name).isVisibleToUser(true).findOnce();
+            let tag = Common.id(name).findOnce();
             if (tag) {
                 return tag;
             }
@@ -279,6 +288,12 @@ let Video = {
     },
 
     getNickname() {
+        if (App.getAppVersionCode('com.tencent.mm') >= "2841") {
+            let tag = Common.id(V.Video.getTitleTag[1]).findOne();
+            let r = tag.bounds();
+            let title = Images.findTextInRegion(Images.capture(), r.left - 20, r.top, r.width() * 2.5, r.height());
+            return title ? title[0] : false;
+        }
         let tag = Common.id(V.Video.getNickname[0]).isVisibleToUser(true).findOne();
         if (tag) {
             return tag.text();

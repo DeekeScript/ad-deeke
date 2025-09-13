@@ -13,6 +13,10 @@ let Comment = {
         return this.tag.children().findOne(Common.id(V.Comment.getAvatarTag[0]).desc(V.Comment.getAvatarTag[1]).isVisibleToUser(true));
     },
 
+    isChannel() {//判断是否是视频号，不是则不能进入主页
+        return this.tag.children().findOne(UiSelector().className('android.widget.ImageView').descContains('logo'));
+    },
+
     getNicknameTag() {
         return this.tag.children().findOne(Common.id(V.Comment.getNicknameTag[0]));
     },
@@ -63,7 +67,11 @@ let Comment = {
     },
 
     getZanCount() {
-        return Common.numDeal(this.getZanCountTag().text());
+        let tag = this.getZanTag();
+        if (!tag) {
+            return 0;
+        }
+        return Common.numDeal(tag.text());
     },
 
     isZan() {
@@ -128,6 +136,11 @@ let Comment = {
         Common.swipeCommentListOp();
     },
 
+    commentCount: 0,
+    getCommentCount() {
+        return this.commentCount;
+    },
+
     getList() {
         let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
             if (v && v.bounds()) {
@@ -136,6 +149,7 @@ let Comment = {
             return v && v.bounds() && v.bounds().left <= 10 && v.bounds().top + v.bounds().height() < Device.height();//过滤评论回复内容
         }).find();
         Log.log("数量：", contains.length);
+        this.commentCount = contains.length;
         let contents = [];
         let data = {};
 
@@ -157,6 +171,8 @@ let Comment = {
                     isZan: this.isZan(),
                     isAuthor: this.isAuthor(),
                     ip: this.getIp(),
+                    headTag: this.getAvatarTag(),
+                    isChannel: this.isChannel(),//是不是视频号
                 }
             } catch (e) {
                 Log.log("部分内容不在屏幕内导致的问题" + e);
@@ -193,14 +209,13 @@ let Comment = {
     },
 
     //data 是getList返回的参数
-    intoUserPage(data) {
-        let headTag = this.getAvatarTag(data.tag);
+    intoUserPage(headTag) {
         Log.log('headTag', headTag);
         //Log.log('headTag-', headTag.parent().parent());
-        Common.click(headTag);
+        Common.click(headTag, 0.24);
         statistics.viewUser();
         //headTag.parent().parent().click();
-        Common.sleep(3000 + 1000 * Math.random());
+        Common.sleep(3000 + 2000 * Math.random());
     },
 
     //视频评论

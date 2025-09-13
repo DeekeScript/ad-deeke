@@ -45,6 +45,7 @@ let task = {
             '账号：': this.me.douyin,
             '昵称：': this.me.nickname,
         }));
+        tCommon.sleep(1000 + 1000 * Math.random());
         DyIndex.intoHome();
 
         if (tCommon.getRemark(settingData.account)) {

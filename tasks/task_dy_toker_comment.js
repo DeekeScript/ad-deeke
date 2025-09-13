@@ -79,7 +79,7 @@ let task = {
             if (intoUserFansList) {
                 res = DyUser.focusListSearch(douyin);
             } else {
-                res = DySearch.intoUserVideoPage(input[this.index], 1);
+                res = DySearch.intoUserVideoPage(input[this.index], 2);
             }
 
             if (!res) {
@@ -221,6 +221,7 @@ let task = {
             Log.log('一个账号完成，休息3分钟');
             tCommon.sleep(180 * 1000);//休眠十分钟
         }
+        this.contents = [];
         return true;//重启
     },
 }

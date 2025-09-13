@@ -43,8 +43,8 @@ let task = {
         DySearch.intoSearchList(keyword);
         tCommon.sleep(4000 + 2000 * Math.random());
 
-        let topTag = tCommon.id(V.Search.searchTop).isVisibleToUser(true).findOne();
-        let top = topTag ? topTag.bounds().top + topTag.bounds().height() : 342;
+        let topTag = UiSelector().className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
+        let top = topTag ? topTag.bounds().top + topTag.bounds().height() : Device.height() / 6;
         Log.log('top', top, topTag ? topTag.bounds() : null);
         let interval = storage.get('task_xhs_yanghao_interval', 'int');
         while (true) {
@@ -57,24 +57,31 @@ let task = {
 
             for (let i in tags) {
                 try {
-                    let text = tags[i].text();
+                    let text = tags[i].content;
                     if (this.contents.includes(text)) {
                         continue;
                     }
 
-                    if (machine.get('task_xhs_yanghao_' + text, 'bool')) {
+                    let md5 = Encrypt.md5(text);
+                    if (machine.get('task_xhs_yanghao_' + md5, 'bool')) {
                         Log.log('重复视频');
                         continue;
                     }
 
-                    Log.log(tags[i].bounds(), tags[i].text());
-                    if (!tCommon.clickRange(tags[i], top, Device.height())) {
+                    if (tags[i].tag.bounds().top < top) {
+                        Log.log('位置不对');
+                        continue;
+                    }
+
+                    Log.log(tags[i].tag.bounds(), text);
+                    if (!tCommon.click(tags[i].tag, 0.15)) {
                         Log.log('点击位置不对，执行下一个');
                         continue;
                     }
                     tCommon.sleep(3000 + 2000 * Math.random());
 
                     let title = Work.getContent();
+                    Log.log('title', title);
                     if (!title) {
                         Log.log('界面更新了，需要滑动');
                         break;//很可能是更新了
@@ -110,9 +117,9 @@ let task = {
                         tCommon.sleep(2000 + 1000 * Math.random());
                     }
 
-                    machine.set('task_xhs_yanghao_' + text, true);
+                    machine.set('task_xhs_yanghao_' + md5, true);
                     this.contents.push(text);
-                    if (!tCommon.id(V.Search.searchTop).isVisibleToUser(true).findOne()) {
+                    if (!UiSelector().className('android.widget.TextView').text(keyword).isVisibleToUser(true).findOne()) {
                         tCommon.back();
                     }
                     tCommon.sleep(1000 + 500 * Math.random());
@@ -149,7 +156,7 @@ if (!task.count) {
 
 tCommon.openApp();
 //开启线程  自动关闭弹窗
-Engines.executeScript("unit/dialogClose.js");
+// Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();

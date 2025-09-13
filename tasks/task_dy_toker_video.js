@@ -84,7 +84,7 @@ let task = {
             while (true) {
                 let comments = DyComment.getList();
                 if (comments.length == 0) {
-                    tCommon.back();
+                    DyComment.closeCommentWindow();
                     tCommon.sleep(1000);
                     Log.log('没有评论内容');
                     break;

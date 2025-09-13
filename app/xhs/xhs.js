@@ -20,7 +20,17 @@ let xhs = {
         sex: storage.getArray('toker_xhs_run_sex'),
         minAge: storage.get('toker_xhs_run_min_age', 'int'),
         maxAge: storage.get('toker_xhs_run_max_age', 'int'),
-        op: storage.getArray('toker_xhs_run_hour'),//运行时间
+        toker_run_hour: storage.getArray('toker_xhs_run_hour'),//运行时间
+    },
+
+    taskCheck() {
+        //查看是否到了时间，没有的话，直接返回flase
+        let hour = this.config.toker_run_hour;
+        if (!hour.includes("" + (new Date()).getHours())) {
+            return 101;//不在任务时间
+        }
+
+        return 0;
     },
     run(getMsg) {
         Log.log(this.config);
@@ -29,29 +39,37 @@ let xhs = {
         } else {
             Index.intoIndex();
         }
-        Common.sleep(1000);
-        Index.refresh();
-        Common.sleep(3000);
+
+        Common.sleep(3000 + 3000 * Math.random());
 
         let titles = [];
-
+        //let spCount = 0;//滑动3次没内容，就判断是不是没有回到主页
         while (true) {
             try {
-                let container;
-                if (this.config.isCity) {
-                    container = Common.id(V.Index.containerCity[0]).isVisibleToUser(true).findOne();
-                } else {
-                    container = Common.id(V.Index.container[0]).isVisibleToUser(true).findOne();
+                let rs = this.taskCheck();
+                if (rs != 0) {
+                    return rs;
                 }
-                let containers = container.children();
-                let len = containers.length();
-                for (let i = 0; i < len; i++) {
-                    let tag = containers.getChildren(i);
-                    if (!tag.isVisibleToUser()) {
-                        Log.log('视线外');
+                let containers = UiSelector().filter(v => {
+                    return v.desc() && (v.desc().indexOf('笔记') === 0 || v.desc().indexOf('视频') === 0) && ['android.widget.LinearLayout', 'android.widget.FrameLayout'].includes(v.className());
+                }).isVisibleToUser(true).find();
+
+                if (!UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOne()) {
+                    Log.log('没有返回到主界面， 返回');
+                    Common.back();
+                    Common.sleep(1000);
+                    continue;
+                }
+
+                for (let i = 0; i < containers.length; i++) {
+                    if (!UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOne()) {
+                        Log.log('没有返回到主界面， 返回');
+                        Common.back();
+                        Common.sleep(1000);
                         continue;
                     }
 
+                    let tag = containers[i];
                     let title = Index.getTitle(tag.desc());
                     if (titles.indexOf(title) != -1) {
                         Log.log('重复');
@@ -63,11 +81,10 @@ let xhs = {
                         titles.shift();
                     }
 
-                    Common.sleep(this.config.opWait);
-                    //let zanCount = Index.getZanCount(tag.desc());
+                    Common.sleep(this.config.opWait / 2 + this.config.opWait * Math.random());
                     Log.log('tag', tag, tag.desc());
                     let type = Index.getType(tag.desc());//0笔记，1视频
-                    Log.log('类型是：', type == 0 ? '笔记' : '视频');
+                    Log.log('类型是：', type == 0 ? '笔记' : '视频', type);
 
                     if (this.config.keywords && !Common.containsWord(this.config.keywords, title)) {
                         Log.log('关键词不符合');
@@ -76,18 +93,6 @@ let xhs = {
 
                     let currentZanRate = Math.random();
                     let currentCommentRate = Math.random();
-
-                    if (currentZanRate < this.config.zanRate) {
-                        if (!this.config.isCity && Math.random() < 0.2) {
-                            //20%直接点赞不进入视频或者图文   80%需要进入浏览再操作
-                            let zanTag = Common.id(V.Index.zan[0]).isVisibleToUser(true).find();
-                            Log.log('赞控件', zanTag && zanTag[i]);
-                            if (zanTag[i]) {
-                                Index.zan(zanTag[i]);
-                            }
-                            continue;
-                        }
-                    }
 
                     //进入 笔记或者视频 操作  这里不直接点击tag，因为这样会点击到“赞”或者“用户头像“
                     if (!Index.intoNote(tag, type)) {
@@ -100,19 +105,20 @@ let xhs = {
                     let wait = this.config.workWait / (swipeNodeCount + 1);
 
                     if (type === 0) {
-                        Common.sleep(wait);
+                        Common.sleep(wait + 2000 * Math.random());
                         if (swipeNodeCount) {
                             while (swipeNodeCount-- > 0) {
                                 Common.swipe(0, 1 / (swipeNodeCount + 1));
-                                Common.sleep(wait);
+                                Common.sleep(wait + 2000 * Math.random());
                             }
                         }
 
                         //笔记需要筛选IP
                         if (this.config.toker_view_video_ip) {
-                            let ipTag = Common.id(V.Work.ip[0]).findOne();//可能不可见
-                            Log.log('ipTag', ipTag);
-                            if (!ipTag || !Common.containsWord(this.config.toker_view_video_ip, ipTag.desc())) {
+                            let ipTag = UiSelector().className('android.view.View').descMatches('\\d+[\\u4e00-\\u9fa5]+$').findOne();
+                            let match = ipTag.desc().match(/\d+([\u4e00-\u9fa5]+)/);
+                            Log.log('ipTag', ipTag, match);
+                            if (!ipTag || match.length != 2 || !Common.containsWord(this.config.toker_view_video_ip, match[1])) {
                                 Common.back();
                                 Common.sleep(1000);
                                 Log.log('IP不符合', this.config.toker_view_video_ip, ipTag ? ipTag.desc() : '无');
@@ -127,7 +133,7 @@ let xhs = {
                     if (currentZanRate < this.config.zanRate) {
                         Log.log('点赞');
                         Work.zan();
-                        Common.sleep(500 + 1000 * Math.random());
+                        Common.sleep(1500 + 1000 * Math.random());
                     }
 
                     if (currentCommentRate < this.config.commentRate) {
@@ -147,20 +153,22 @@ let xhs = {
                     }
 
                     if (this.config.focusRate > Math.random()) {
+                        Common.sleep(1000 + 1000 * Math.random());
                         Log.log('关注了');
                         Work.focus(type);
-                        Common.sleep(1000 + 1000 * Math.random());
+                        Common.sleep(2000 + 2000 * Math.random());
                     }
 
                     Common.back();
-                    Common.sleep(500);
+                    Common.sleep(1000 + 1000 * Math.random());
                 }
 
                 Log.log('滑动');
                 Index.swipe(this.config.isCity);
+                Common.sleep(2000 + 2000 * Math.random());
             } catch (e) {
                 Log.log('异常了', e);
-                if (!Common.id(V.Common.backHome[0]).textContains(V.Common.backHome[1]).findOne()) {
+                if (!UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOne()) {
                     Common.back();
                     Common.sleep(1000);
                 }

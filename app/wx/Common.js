@@ -1,6 +1,6 @@
 
 let cStorage = require('common/storage.js');
-let V = require('version/WxV.js'); 
+let V = require('version/WxV.js');
 
 const Common = {
     //封装的方法
@@ -202,7 +202,9 @@ const Common = {
     },
 
     swipeCommentListOp() {
-        this.swipeCommentListOpTarget = UiSelector().className(V.Common.swipeCommentListOp[0]).scrollable(true).isVisibleToUser(true).findOnce();
+        this.swipeCommentListOpTarget = UiSelector().className(V.Common.swipeCommentListOp[0]).filter(v => {
+            return v.bounds().height() < Device.height() - 100;
+        }).scrollable(true).isVisibleToUser(true).findOnce();
         if (this.swipeCommentListOpTarget) {
             this.swipeCommentListOpTarget.scrollForward();
         } else {

@@ -49,7 +49,7 @@ let task = {
         tCommon.sleep(3000);
         this.params.settingData = settingData;
         return KsSearch.userList(
-            (v) => machine.get('task_ks_search_user_' + v, true),
+            (v) => machine.get('task_ks_search_user_' + v, 'bool'),
             () => this.decCount(),
             KsUser,
             KsComment,
@@ -75,7 +75,7 @@ if (!task.count) {
 
 // tCommon.openApp(); //已经自动打开了，不需要再次打开
 //开启线程  自动关闭弹窗
-Engines.executeScript("unit/dialogClose.js");
+//Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();

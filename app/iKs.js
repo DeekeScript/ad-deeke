@@ -89,10 +89,9 @@ let iKs = {
         if (rule.toker_view_video_keywords) {
             let containWord = KsCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
-            if (containWord) {
-                return true;
+            if (!containWord) {
+                return false;
             }
-            return false;
         }
 
         console.log('同城数据判断：', rule.toker_distance, videoData.distance);
@@ -176,9 +175,9 @@ let iKs = {
                 continue;
             }
 
+            Log.log('开始获取视频数据');
             videoData = KsVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
-
-
+            Log.log('视频获取结束');
             errorCount = 0;
             //接下来是视频的参数和config比对， 不合适则刷下一个
             let tmp = this.videoRulesCheck(videoRules, videoData, isCity);

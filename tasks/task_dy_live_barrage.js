@@ -47,7 +47,7 @@ let task = {
                 return true;
             }
 
-            DySearch.intoSearchList(account, 1);
+            DySearch.intoSearchList(account, 2);
             DySearch.intoLiveRoom(account);
         } else {
             account = account.substring(1);

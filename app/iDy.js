@@ -88,10 +88,9 @@ let iDy = {
         if (rule.toker_view_video_keywords) {
             let containWord = DyCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
-            if (containWord) {
-                return true;
+            if (!containWord) {
+                return false;
             }
-            return false;
         }
 
         console.log('同城数据判断：', rule.toker_distance, videoData.distance);
@@ -392,7 +391,7 @@ let iDy = {
                     }).exists()) {
                         Log.log('存在“反馈”字眼');
                         DyCommon.back();
-                        if (text('确定').filter((v) => {
+                        if (UiSelector().text('确定').filter((v) => {
                             return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
                         }).exists()) {
                             let a = UiSelector().text('确定').filter((v) => {
@@ -423,6 +422,7 @@ let iDy = {
                 }
 
                 //判断IP
+                Log.log('ip', this.configData.toker_view_video_ip, userData.ip);
                 if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
                     DyCommon.back();
                     DyCommon.sleep(1000);

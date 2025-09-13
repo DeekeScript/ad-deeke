@@ -1,6 +1,6 @@
 // let user = textContains('用户').id('android:id/text1').findOne();
 
-// log(user); 
+// log(user);
 
 // click(user.bounds().centerX(), user.bounds().centerY());
 

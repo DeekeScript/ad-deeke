@@ -33,6 +33,7 @@ let Video = {
 
     getZanCount() {
         let zan = this.getZanTag(1);
+        Log.log('zan', zan);
         return Common.numDeal(zan.text());
     },
 
@@ -58,6 +59,9 @@ let Video = {
         }
 
         let tag = Common.id(V.Video.getCommentTag[index]).isVisibleToUser(true).findOnce();
+        if (index == 1 && !tag) {
+            tag = Common.id(V.Video.getCommentTag[index + 1]).isVisibleToUser(true).findOnce();
+        }
         Log.log("评论标签：：：", index, tag.text(), tag);
         if (tag) {
             return tag;
@@ -68,6 +72,7 @@ let Video = {
 
     getCommentCount() {
         let comment = this.getCommentTag(1);
+        Log.log('comment', comment);
         return Common.numDeal(comment.text());
     },
 
@@ -79,6 +84,10 @@ let Video = {
             Common.sleep(2000 + 1500 * Math.random());
         } else {
             Common.sleep(2000 + 1000 * Math.random());
+            if (UiSelector().className('android.widget.TextView').descContains('仅作者的好友可评论').isVisibleToUser(true).findOne()) {
+                Log.log('仅作者的好友可评论，不需要返回');
+                return true;
+            }
             Common.back();
         }
 
@@ -99,6 +108,7 @@ let Video = {
 
     getCollectCount() {
         let collect = this.getCollectTag(1);
+        Log.log('collect', collect);
         return Common.numDeal(collect.text());
     },
 
@@ -126,6 +136,7 @@ let Video = {
 
     getShareCount() {
         let share = this.getShareTag(1);
+        Log.log('share', share);
         return Common.numDeal(share.text());
     },
 

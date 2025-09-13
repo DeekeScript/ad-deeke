@@ -7,13 +7,13 @@ let MessageNew = {
     scrollCount: 0,
     getMsg(type, msg) {
         //这里必须调用智能话术
-        // return "😄";
+        //return "😄";
         return baiduWenxin.getChatByMsg(type, msg, 1);
     },
 
     hasMessage() {
-        let tag = Common.id(V.Index.intoMyMessage[0]).descContains(V.Index.intoMyMessage[2]).filter(v => {
-            return v && v.bounds() && v.bounds().left > Device.width() / 2 && v.bounds().top > Device.height() * 0.8;
+        let tag = UiSelector().className('android.view.ViewGroup').descContains('消息').filter(v => {
+            return v.desc().indexOf('未读') !== -1;
         }).isVisibleToUser(true).findOne();
         Log.log('消息控件', tag);
         console.log('消息控件', tag);
@@ -31,11 +31,13 @@ let MessageNew = {
         }
 
         //判断是否已经在消息页面
-        if (Common.id(V.Index.intoMyMessage[0]).descContains(V.Index.intoMyMessage[1]).isVisibleToUser(true).selected(true).findOne()) {
+        if (UiSelector().className('android.widget.RelativeLayout').descContains('赞和收藏').isVisibleToUser(true).findOne()) {
             return true;
         }
 
-        let messageTag = Common.id(V.Index.intoMyMessage[0]).descContains(V.Index.intoMyMessage[1]).isVisibleToUser(true).findOne();
+        let messageTag = UiSelector().className('android.view.ViewGroup').descContains('消息').filter(v => {
+            return v.desc().indexOf('未读') !== -1;
+        }).isVisibleToUser(true).findOne();
         if (messageTag) {
             Common.click(messageTag);
             Log.log('进入消息中心');
@@ -47,7 +49,10 @@ let MessageNew = {
 
     //默认下滑，type为true则滑动回去
     scroll(type) {
-        let tag = Common.id(V.Message.scroll[0]).scrollable(true).isVisibleToUser(true).findOne();
+        let tag = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
+
         if (!type) {
             this.scrollCount++;
         } else {
@@ -62,17 +67,31 @@ let MessageNew = {
     },
 
     getLastMessageContent() {
-        let tags = Common.id(V.Message.chat[0]).isVisibleToUser(true).find();
+        let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').isVisibleToUser(true).findOne();
+        if (!tag) {
+            return false;
+        }
+
+        let childs = tag.children();
+        if (childs.length == 0) {
+            return false;
+        }
+
+        let tags = childs.find(UiSelector().className('android.widget.TextView').filter(v => {
+            return v.text().indexOf('由于你和对方未互相关注') !== 0;//由于你和对方未互相关注，你回复之前，ta只能发送1条文字消息
+        }).isVisibleToUser(true));
         if (tags.length === 0) {
             return false;
         }
         Log.log('消息：', tags[0].text());
-        // return tags[tags.length - 1].text();
-        return tags[0].text();//居然第一条是距离输入框最近的那条，而不是最后一条
+        return tags[tags.length - 1].text();
     },
 
     noUserMessageBackScroll() {
-        let tag = Common.id(V.Message.stranger[0]).scrollable(true).isVisibleToUser(true).findOne();
+        let tag = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
+
         if (tag) {
             tag.scrollForward();
             return true;
@@ -82,7 +101,8 @@ let MessageNew = {
 
     //陌生人消息
     noUserMessageBack() {
-        let titleTag = Common.id(V.Message.stranger[1]).text(V.Message.stranger[2]).isVisibleToUser(true).findOne();//消息界面点击进入的陌生人列表页 头部的 “陌生人消息“
+        //消息界面点击进入的陌生人列表页 头部的 “陌生人消息“
+        let titleTag = UiSelector().className('android.widget.TextView').text('陌生人消息').isVisibleToUser(true).findOne();
         if (!titleTag) {
             return;
         }
@@ -91,16 +111,29 @@ let MessageNew = {
         while (k-- > 0) {
             Log.log('k', k);
             //消息
-            let tags = Common.id(V.Message.stranger[3]).isVisibleToUser(true).filter(v => {
-                return v && v.text() > 0;
+            let tags = UiSelector().className('android.view.ViewGroup').isVisibleToUser(true).filter(v => {
+                return v && v.bounds() && v.bounds().left <= 1 && v.bounds().width() >= Device.width() - 1 && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView';
             }).find();
 
+            Log.log('陌生人消息数量', tags.length);
             if (tags.length <= 0) {
                 break;
             }
 
+            let noMsgCount = 0;
+            let baseChilds = [];
             for (let i in tags) {
-                Common.click(tags[i]);
+                baseChilds.push(tags[i].children());
+            }
+            for (let i in tags) {
+                let childs = baseChilds[i].children().find(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+                Log.log('是否有消息', childs[3]);
+                if (!childs[3] || isNaN(childs[3].text()) || childs[3].text() * 1 <= 0) {
+                    noMsgCount++;
+                    continue;
+                }
+
+                Common.click(baseChilds[i], 0.15);
                 Common.sleep(3000 + 1000 * Math.random());
                 //获取最后一次聊天的消息内容
                 let msg = this.getLastMessageContent();
@@ -109,6 +142,10 @@ let MessageNew = {
                 User.privateMsgTwo(this.getMsg(0, msg));
                 Gesture.back();
                 Common.sleep(2000 + 1000 * Math.random());
+            }
+
+            if (noMsgCount == tags.length) {
+                return;
             }
 
             this.noUserMessageBackScroll();
@@ -135,21 +172,34 @@ let MessageNew = {
             return;//评论开关关闭
         }
 
-        let commentCountTag = Common.id(V.Message.messageCount[2]).isVisibleToUser(true).findOne();
-        if (!commentCountTag || commentCountTag.text() <= 0) {
+        let commentCountTag = UiSelector().className('android.widget.RelativeLayout').descContains('评论').filter(v => {
+            return v.desc().indexOf('未读') !== -1;
+        }).isVisibleToUser(true).findOne();
+        if (!commentCountTag) {
             Log.log('没有评论消息');
             return true;
         }
 
-        let allCount = commentCountTag ? commentCountTag.text() * 1 : 0;
+        let allCount = Common.numDeal(commentCountTag.desc());
         Log.log('消息总数', allCount);
-        commentCountTag ? Common.click(commentCountTag) : Gesture.click(803, 301);
+        if (allCount === 0) {
+            return true;
+        }
+
+        Common.click(commentCountTag, 0.15);
         Common.sleep(4000 + 2000 * Math.random());
+        let tipTag = UiSelector().className('android.widget.Button').text('不再提醒').isVisibleToUser(true).findOne();
+        if (tipTag) {
+            Common.click(tipTag, 0.15);
+            Log.log('点击 不再提醒');
+            Common.sleep(2000 + 2000 * Math.random());
+        }
+
         let k = 20;
         let contains = [];
         while (k-- > 0) {
-            let tags = UiSelector().className(V.Message.interact[0]).filter(v => {
-                return v && v.bounds() && v.bounds().left <= 1 && v.bounds().width() <= Device.height() - 1;
+            let tags = UiSelector().className('android.view.ViewGroup').filter(v => {
+                return v && v.bounds() && v.bounds().left <= 1 && v.bounds().width() >= Device.width() - 1;
             }).isVisibleToUser(true).find();
             Log.log('tags', tags.length);
 
@@ -159,7 +209,9 @@ let MessageNew = {
                 let top = tags[i].bounds().top;
                 let bottom = top + tags[i].bounds().height();
 
-                let isMsgTag = Common.id(V.Message.interact[1]).text(V.Message.interact[2]).isVisibleToUser(true).filter(v => {
+                let isMsgTag = UiSelector().className('android.widget.TextView').filter(v => {
+                    return v.text().indexOf('回复了你的评论') !== -1 || v.text().indexOf('评论了你的笔记') !== -1;
+                }).isVisibleToUser(true).filter(v => {
                     return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
                 }).findOne();
                 if (!isMsgTag) {
@@ -167,14 +219,18 @@ let MessageNew = {
                     continue;
                 }
 
-                let msgTag = Common.id(V.Message.interact[3]).isVisibleToUser(true).filter(v => {
-                    return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
-                }).findOne();
+                //0昵称、1评论了你的笔记、2时间、3评论、4赞按钮，5回复按钮
+                let childs = tags[i].children().find(UiSelector().isVisibleToUser(true).className('android.widget.TextView'));
+                let k = 0;
+                for (let i in childs) {
+                    if (childs[i].text().indexOf('评论了你的笔记') !== -1 || childs[i].text().indexOf('回复了你的评论') !== -1) {
+                        k = i;
+                        break;
+                    }
+                }
+                let msgTag = childs[k * 1 + 2];//去掉回复和赞
 
-                let nicknameTag = Common.id(V.Message.interact[8]).isVisibleToUser(true).filter(v => {
-                    return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
-                }).findOne();
-
+                let nicknameTag = childs[0];
                 Log.log('msgTag', msgTag);
                 if (!msgTag || !msgTag.text()) {
                     continue;
@@ -187,7 +243,7 @@ let MessageNew = {
                 }
 
                 contains.push(nicknameTag.text() + ':::' + msg);
-                let backTag = Common.id(V.Message.interact[4]).text(V.Message.interact[5]).isVisibleToUser(true).filter(v => {
+                let backTag = UiSelector().text('回复').isVisibleToUser(true).filter(v => {
                     return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
                 }).findOne();
                 if (!backTag) {
@@ -196,15 +252,17 @@ let MessageNew = {
                 }
 
                 isDeal = true;
-                Common.click(backTag);
+                Common.click(backTag.parent(), 0.15);
                 Common.sleep(1000 + 1000 * Math.random());
 
-                let iptTag = Common.id(V.Message.interact[6]).isVisibleToUser(true).findOne();
+                let iptTag = UiSelector().className('android.widget.EditText').filter(v => {
+                    return v.isEditable();
+                }).isVisibleToUser(true).findOne();
                 iptTag.setText(this.getMsg(1, msg));
                 Common.sleep(1000 + 1000 * Math.random());
 
-                let btnTag = Common.id(V.Message.interact[7]).isVisibleToUser(true).findOne();
-                Common.click(btnTag);
+                let btnTag = UiSelector().className('android.widget.TextView').text('发送').isVisibleToUser(true).findOne();
+                Common.click(btnTag, 0.15);
                 Common.sleep(3000 + 2000 * Math.random());
             }
 
@@ -213,7 +271,10 @@ let MessageNew = {
                 break;
             }
 
-            let scrollTag = Common.id(V.Message.interact[9]).isVisibleToUser(true).scrollable(true).findOne();
+            let scrollTag = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+                return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+            }).findOne();
+
             if (scrollTag) {
                 scrollTag.scrollForward();
                 Common.sleep(3000 + 2000 * Math.random());
@@ -225,14 +286,14 @@ let MessageNew = {
 
     privateMsgCount() {
         //消息数量分布，如果没有私信，则不需要做私信操作
-        let allMessageTag = Common.id(V.Index.intoMyMessage[0]).descContains(V.Index.intoMyMessage[2]).filter(v => {
-            return v && v.bounds() && v.bounds().left > Device.width() / 2 && v.bounds().top > Device.height() * 0.8;
+        let allMessageTag = UiSelector().className('android.view.ViewGroup').descContains('消息').filter(v => {
+            return v.desc().indexOf('未读') !== -1 && v.desc().indexOf('消息') == 0;//最后这个是为了过滤 “陌生人消息”
         }).isVisibleToUser(true).findOne();
 
-        let zanTag = Common.id(V.Message.messageCount[0]).isVisibleToUser(true).findOne();
-        let focuTag = Common.id(V.Message.messageCount[1]).isVisibleToUser(true).findOne();
-        let commentTag = Common.id(V.Message.messageCount[2]).isVisibleToUser(true).findOne();
-        let allMessageCount = (zanTag ? zanTag.text() : 0) * 1 + (focuTag ? focuTag.text() : 0) * 1 + (commentTag ? commentTag.text() : 0) * 1;
+        let zanTag = UiSelector().className('android.widget.RelativeLayout').descContains('赞和收藏').isVisibleToUser(true).findOne();
+        let focuTag = UiSelector().className('android.widget.RelativeLayout').descContains('新增关注').isVisibleToUser(true).findOne();
+        let commentTag = UiSelector().className('android.widget.RelativeLayout').descContains('评论').isVisibleToUser(true).findOne();
+        let allMessageCount = Common.numDeal(zanTag.desc()) + Common.numDeal(focuTag.desc()) + Common.numDeal(commentTag.desc());
         let a_count = Common.numDeal(allMessageTag.desc()) - allMessageCount;
         Log.log('剩余消息数量：', a_count, allMessageTag.desc(), allMessageCount);
         return a_count;
@@ -259,15 +320,16 @@ let MessageNew = {
         let k = 10;
         let kk = 0;
         while (a_count > 0 && k-- > 0) {
-            let tags = UiSelector().className(V.Message.readMessage[0]).isVisibleToUser(true).filter(v => {
+            let tags = UiSelector().className('android.view.ViewGroup').isVisibleToUser(true).filter(v => {
                 return v && v.bounds() && v.bounds().left <= 1 && v.bounds().width() >= Device.width() - 1;
-            }).descMatches('[\\s\\S]+').find()
+            }).descMatches('[\\s\\S]+').find();
 
             Log.log('tags', tags.length);
             Log.log('一轮开始进行');
             for (let i in tags) {
-                let tvTag = tags[i].children().findOne(Common.id(V.Message.readMessage[1]).isVisibleToUser(true));
+                let childs = tags[i].children().find(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
                 //过滤非当前查找的控件
+                let tvTag = childs[0];
                 if (!tvTag) {
                     continue;
                 }
@@ -282,14 +344,7 @@ let MessageNew = {
                     }
                 }
 
-                let left = tags[i].bounds().left;
-                let top = tags[i].bounds().top;
-                let bottom = top + tags[i].bounds().height();
-
-                let messageTag = Common.id(V.Message.readMessage[2]).isVisibleToUser(true).filter(v => {
-                    return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
-                }).findOne();
-
+                let messageTag = childs[3] ? childs[3] : 0;
                 if (!messageTag || messageTag.text() <= 0) {
                     continue;
                 }
@@ -324,7 +379,7 @@ let MessageNew = {
                 Common.sleep(1000 + 1000 * Math.random());
             }
             //查看消息数是不是为0  不是则滑动
-            if (this.privateMsgCount() <= 0) {
+            if (a_count <= 0) {
                 Log.log('没有额外的消息');
                 break;
             }

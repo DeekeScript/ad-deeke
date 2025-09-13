@@ -97,6 +97,31 @@ const Common = {
         return true;
     },
 
+    clickBounds(bounds, rate) {
+        if (!rate) {
+            rate = 0.05;
+        }
+
+        let p = 1 - rate * 2;
+        let width = bounds.width() * rate + Math.random() * (bounds.width() * p);
+        let height = bounds.height() * rate + Math.random() * (bounds.height() * p);
+
+        try {
+            Gesture.click(bounds.left + Math.round(width), bounds.top + Math.round(height));
+        } catch (e) {
+            this.log(e);
+            try {
+                Gesture.click(bounds.left + Math.round(width), bounds.top);
+            } catch (e) {
+                this.log(e);
+                return false;
+            }
+        }
+
+        this.sleep(500);
+        return true;
+    },
+
     openApp() {
         this.log('openApp', System.currentPackage(), cStorage.getPackage());
         if (cStorage.getPackage() && System.currentPackage() !== cStorage.getPackage() && cStorage.getPackage() !== 'top.deeke.script') {

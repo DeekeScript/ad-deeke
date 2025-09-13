@@ -7,15 +7,6 @@ let V = require('version/V.js');
 let storage = require('common/storage.js');
 
 let Message = {
-    showAll() {
-        let showTag = Common.id(V.Message.showAll[0]).text(V.Message.showAll[1]).clickable(true).isVisibleToUser(true).findOnce();
-
-        if (showTag) {
-            showTag.click();
-            Common.sleep(1000 * Math.random() + 2000);
-        }
-    },
-
     getNumForDetail(str) {
         hour = /(\d+)小时前/.exec(str);
         if (hour && hour[1]) {
@@ -31,7 +22,7 @@ let Message = {
         let rp = 3;
         while (rp--) {
             //读取消息数量
-            let commentCountTags = Common.id(V.Message.backMsg[0]).descContains(V.Message.backMsg[1]).isVisibleToUser(true).find();
+            let commentCountTags = Common.id(V.Message.backMsg[0]).isVisibleToUser(true).find();
             if (!commentCountTags || commentCountTags.length === 0) {
                 Common.sleep(10 * 1000);//休眠10秒
                 Log.log('没消息，休息10秒');
@@ -63,8 +54,6 @@ let Message = {
             break;
         }
 
-        //进入了消息详情
-        //this.showAll();
         let contents = [];
         let rpCount = 0;
         let stopCount = 0;
@@ -241,13 +230,14 @@ let Message = {
 
         Log.log('config', config);
 
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            tag = Common.id(V.Message.intoGroupUserList[0]).isVisibleToUser(true).findOnce();
+        } else if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
             tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
         } else {
             tag = UiSelector().className(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).clickable(true).findOnce();
         }
 
-        tag = undefined;
         let tag2 = undefined;
         if (!tag) {
             tag2 = UiSelector().className(V.Message.intoGroupUserList[0]).clickable(true).isVisibleToUser(true).filter(v => {
@@ -256,7 +246,7 @@ let Message = {
         }
 
         if (tag) {
-            tag.click();
+            Common.click(tag);
             console.log('进群1');
         } else if (tag2) {
             tag2.click();
@@ -430,7 +420,14 @@ let Message = {
                 }
 
                 Common.sleep(500);
-                Common.swipe(1, 0.6);
+                Common.swipe(1, 1, 0.3);
+                Common.sleep(1000);
+                if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                    let closeBtn = Common.id(V.User.bgGroundClose[0]).isVisibleToUser(true).findOne();
+                    if (closeBtn) {
+                        Common.click(closeBtn);
+                    }
+                }
                 Common.sleep(1500);
                 if (Math.random() * 100 <= config.focusRate) {
                     Common.sleep(base * config.focusWait);

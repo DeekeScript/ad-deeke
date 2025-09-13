@@ -55,7 +55,7 @@ let task = {
         //查看是不是进入了指定页面，是的话才开始运行
         let config = this.getConfig();
         Log.log("配置信息：", config);
-        tCommon.aId(V.C.text1a).textContains(V.Search.userList[2]).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
+        tCommon.aId(V.C.text1a).descContains(V.Search.userList[2]).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
         Log.log("bug来了");
         let arr = [];//存储最新的20个
         let count = 0;

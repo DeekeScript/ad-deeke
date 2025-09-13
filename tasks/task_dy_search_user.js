@@ -51,7 +51,7 @@ let task = {
         tCommon.sleep(3000);
         this.params.settingData = settingData;
         return DySearch.userList(
-            (v) => machine.get('task_dy_search_user_' + v, true),
+            (v) => machine.get('task_dy_search_user_' + v, 'bool'),
             () => this.decCount(),
             DyUser,
             DyComment,
@@ -67,6 +67,7 @@ let task = {
 let settingData = machine.getSearchUserSettingRate();//commentRate
 settingData.isFirst = false;//首个视频必操作，关闭
 Log.log('settingData', settingData);
+settingData.keyword = settingData.keyword.replace(/\s+/g, '')
 
 if (!settingData.keyword) {
     tCommon.showToast('未设置关键词，停止运行');

@@ -25,10 +25,54 @@ let task = {
     run() {
         this.log();
         Common.openApp();
-        xhs.run(this.getMsg);
+        return xhs.run(this.getMsg);
     }
 }
 
-if (task.run()) {
-    FloatDialogs.show('提示', '已完成');
+let config = {
+    isCity: storage.get('toker_xhs_is_city', 'bool'),
+    opWait: storage.get('toker_xhs_op_second', 'int') * 1000,//操作间隔
+    workWait: storage.get('toker_xhs_view_video_second', 'int') * 1000,
+    keywords: storage.get('toker_xhs_view_video_keywords', 'string'),
+    toker_view_video_ip: storage.get('toker_xhs_view_video_ip', 'string'),
+    zanRate: storage.get('toker_xhs_zan_rate', 'int') / 100,
+    commentRate: storage.get('toker_xhs_comment_rate', 'int') / 100,
+    focusRate: storage.get('toker_focus_rate', 'int') / 100,
+    privatMsgRate: storage.get('toker_xhs_private_msg_rate', 'int') / 100,
+    zanCommentRate: storage.get('toker_comment_area_zan_rate', 'int') / 100,
+    sex: storage.getArray('toker_xhs_run_sex'),
+    minAge: storage.get('toker_xhs_run_min_age', 'int'),
+    maxAge: storage.get('toker_xhs_run_max_age', 'int'),
+    toker_run_hour: storage.getArray('toker_xhs_run_hour'),//运行时间
+};
+
+while (true) {
+    task.log();
+    try {
+        Common.openApp();//兜底，防止跑到外面去了
+        let code = task.run();
+        if (code === 101) {
+            // tCommon.closeApp();
+            Common.showToast('不在任务时间，休息一会儿');
+            Log.log('不在任务时间，休眠一会儿');
+            Common.backApp();
+            //App.notifySuccess('通知', '即将返回到App');
+            let hours = config.toker_run_hour;
+            console.log(Array.isArray(hours), hours, (new Date()).getHours(), hours.includes("0"));
+            while (true) {
+                Common.sleep(1 * 60 * 1000 / 6);
+                if (hours.includes((new Date()).getHours().toString())) {
+                    break;
+                }
+            }
+            Log.log("内存清理");
+            System.cleanUp();
+            throw new Error('重新进入');
+        }
+        Common.sleep(3000);
+    } catch (e) {
+        Log.log(e);
+        Common.cleanUp();
+        Common.backHome();
+    }
 }

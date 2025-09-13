@@ -165,10 +165,15 @@ const Common = {
         return text[0] * 1;//可能存在多个逗号
     },
 
-    swipe(type, sensitivity) {
+    swipe(type, sensitivity, rate) {
         let left = Math.random() * Device.width() * 0.8 + Device.width() * 0.2;
         let bottom = Device.height() * 2 / 3 * sensitivity + Device.height() / 6 * Math.random();
-        let top = Device.height() / 12 + Device.height() / 12 * Math.random();
+        if (!rate) {
+            rate = 12;
+        } else {
+            rate = 1 / rate;
+        }
+        let top = Device.height() / rate + Device.height() / rate * Math.random();
         if (!type) {
             Gesture.swipe(left, bottom, left, top, 200 + 100 * Math.random());//从下往上推，清除
             return true;

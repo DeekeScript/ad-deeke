@@ -5,7 +5,7 @@ let V = require('version/V.js');
 let Video = require('app/dy/Video.js');
 
 const Search = {
-    //type = 0 视频  type = 1 用户  需要先进入搜索页
+    //type = 0 视频  type = 1 用户  需要先进入搜索页  2 综合
     intoSearchList(keyword, type) {
         if (!type) {
             type = 0;
@@ -31,6 +31,9 @@ const Search = {
         Log.log('searchBtnTag', searchBtnTag);
         Common.click(searchBtnTag);
         Common.sleep(3000 + 2000 * Math.random());
+        if (type == 2) {
+            return true;
+        }
         let videoTag;
         let rp = 3;
         while (!videoTag) {
@@ -134,7 +137,7 @@ const Search = {
             return v && v.bounds() && v.bounds().top >= 0 && v.bounds().left >= 0 && v.bounds().width() > 0 && v.bounds().height() > 0;
         }).isVisibleToUser(true).filter((v) => {
             return v && v._id == null;
-        }).findOnce().parent();
+        }).findOnce();
 
         console.log(douyin, V.Search.intoUserLiveRoom[0]);
         console.log('找进入用户内容', tag);
@@ -183,14 +186,11 @@ const Search = {
     //搜索，进入用户页面，再进入视频页面
     intoUserVideoPage(douyin, type) {
         this.intoSearchList(douyin, type);
-        let topTag = Common.id(V.Search.userList[0]).isVisibleToUser(true).findOne();
-        let tag = UiSelector().textContains(douyin).isVisibleToUser(true).filter((v) => {
-            return v && v._id == null && v.bounds().top > topTag.bounds().top + topTag.bounds().height();
-        }).findOnce()
-        Log.log("进入搜索用户页面：", tag);
+        let tag = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').descContains('按钮').textContains(douyin).isVisibleToUser(true).findOne();
         if (!tag) {
-            return false;
+            return false;//弹窗提示找不到账号
         }
+
         Common.click(tag);
         Common.sleep(2500);
 
@@ -209,8 +209,8 @@ const Search = {
         let _height = textTag.bounds().height();
 
         while (true) {
-            let tags = UiSelector().className(V.Search.userList[1]).isVisibleToUser(true).focusable(true).filter((v) => {
-                return v && v.bounds() && v.bounds().left === 0 && v.bounds().top > _top + _height && v.bounds().top + v.bounds().height() < Device.height() && !!v.children() && !!v.children().findOne(UiSelector().textContains(V.Search.userList[2]));
+            let tags = UiSelector().className(V.Search.userList[1]).isVisibleToUser(true).filter((v) => {
+                return v && v.bounds() && v.bounds().left === 0 && v.bounds().top > _top + _height && v.bounds().top + v.bounds().height() < Device.height() && !!v.children().findOne(UiSelector().className('com.lynx.tasm.behavior.ui.view.UIView').descContains(V.Search.userList[2]));
             }).find();
 
             Log.log('tags', tags.length);
@@ -230,7 +230,7 @@ const Search = {
                     continue;
                 }
 
-                let child = tags[i].children().findOne(UiSelector().isVisibleToUser(true).textContains(V.Search.userList[2]));
+                let child = tags[i].children().findOne(UiSelector().isVisibleToUser(true).className('com.lynx.tasm.behavior.ui.view.UIView').descContains(V.Search.userList[2]));
                 if (!child || !child.text()) {
                     continue;
                 }
@@ -239,16 +239,8 @@ const Search = {
                     continue;
                 }
 
-                let text = child.text().split(/[,|，]/);
-                let account = text[2].replace(V.Search.userList[3], '').replace('按钮', '');
-                Log.log(account, 'account');
-
-                if (!account || this.contents.includes(account) || getAccounts(account)) {
-                    continue;
-                }
-
                 try {
-                    Common.click(child);//部分机型超出范围
+                    Common.click(tags[i], 0.3);//部分机型超出范围
                 } catch (e) {
                     continue;
                 }
@@ -257,6 +249,14 @@ const Search = {
                 //看看有没有视频，有的话，操作评论一下，按照20%的频率即可
                 statistics.viewUser();
                 let isPrivateAccount = DyUser.isPrivate();
+                let account = DyUser.getDouyin();
+                Log.log(account, 'account');
+                if (!account || this.contents.includes(account) || getAccounts(account)) {
+                    Common.back();
+                    Common.sleep(500 + 500 * Math.random());
+                    continue;
+                }
+
                 Log.log('是否是私密账号：' + isPrivateAccount);
                 if (isPrivateAccount) {
                     Common.back();
@@ -312,14 +312,14 @@ const Search = {
                 Log.log('即将进入视频', commentRate, zanRate);
                 if ((settingData.isFirst || commentRate < settingData.commentRate * 1 || zanRate < settingData.zanRate * 1) && DyVideo.intoUserVideo()) {
                     //点赞
-                    Log.log('点赞频率检测', zanRate , settingData.zanRate * 1);
+                    Log.log('点赞频率检测', zanRate, settingData.zanRate * 1);
                     if (settingData.isFirst || zanRate <= settingData.zanRate * 1) {
                         DyVideo.clickZan();
                     }
 
                     //随机评论视频
                     Log.log('评论频率检测', commentRate, settingData.commentRate * 1);
-                    if (settingData.isFirst || commentRate <= settingData.commentRate * 1) {
+                    if ((settingData.isFirst || commentRate <= settingData.commentRate * 1) && !UiSelector().text('作者仅允许互关朋友评论').isVisibleToUser(true).findOne()) {
                         let msg = getMsg(0, DyVideo.getContent());
                         if (msg) {
                             DyVideo.openComment(!!DyVideo.getCommentCount());

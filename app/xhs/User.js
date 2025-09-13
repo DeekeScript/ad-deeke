@@ -1,81 +1,131 @@
 let Common = require("app/xhs/Common.js");
-let V = require("version/XhsV.js");
+let statistics = require("common/statistics.js");
 
 let User = {
     swipeFans(selectText) {
-        if (selectText == V.User.fans[1]) {
+        if (selectText.indexOf('关注') !== -1) {
             Common.swipeFocusListOp();
-        } else if (selectText == V.User.fans[2]) {
+        } else if (selectText.indexOf('粉丝') !== -1) {
             Common.swipeFansListOp();
-        } else if (selectText == V.User.fans[3]) {
+        } else if (selectText.indexOf('推荐') !== -1) {
             Common.swipeRecommendListOp();
         }
         Log.log("滑动异常：" + selectText);
     },
 
+    isPrivate() {
+        return UiSelector().className('').text('私密账号').findOne() ? true : false;
+    },
+
     intoVideo() {
-        let videoTag = Common.id(V.User.fans[7]).findOne();
+        let videoTag = UiSelector().className('android.widget.FrameLayout').filter(v => {
+            return v.desc() && (v.desc().indexOf('视频') === 0 || v.desc().indexOf('笔记') === 0);
+        }).findOne();
+
         if (!videoTag) {
             return false;
         }
 
-        videoTag.click();
-        Common.sleep(5000);
+        //Common.click(videoTag, 0.3);//点击中间的60%
+        Gesture.click(videoTag.bounds().left + videoTag.bounds().width()*0.7, videoTag.bounds().top + videoTag.bounds().height()*0.6);
+        statistics.viewVideo();
+        statistics.viewTargetVideo();
+        Common.sleep(4000 + 3000 * Math.random());
         return true;
     },
 
-    privateMsg(msg) {
-        let focusTag = Common.id(V.User.focus[0]).findOne();
-        if (focusTag && focusTag.text() == V.User.focus[2]) {
-            focusTag.click();
-            Common.sleep(2000 + 1000 * Math.random());
-        } else {
-            let sendMsgTag = Common.id(V.User.sendMsg[0]).findOne();
-            sendMsgTag.click();
-            Common.sleep(2000 + 1000 * Math.random());
+    intoVideoX(ignoreTitles, opCount) {
+        let contents = [];
+        if (!ignoreTitles) {
+            ignoreTitles = [];
         }
 
-        let sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
-        Common.click(sendIptTag);
-        Common.sleep(500 + 1000 * Math.random());
+        let swipeCount = 0;
+        while (true) {
+            let videoTags = UiSelector().className('android.widget.FrameLayout').filter(v => {
+                return v.desc() && (v.desc().indexOf('视频') === 0 || v.desc().indexOf('笔记') === 0);
+            }).find();
 
-        sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
-        Log.log('开始设置私信', msg);
-        sendIptTag.setText(msg);
-        Common.sleep(500 + 500 * Math.random());
+            if (!videoTags || videoTags.length === 0) {
+                return false;
+            }
 
-        //发送
-        let sendBtnTag = Common.id(V.User.sendBtn[0]).findOne();
-        Common.click(sendBtnTag);
-        Log.log('点击发送');
+            if (swipeCount >= 2 && videoTags.length < opCount) {
+                return -1;//视频操作完了
+            }
 
-        Common.back();
-        Common.sleep(500 + 500 * Math.random());
+            for (let i in videoTags) {
+                let content = videoTags[i].desc();
+                contents.push(content);
+                if (contents.length >= 3) {
+                    if (contents[0] == contents[1] && contents[1] == contents[2]) {
+                        throw new Error('已经没有图文了');
+                    }
+
+                    contents.unshift();
+                }
+                if (ignoreTitles.indexOf(content) !== -1) {
+                    continue;
+                }
+                ignoreTitles.push(content);
+                Common.click(videoTags[i], 0.15);
+                Common.sleep(4000 + 3000 * Math.random());
+                statistics.viewVideo();
+                statistics.viewTargetVideo();
+                return true;
+            }
+
+            Common.swipeWorksOp();
+            swipeCount++;
+            Common.sleep(1500 + 1000 * Math.random());
+        }
+    },
+
+    privateMsg(msg) {
+        let sendTag = UiSelector().className('android.widget.TextView').text('私信').filter(v => {
+            return v.text() == '私信';
+        }).findOne() || UiSelector().className('android.widget.TextView').text('发消息').filter(v => {
+            return v.text() == '发消息';
+        }).findOne();
+        if (!sendTag) {
+            Log.log('找不到私信按钮');
+            return true;
+        }
+        Common.click(sendTag, 0.3);
+        Common.sleep(2000 + 1000 * Math.random());
+
+        this.privateMsgTwo(msg);
         Common.back();
     },
 
     privateMsgTwo(msg) {
-        let sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
-        Common.click(sendIptTag);
-        Common.sleep(500 + 1000 * Math.random());
+        let sendIptTag = UiSelector().className('android.widget.EditText').isVisibleToUser(true).findOne();
+        Common.click(sendIptTag, 0.2);
+        Common.sleep(1000 + 1000 * Math.random());
 
-        sendIptTag = Common.id(V.User.msgBtn[0]).findOne();
+        sendIptTag = UiSelector().className('android.widget.EditText').isVisibleToUser(true).findOne();
         Log.log('开始设置私信', msg);
         sendIptTag.setText(msg);
-        Common.sleep(500 + 500 * Math.random());
+        Common.sleep(1500 + 1200 * Math.random());
 
         //发送
-        let sendBtnTag = Common.id(V.User.sendBtn[0]).findOne();
-        Common.click(sendBtnTag);
-        Log.log('点击发送');
-
+        let sendBtnTag = UiSelector().className('android.widget.TextView').filter(v => {
+            return v.parent().className() == 'android.widget.RelativeLayout';//这里可能有两个发送，最上面的是发送浏览记录，直接忽略
+        }).isVisibleToUser(true).text('发送').findOne();
+        Common.click(sendBtnTag, 0.2);
+        Log.log('点击发送', sendBtnTag);
+        statistics.privateMsg();
+        Common.sleep(1500 + 500 * Math.random());
         Common.back();
         Common.sleep(500 + 500 * Math.random());
     },
 
+    //注意，粉丝关注有两种模式，一种是横版的，一种是关注和发私信两个按钮占据一行
     isFocus() {
-        let focusTag = Common.id(V.User.focus[0]).findOne();
-        if (focusTag && focusTag.text() == V.User.focus[2]) {
+        let focusTag = UiSelector().filter(v => {
+            return (v.className() == 'android.widget.TextView' && v.parent().className() == 'android.widget.FrameLayout') || v.className() == 'android.widget.Button';
+        }).isVisibleToUser(true).textContains('关注').findOne();
+        if (focusTag && focusTag.text() != '关注') {
             Log.log('已经关注过了');
             return true;
         }
@@ -87,8 +137,11 @@ let User = {
             return true;
         }
 
-        let focusTag = Common.id(V.User.focus[0]).findOne();
-        focusTag.click();
+        let focusTag = UiSelector().filter(v => {
+            return (v.className() == 'android.widget.TextView' && v.parent().className() == 'android.view.ViewGroup') || v.className() == 'android.widget.Button';
+        }).isVisibleToUser(true).textContains('关注').findOne();
+        Common.click(focusTag, 0.2);
+        statistics.focus();
         return true;
     },
 
@@ -105,32 +158,52 @@ let User = {
     },
 
     getListWorkCount(tag) {
-        let workCountTag = tag.children().findOne(Common.id(V.User.fans[8]));//笔记·44|粉丝·38
-        if (!workCountTag) {
+        if (!tag) {
+            return 0;//笔记 42 | 粉丝 7
+        }
+
+        let text = tag.text();
+        if (text.indexOf('笔记') == -1) {
             return 0;
         }
 
-        let workCount = workCountTag.text().split('|')[0].replace('笔记', '').replace('·', '').replace(' ', '');
+        let workCount;
+        if (text.indexOf('|') != -1) {
+            workCount = tag.text().split('|')[0].replace('笔记', '').replace('·', '').replace(' ', '');
+        } else {
+            workCount = tag.text().replace('笔记', '').replace('·', '').replace(' ', '');
+        }
+
         return this.dealNum(workCount);
     },
 
     getListFansCount(tag) {
-        let workCountTag = tag.children().findOne(Common.id(V.User.fans[8]));//笔记·44|粉丝·38
-        if (!workCountTag) {
+        if (!tag) {
+            return 0;//笔记 42 | 粉丝 7
+        }
+
+        let text = tag.text();
+        let fansCount;
+        if (text.indexOf('粉丝') == -1) {
             return 0;
         }
 
-        let workCount = workCountTag.text().split('|')[1].replace('粉丝', '').replace('·', '').replace(' ', '');
-        return this.dealNum(workCount);
+        if (text.indexOf('|') != -1) {
+            fansCount = tag.text().split('|')[1].replace('粉丝', '').replace('·', '').replace(' ', '');
+        } else {
+            fansCount = tag.text().replace('粉丝', '').replace('·', '').replace(' ', '');
+        }
+
+        return this.dealNum(fansCount);
     },
 
     getFansCount() {
-        let fansCountTag = Common.id(V.User.fansText[0]).findOne();
+        let fansCountTag = UiSelector().className('android.widget.Button').descContains('粉丝').findOne();
         if (!fansCountTag) {
             return 0;
         }
 
-        let fansCount = fansCountTag.text();
+        let fansCount = fansCountTag.desc();
         return this.dealNum(fansCount);
     }
 }

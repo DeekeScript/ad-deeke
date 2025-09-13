@@ -32,7 +32,7 @@ let task = {
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
         if (storage.getMachineType() === 1) {
-            if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
+            if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
             }
             return machine.getMsg(type) || false;//永远不会结束
@@ -63,11 +63,21 @@ let task = {
                 continue;
             }
 
+            //判断是不是评论窗口卡主
+            let closeTag = UiSelector().clickable(true).desc('关闭').isVisibleToUser(true).findOne();
+            if (closeTag) {
+                Log.log('评论窗口');
+                tCommon.click(closeTag);
+                tCommon.sleep(2000);
+                continue;
+            }
+
             let title = DyVideo.getContent();
             let nickname = DyVideo.getNickname();
             let commentCount = DyVideo.getCommentCount();
 
-            if (machine.get('task_dy_search_inquiry_' + nickname + "_" + title, 'bool') || commentCount <= 0) {
+            let md5 = Encrypt.md5(nickname + "_" + title);
+            if (machine.get('task_dy_search_inquiry_' + md5, 'bool') || commentCount <= 0) {
                 Log.log('重复视频');
                 tCommon.sleep(2000 + Math.random() * 2000);
                 DyVideo.next();
@@ -210,7 +220,7 @@ let task = {
             }
 
             tCommon.back();
-            machine.set('task_dy_search_inquiry_' + nickname + "_" + title, true);
+            machine.set('task_dy_search_inquiry_' + md5, true);
             DyVideo.next();
             tCommon.sleep(2000);
         }

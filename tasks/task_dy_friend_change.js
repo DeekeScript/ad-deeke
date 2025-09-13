@@ -46,6 +46,7 @@ let task = {
             fansMin: machine.get('task_dy_friend_change_min_fans', 'int'), //最小粉丝数
             fansMax: machine.get('task_dy_friend_change_max_fans', 'int'),//最大粉丝数
             workMin: machine.get('task_dy_friend_change_min_work', 'int'),//最小作品数
+            gender: machine.getArray('task_dy_friend_gender'),
             op: machine.getArray('task_dy_friend_change_op'), // "0"，"1"，"2" 分别是 关注、私信、点赞
             privateType: machine.getArray('task_dy_friend_change_private_type'),
         }
@@ -55,7 +56,7 @@ let task = {
         //查看是不是进入了指定页面，是的话才开始运行
         let config = this.getConfig();
         Log.log("配置信息：", config);
-        tCommon.aId(V.C.text1a).textContains(V.Search.userList[2]).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
+        tCommon.aId(V.C.text1a).descContains(V.Search.userList[2]).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
         let arr = [];//存储最新的20个
         let count = 0;
         let repeatCount = 0;
@@ -114,6 +115,14 @@ let task = {
                     }
 
                     Log.log("抖音号：", account);
+                    let gender = DyUser.getGender();
+                    Log.log('性别', gender, config.gender);
+                    if (!config.gender.includes(gender)) {
+                        tCommon.back();
+                        System.toast('性别不符合要求');
+                        Log.log('性别不符合要求');
+                        continue;
+                    }
                     machine.set("task_dy_friend_change_" + account, true);
                     if (arr.indexOf(account) != -1) {
                         repeatCount++;
@@ -157,6 +166,13 @@ let task = {
                             tCommon.sleep(2000 + 1000 * Math.random());
                         }
                         tCommon.back();
+                        tCommon.sleep(1000 + 500 * Math.random());
+                        
+                        let bottom = Device.height() - 200 - Math.random() * 300;
+                        let top = bottom - 400 - Math.random() * 200;
+                        let left = Device.width() * 0.1 + Math.random() * (Device.width() * 0.8);
+                        Gesture.swipe(left, top, left, bottom, 300);
+                        tCommon.sleep(500 + 500 * Math.random());
                     }
 
                     //查看是否关注

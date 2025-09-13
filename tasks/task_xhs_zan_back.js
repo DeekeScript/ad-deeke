@@ -36,8 +36,7 @@ let task = {
 
     zanBack(config) {
         Log.log('开始');
-        Log.log(Common.id(V.Work.zanCollectionHead[0]).descContains(V.Work.zanCollectionHead[1]).findOne());
-        Common.id(V.Work.zanCollectionHead[0]).descContains(V.Work.zanCollectionHead[1]).isVisibleToUser(true).waitFindOne();
+        UiSelector().className('android.view.ViewGroup').descContains('已选定赞和收藏').isVisibleToUser(true).waitFindOne();
         Log.log('进入');
 
         let noNicknameTagCount = 0;
@@ -47,15 +46,41 @@ let task = {
 
         while (true) {
             try {
-                let containers = Common.id(V.Work.zanUserList[0]).findOne().children().find(Common.id(V.Work.zanUserList[2]).isVisibleToUser(true));//获取列表外层
+                let containers = UiSelector().className('android.view.ViewGroup').isVisibleToUser(true).filter(v => {
+                    let childs = v.children();
+                    if (!childs.findOne(Common.id('avatarLayout'))) {
+                        return false;
+                    }
+
+                    if (!childs.findOne(Common.id('nickNameTV'))) {
+                        return false;
+                    }
+
+                    if (!childs.findOne(Common.id('followTV'))) {
+                        return false;
+                    }
+                    return true;
+                }).find();//获取列表外层
+                Log.log('内容：', containers.length);
+                if (containers.length == 0) {
+                    return true;
+                }
+
+                let baseChilds = [];
                 for (let i in containers) {
-                    let nicknameTag = containers[i];
+                    baseChilds.push(containers[i].children());//保存对象
+                }
+
+                for (let i in containers) {
+                    let childs = baseChilds[i];
+                    let nicknameTag = childs.findOne(Common.id('nickNameTV'));
                     if (!nicknameTag) {
                         if (noNicknameTagCount++ >= 3) {
                             throw new Error('3次找不到昵称');
                         }
                     }
 
+                    noNicknameTagCount = 0;
                     let nickname = nicknameTag.text();
                     Log.log('准备操作昵称：' + nickname);
 
@@ -71,14 +96,6 @@ let task = {
                     arr.push(nickname);
                     if (arr.length >= 20) {
                         arr.shift();
-                    }
-
-                    try {
-                        if (containers[i].parent().children().findOne(Common.id(V.Work.zanUserList[3])).text() == V.Work.zanUserList[4]) {
-                            continue;
-                        }
-                    } catch (e) {
-                        Log.log('作者判断');
                     }
 
                     Common.click(nicknameTag);
@@ -102,7 +119,7 @@ let task = {
 
                     //判断是否在用户页面  有作品的才操作，没有作品
                     if (intoVideo) {
-                        if (Common.id(V.User.account[0]).findOne()) {
+                        if (UiSelector().className('android.view.View').descContains('头像').findOne()) {
                             Common.sleep(config.homeWait * 0.8);
                             Common.swipe(0, 0.5);
                             Common.sleep(config.homeWait * 0.2);
@@ -122,7 +139,7 @@ let task = {
 
                 Work.zanUserListSwipe();
             } catch (e) {
-                let a = Common.id(V.Work.zanCollectionHead[0]).descContains(V.Work.zanCollectionHead[1]).findOne();
+                let a = UiSelector().className('android.view.ViewGroup').descContains('已选定赞和收藏').isVisibleToUser(true).findOne();
                 if (a) {
                     Log.log(a);
                     Work.zanUserListSwipe();

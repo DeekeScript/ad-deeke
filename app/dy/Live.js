@@ -25,6 +25,13 @@ let Live = {
     },
 
     getUserTags() {
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            let tags = UiSelector().className(V.Live.getUserTags[0]).findOnce().children().find(UiSelector().className(V.Live.getUserTags[2]).isVisibleToUser(true).filter((v) => {
+                //console.log("vvv", v);
+                return v && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10;
+            }));
+            return tags;
+        }
         let tags = Common.id(V.Live.getUserTags[0]).findOnce().children().find(UiSelector().className(V.Live.getUserTags[2]).isVisibleToUser(true).filter((v) => {
             //console.log("vvv", v);
             return v && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10;

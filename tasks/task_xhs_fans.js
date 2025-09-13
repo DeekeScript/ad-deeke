@@ -1,7 +1,6 @@
 let storage = require("common/storage.js");
 let machine = require("common/machine.js");
 let Common = require("app/xhs/Common.js");
-let V = require("version/XhsV.js");
 let User = require("app/xhs/User.js");
 let Work = require("app/xhs/Work.js");
 let baiduWenxin = require('service/baiduWenxin.js');
@@ -42,13 +41,14 @@ let task = {
     },
 
     tokerFans(config) {
-        Common.id(V.User.fans[0]).descContains(V.User.fans[1]).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
-        let nicknameErrorCount = 0;
+        let selectedTag = UiSelector().className('android.view.ViewGroup').descContains('已选定').filter(v => {
+            return v.desc().indexOf('粉丝') !== -1 || v.desc().indexOf('关注') !== -1;
+        }).isVisibleToUser(true).waitFindOne();//粉丝或者关注界面
 
-        let selectedTag = Common.id(V.User.fans[0]).isVisibleToUser(true).descContains(V.User.fans[4]).findOne();
+        let nicknameErrorCount = 0;
         Log.log("选择的内容", selectedTag);
 
-        let selectText = selectedTag.desc().replace(V.User.fans[4], '');//根据内容 【关注、粉丝、推荐】选择对应的滑动
+        let selectText = selectedTag.desc();//粉丝已选定、关注已选定
         let arr = [];
         let stopMarkCount = 0;
         Log.log('总数量：' + config.runCount);
@@ -59,7 +59,10 @@ let task = {
 
         while (true) {
             try {
-                let contains = Common.id(V.User.fans[5]).isVisibleToUser(true).find();
+                let contains = UiSelector().className('android.widget.LinearLayout').isVisibleToUser(true).filter(v => {
+                    return v && v.parent() != null && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView';
+                }).find();
+
                 Log.log('容器数量：' + contains.length);
                 if (contains.length === 0) {
                     if (containsCountError++ >= 3) {
@@ -67,11 +70,19 @@ let task = {
                     }
                 }
 
+                let baseChilds = [];
+                for (let i in contains) {
+                    baseChilds.push(contains[i].children());//把历史的存储，防止丢失
+                }
+
                 containsCountError = 0;
                 for (let i in contains) {
-                    let nicknameTag = contains[i].children().findOne(Common.id(V.User.fans[6]).filter(v => {
-                        return v && v.bounds() && v.bounds().height() > 0 && v.bounds().top >= minTop;
+                    let childs = baseChilds[i];
+                    let nicknameTag = childs.findOne(UiSelector().className('android.widget.TextView').filter(v => {
+                        return v.text() != '' && v.bounds().top > minTop;
                     }));
+                    //let focusTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('关注'));
+
                     if (!nicknameTag) {
                         Log.log("找不到昵称", contains[i]);
                         if (nicknameErrorCount++ >= 3) {
@@ -97,15 +108,20 @@ let task = {
                     }
 
                     //作品数和粉丝数，仅仅针对“粉丝列表”
-                    if (selectText == V.User.fans[2]) {
-                        let countTag = contains[i].children().findOne(Common.id(V.User.fans[8]));
-                        let workCount = User.getListWorkCount(countTag);
+                    if (selectText.indexOf('粉丝') !== -1) {
+                        let workTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('笔记').filter(v => {
+                            return v.parent() != null && v.parent().className() == 'android.widget.RelativeLayout';
+                        }));
+                        let fansTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('粉丝').filter(v => {
+                            return v.parent() != null && v.parent().className() == 'android.widget.RelativeLayout';
+                        }));
+                        let workCount = User.getListWorkCount(workTag);
                         if (workCount < config.minWork) {
                             Log.log('作品数量不合格：', workCount, config.minWork);
                             continue;
                         }
 
-                        let fansCount = User.getListFansCount(countTag);
+                        let fansCount = User.getListFansCount(fansTag);
                         if (fansCount < config.minFans || fansCount > config.maxFans) {
                             Log.log('粉丝数量不合格：', fansCount, config.minFans, config.maxFans);
                             continue;
@@ -113,7 +129,7 @@ let task = {
                     }
 
                     Common.click(nicknameTag);
-                    Common.sleep(2000 + 1000 * Math.random());//进入了主页
+                    Common.sleep(3000 + 2000 * Math.random());//进入了主页
                     let fansCount = User.getFansCount();
                     if (fansCount < config.minFans || fansCount > config.maxFans) {
                         Log.log('作品:数量不合格：', fansCount, config.minFans, config.maxFans);
@@ -131,6 +147,7 @@ let task = {
                         //是否点赞  
                         if (config.op.indexOf('2') != -1) {
                             Log.log('点赞了');
+                            Common.sleep(1000 + 1000 * Math.random());
                             Work.zan();
                         }
 
@@ -141,7 +158,7 @@ let task = {
                     }
 
                     //这里防止视频页面没有进去，但是已经返回到了列表页
-                    if (!Common.id(V.User.nickname[0]).findOne()) {
+                    if (!UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
                         continue;
                     }
 
@@ -151,7 +168,7 @@ let task = {
                     if (config.op.indexOf('0') != -1) {
                         Log.log('准备关注');
                         User.focus();
-                        Common.sleep(1500 + 1000 * Math.random());
+                        Common.sleep(2000 + 2000 * Math.random());
                     }
 
                     if (config.op.indexOf('1') != -1) {
@@ -174,14 +191,18 @@ let task = {
                     Common.back();
                     Common.sleep(500);
 
-                    if (Common.id(V.User.nickname[0]).findOne()) {
+                    if (UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
                         Common.back();//有时候会出现不能返回的情况，小红薯的设计bug
                     }
                     Log.log('返回到了主界面');
                 }
 
                 if (!showAll) {
-                    let showAllTag = Common.id(V.User.showAllFans[0]).textContains(V.User.showAllFans[1]).isVisibleToUser(true).findOne();
+                    Common.sleep(1000 + 1000 * Math.random());
+                    let showAllTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+                        return v && v.text() && v.text() == '查看全部';
+                    }).isVisibleToUser(true).findOne();
+
                     if (showAllTag) {
                         Log.log('点击“查看全部”');
                         Common.click(showAllTag);
@@ -190,7 +211,9 @@ let task = {
                     }
                 }
 
-                let likeTag = Common.id(V.Work.like[0]).textContains(V.Work.like[1]).isVisibleToUser(true).findOne();
+                let likeTag = UiSelector().className('android.widget.TextView').filter(v => {
+                    return v && v.text() && v.text() == '你可能感兴趣的人';
+                }).isVisibleToUser(true).findOne();
                 if (likeTag) {
                     return true;//操作完成了，下面都是“你可能感兴趣的人”
                 }
@@ -199,7 +222,9 @@ let task = {
                 Common.sleep(1000 + 1000 * Math.random());
             } catch (e) {
                 Log.log('异常了~', e);
-                if (Common.id(V.User.fans[0]).descContains(V.User.fans[1]).isVisibleToUser(true).findOne()) {
+                if (UiSelector().className('android.view.ViewGroup').descContains('已选定').filter(v => {
+                    return v.desc().indexOf('粉丝') !== -1 || v.desc().indexOf('关注') !== -1;
+                }).isVisibleToUser(true).findOne()) {
                     User.swipeFans(selectText);
                 } else {
                     Common.back();
@@ -210,6 +235,5 @@ let task = {
     }
 }
 
-if (task.run()) {
-    FloatDialogs.show('提示', '已完成');
-}
+task.run();
+FloatDialogs.show('提示', '已完成');

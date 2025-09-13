@@ -89,10 +89,9 @@ let iWx = {
         if (rule.toker_view_video_keywords) {
             let containWord = WxCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
-            if (containWord) {
-                return true;
+            if (!containWord) {
+                return false;
             }
-            return false;
         }
 
         console.log('同城数据判断：', rule.toker_distance, videoData.distance);
@@ -335,6 +334,7 @@ let iWx = {
 
             Log.log('开始获取视频数据');
             let videoData = this.refreshVideo(this.configData, this.isCity);
+            Log.log(videoData);
             Log.log('看看是不是广告');
             //看看是不是广告，是的话，不操作作者
             if (WxVideo.viewDetail()) {
@@ -362,6 +362,7 @@ let iWx = {
                 try {
                     Log.log("查看用户数据");
                     userData = WxUser.getUserInfo();///////////操作  进入用户主页
+                    Log.log(userData);
                     Log.log("查看用户数据-2");
                 } catch (e) {
                     //看看是不是进入了广告

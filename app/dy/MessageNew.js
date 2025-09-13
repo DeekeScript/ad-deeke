@@ -45,7 +45,7 @@ let MessageNew = {
         }
         Log.log('准备进入消息页面');
 
-        let messageTag = Common.id(V.Index.intoMyMessage[0]).text(V.Index.intoMyMessage[1]).isVisibleToUser(true).findOne();
+        let messageTag = Common.id(V.Index.intoMyMessage[0]).text(V.Index.intoMyMessage[1]).findOne();
         Log.log('messageTag', messageTag, V.Index.intoMyMessage[0], V.Index.intoMyMessage[1]);
         if (messageTag) {
             Common.click(messageTag);
@@ -67,13 +67,14 @@ let MessageNew = {
 
         if (tag) {
             type ? tag.scrollBackward() : tag.scrollForward();
+            Common.sleep(3000 + 2000 * Math.random());
             return true;
         }
         return false;
     },
 
     getLastMessageContent() {
-        let tags = Common.id(V.Message.chat[0]).isVisibleToUser(true).find();
+        let tags = Common.id(V.Message.chat[0]).className('android.widget.TextView').isVisibleToUser(true).find();
         if (tags.length === 0) {
             return false;
         }
@@ -106,54 +107,55 @@ let MessageNew = {
                 break;
             }
 
-            for (let i in tags) {
-                //let tag = tags[i].children().findOne(Common.id(V.Message.stranger[4]).isVisibleToUser(true));
-                let left = tags[i].bounds().left;
-                let top = tags[i].bounds().top;
-                let bottom = tags[i].bounds().top + tags[i].bounds().height();
-                let tag = Common.id(V.Message.stranger[4]).isVisibleToUser(true).filter(v => {
-                    return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
-                }).findOne();
-                //测试使用
-                // tag = {
-                //     text: () => 3
-                // };
+            while (true) {
+                let _break = true;
+                for (let i in tags) {
+                    //let tag = tags[i].children().findOne(Common.id(V.Message.stranger[4]).isVisibleToUser(true));
+                    let left = tags[i].bounds().left;
+                    let top = tags[i].bounds().top;
+                    let bottom = tags[i].bounds().top + tags[i].bounds().height();
+                    let tag = Common.id(V.Message.stranger[4]).isVisibleToUser(true).filter(v => {
+                        return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
+                    }).findOne();
 
-                if (!tag || tag.text() <= 0) {
-                    Log.log('找不到内容');
-                    continue;
-                }
+                    if (!tag || tag.text() <= 0) {
+                        Log.log('找不到内容');
+                        continue;
+                    }
 
-                if (tag.text() && i == 0) {
-                    contains.push(tag.text());
-                    if (contains.length > 2) {
-                        contains.shift();//去掉第一个
-                        if (contains[0] === contains[1] && contains[0] === contains[2]) {
-                            Log.log('完成');
-                            break;
+                    if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                        let msgCount = Common.id('v2p').filter(v => {
+                            return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
+                        }).isVisibleToUser(true).findOnce();
+                        if (!msgCount || msgCount.text() <= 0) {
+                            Log.log('没有新消息1');
+                            continue;
                         }
                     }
+
+                    Common.click(tag);
+                    System.sleep(3000 + 1000 * Math.random());
+
+                    //看看是不是有确定聊天
+                    let sureMsgTag = Common.id(V.Message.stranger[5]).isVisibleToUser(true).findOne();//点击 ”确定聊天“之后，才会出现聊天输入框
+                    if (sureMsgTag) {
+                        Common.click(sureMsgTag);
+                        System.sleep(2000 + 2000 * Math.random());
+                    }
+
+                    //获取最后一次聊天的消息内容
+                    let msg = this.getLastMessageContent();
+                    Log.log('msg', msg);
+                    //这里直接私信
+                    User.privateMsgTwo(this.getMsg(0, msg), true);
+                    System.sleep(2000 + 1000 * Math.random());
+                    _break = false;
                 }
 
-                Common.click(tag);
-                System.sleep(3000 + 1000 * Math.random());
-
-                //看看是不是有确定聊天
-                let sureMsgTag = Common.id(V.Message.stranger[5]).isVisibleToUser(true).findOne();//点击 ”确定聊天“之后，才会出现聊天输入框
-                if (sureMsgTag) {
-                    Common.click(sureMsgTag);
-                    System.sleep(2000 + 2000 * Math.random());
+                if (_break) {
+                    break;
                 }
-
-                //获取最后一次聊天的消息内容
-                let msg = this.getLastMessageContent();
-                Log.log('msg', msg);
-                //这里直接私信
-                User.privateMsgTwo(this.getMsg(0, msg));
-                System.sleep(2000 + 1000 * Math.random());
             }
-
-            this.noUserMessageBackScroll();
         }
     },
 
@@ -168,7 +170,7 @@ let MessageNew = {
         if (!config.ai_back_friend_private_switch) {
             return;
         }
-        User.privateMsgTwo(this.getMsg(0, msg));
+        User.privateMsgTwo(this.getMsg(0, msg), true);
     },
 
     //互动消息
@@ -245,16 +247,24 @@ let MessageNew = {
         let contains = [];
         let k = 10;
         let kk = 0;
+        let repeat = 0;
         while (k-- > 0) {
             let tags = Common.id(V.Message.readMessage[0]).isVisibleToUser(true).find();
             Log.log('tags', tags);
             Log.log('一轮开始进行，确保是最新');
+            let childs = [];
             for (let i in tags) {
-                let tvTag = tags[i].children().findOne(Common.id(V.Message.readMessage[1]).isVisibleToUser(true));
+                childs.push(tags[i].children().findOne(Common.id(V.Message.readMessage[1]).isVisibleToUser(true)));//提前存储内容，否则进入私信后，回来找不到内容
+            }
+
+            for (let i in tags) {
+                let tvTag = childs[i];
                 //过滤非当前查找的控件
                 if (!tvTag) {
+                    Log.log('没有内容tvTag');
                     continue;
                 }
+                Log.log('tvTag', tvTag.text());
 
                 if (tvTag.text() && i == 0) {
                     contains.push(tvTag.text());
@@ -286,12 +296,14 @@ let MessageNew = {
                 let dotTag = Common.id(V.Message.readMessage[4]).isVisibleToUser(true).filter(v => {
                     return v && v.bounds() && v.bounds().left >= left && v.bounds().top >= top && v.bounds().top + v.bounds().height() <= bottom;
                 }).findOne();
+                dotTag = { text: () => 0 };//陌生人消息，可能存在里面还有未读消息，这里直接不判断消息数量了，直接允许点击进入
 
-                if ((!messageTag || messageTag.text()) <= 0 && (!tipTag && tipTag.text() <= 0) && !dotTag) {
+                if ((!messageTag || messageTag.text() <= 0) && (!tipTag || tipTag.text() <= 0) && !dotTag) {
+                    Log.log('---跳过---');
                     continue;
                 }
 
-                Log.log('开始操作：', tvTag.text());
+                Log.log('开始操作：', tvTag.text(), tvTag);
                 Log.log('tipTag', tipTag ? tipTag.text() : 0);
                 Log.log('dotTag', dotTag ? dotTag.text() : 0);
                 Log.log('messageTag', messageTag ? messageTag.text() : 0);
@@ -310,6 +322,8 @@ let MessageNew = {
                     System.sleep(3000 + 2000 * Math.random());
                     this.interact();
                     Gesture.back();
+                    System.sleep(3000 + 2000 * Math.random());
+                    break;
                 } else if (dotTag && tvTag.text() === V.Message.tag[4]) {
                     Log.log('陌生人消息处理');
                     if (!config.ai_back_private_switch) {
@@ -319,12 +333,16 @@ let MessageNew = {
                     System.sleep(3000 + 2000 * Math.random());
                     this.noUserMessageBack();
                     Gesture.back();
+                    System.sleep(3000 + 2000 * Math.random());
+                    break;
                 } else if (messageTag && messageTag.text() > 0) {
                     Log.log('可能是未知的tvTag', tvTag);//这里统一当做私信来处理
                     //如果是私信，则回复
                     Common.click(tvTag);
                     System.sleep(3000 + 2000 * Math.random());
                     this.backMsg(config);
+                    System.sleep(3000 + 2000 * Math.random());
+                    break;
                     // Gesture.back();//这里不需要，已经返回回来了
                 } else {
                     Log.log('什么都不干，意外的情况', tvTag.text());
@@ -338,7 +356,13 @@ let MessageNew = {
                 break;
             }
 
+            if (repeat == 0) {
+                repeat++;
+                continue;
+            }
+            
             this.scroll();
+            repeat = 0;
             kk++;
         }
 

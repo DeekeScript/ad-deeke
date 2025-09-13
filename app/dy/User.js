@@ -33,6 +33,9 @@ const User = {
         if (!moreTag) {
             Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
             Common.back();
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             return false;
         }
         Common.click(moreTag);
@@ -42,6 +45,9 @@ const User = {
         if (!toolTag) {
             Log.log('找不到发私信toolTag');//可能是企业号，输入框被隐藏了
             Common.back(2);
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             return false;
         }
         Common.click(toolTag);
@@ -51,6 +57,9 @@ const User = {
         if (!higherTag) {
             Log.log('找不到发私信higherTag');
             Common.back(2);
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             return false;
         }
 
@@ -61,6 +70,9 @@ const User = {
         if (!previewTag) {
             Log.log('找不到发私信higherTag');
             Common.back(3);
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             return false;
         }
 
@@ -75,6 +87,9 @@ const User = {
         if (!sendsTag) {
             Common.sleep(Math.random() * 1000);
             Common.back(3);
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             Log.log("返回两次");
             return false;
         }
@@ -84,6 +99,9 @@ const User = {
         Common.sleep(Math.random() * 1000);
         Log.log("成功：返回1次");
         Common.back(2);
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            Common.back(1);
+        }
         return true;
     },
     //保证执行的时候在哪个页面，执行完成也是哪个界面
@@ -154,6 +172,9 @@ const User = {
         if (closePrivateMsg) {
             Common.sleep(Math.random() * 1000);
             Common.back(2);
+            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             Log.log("返回两次");
             return -1;
         }
@@ -161,11 +182,15 @@ const User = {
         Common.sleep(Math.random() * 1000);
         Log.log("成功：返回2次");
         Common.back(2);
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            Common.back(1);
+        }
+
         return true;
     },
 
     //代码完全复制上面的，这个是已经进入了用户页开始私信
-    privateMsgTwo(msg) {
+    privateMsgTwo(msg, noback) {
         let textTag = Common.id(V.User.privateMsg[6]).findOnce();
         if (!textTag) {
             Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
@@ -198,6 +223,9 @@ const User = {
         if (closePrivateMsg) {
             Common.sleep(Math.random() * 1000);
             Common.back(2);
+            if (!noback && App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+                Common.back(1);
+            }
             Log.log("返回两次");
             return -1;
         }
@@ -205,6 +233,9 @@ const User = {
         Common.sleep(Math.random() * 1000);
         Log.log("成功：返回2次");
         Common.back(2);
+        if (!noback && App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            Common.back(1);
+        }
         return true;
     },
 
@@ -217,7 +248,7 @@ const User = {
                 if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
                     return nickname.text();
                 }
-                return nickname.text().replace(V.User.getNickname[1], '');
+                return nickname.text();
             }
             Common.sleep(200);
         }
@@ -232,6 +263,7 @@ const User = {
 
     getDouyin() {
         let douyin = Common.id(V.User.getDouyin[0]).isVisibleToUser(true).findOnce();
+        Log.log('douyin', douyin);
         if (douyin && douyin.text()) {
             return douyin.text().replace(V.User.getDouyin[1], '');
         }
@@ -243,7 +275,18 @@ const User = {
         }
 
         //官方账号等等
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
+        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
+            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
+            if (douyin) {
+                douyin = douyin.children();
+                if (douyin) {
+                    douyin = douyin.children().findOne(UiSelector().className('android.widget.TextView'));
+                    if (douyin && douyin.text()) {
+                        return douyin.text();
+                    }
+                }
+            }
+        } else if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
             douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
             if (douyin && douyin.text()) {
                 return douyin.text();
@@ -572,6 +615,7 @@ const User = {
                 Log.log(this.contents.length, this.contents.includes(titleTag.text()));
                 let nickname = titleTag.text();
 
+                //顶部标题的tab外容器
                 let titleBarTag = Common.id(V.User.cancelFocusList[4]).findOnce();
                 if (titleBarTag && titleTag.bounds().top <= titleBarTag.bounds().top + titleBarTag.bounds().height()) {
                     continue;

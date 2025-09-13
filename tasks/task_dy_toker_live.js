@@ -46,7 +46,7 @@ let task = {
         if (!tCommon.getRemark(douyin)) {
             //首先进入页面
             DyIndex.intoSearchPage();
-            let res = DySearch.intoUserLiveRoom(douyin, 1);
+            let res = DySearch.intoUserLiveRoom(douyin, 2);
             if (!res) {
                 System.toast('找不到用户账号：' + douyin);
                 this.intoErrorCount++;

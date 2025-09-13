@@ -4,7 +4,7 @@ let statistics = require('common/statistics.js');
 let V = require('version/V.js');
 
 const Comment = {
-    tag: undefined,//当前的tag标签 
+    tag: undefined,//当前的tag标签
     containers: [],//本次遍历的内容  主要用于去重
     getAvatarTag(tag) {
         if (tag) {
@@ -159,6 +159,13 @@ const Comment = {
     },
 
     getList() {
+        let moreTag = UiSelector().text('已折叠部分评论').isVisibleToUser(true).findOne();
+        if (moreTag) {
+            Log.log('点击展开');
+            Common.click(moreTag);
+            Common.sleep(3000 + Math.random() * 1500);
+        }
+
         let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
             if (v && v.bounds()) {
                 Log.log('位置', v.bounds().top, v.bounds().height(), v.bounds().left, Device.height());
@@ -224,6 +231,9 @@ const Comment = {
     intoUserPage(data) {
         let headTag = this.getAvatarTag(data.tag);
         Log.log('headTag', headTag);
+        if (headTag.bounds().height() <= 0) {
+            return false;
+        }
         //Log.log('headTag-', headTag.parent().parent());
         Common.click(headTag);
         statistics.viewUser();
@@ -258,7 +268,8 @@ const Comment = {
         Common.sleep(Math.random() * 1000);
 
         let submitTag = Common.id(V.Comment.backMsg[1]).isVisibleToUser(true).findOne();
-        submitTag.click();
+        //submitTag.click();
+        Common.click(submitTag);
         Common.sleep(2000 * Math.random());
     },
 
@@ -314,9 +325,10 @@ const Comment = {
                 }
 
                 if (submitTags.length == 1) {
-                    submitTags[0].click();
+                    //submitTags[0].click();
+                    Common.click(submitTags[0]);
                 } else {
-                    submitTags[1].click() && submitTags[0].click();
+                    Common.click(submitTags[1]);
                 }
 
                 Common.sleep(1000);
@@ -386,7 +398,7 @@ const Comment = {
 
         this.iptEmoj(1 + Math.round(3 * Math.random()));
         Common.sleep(2000 + 1000 * Math.random());
-        let atTag = clickable(true).desc(V.Comment.commentAtUser[1]).find();
+        let atTag = desc(V.Comment.commentAtUser[1]).find();
         if (atTag.length === 2) {
             atTag = atTag[1].bounds().top > atTag[0].bounds().top ? atTag[0] : atTag[1];
         } else {

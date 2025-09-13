@@ -1,5 +1,4 @@
 let cStorage = require('common/storage.js');
-let V = require('version/XhsV.js');
 
 let Common = {
     //封装的方法
@@ -26,10 +25,26 @@ let Common = {
         this.openApp();
         let i = 0;
         while (i++ < 5) {
-            let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
+            let homeTag = UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOnce();
             if (!homeTag) {
                 this.back();
                 this.sleep(2000);
+                continue;
+            }
+            Log.log("找到了homeTag");
+            break;
+        }
+        return true;
+    },
+
+    backHomeOnly() {
+        let i = 0;
+        while (i++ < 5) {
+            let homeTag = UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOnce();
+            if (!homeTag) {
+                Log.log(UiSelector().className('android.widget.ImageView').desc('菜单').findOnce());
+                this.back();
+                this.sleep(1000);
                 continue;
             }
             Log.log("找到了homeTag");
@@ -98,13 +113,7 @@ let Common = {
     },
 
     openApp() {
-        this.log('openApp', System.currentPackage(), cStorage.getPackage());
-        if (cStorage.getPackage() && System.currentPackage() !== cStorage.getPackage() && cStorage.getPackage() !== 'top.deeke.script') {
-            App.launch(cStorage.getPackage());
-            this.sleep(2000);
-        }
-
-        App.launch('com.xingin.xhs');//打开抖音
+        App.launch('com.xingin.xhs');//打开app
         this.sleep(8000);
     },
 
@@ -161,22 +170,10 @@ let Common = {
         Gesture.swipe(left, top, left, bottom, 200 + 100 * Math.random());//从上往下滑
     },
 
-    swipeSearchUserOp() {
-        this.swipeSearchUserOpTarge = this.id(V.Common.swipeSearchUserOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-
-        if (this.swipeSearchUserOpTarge) {
-            this.swipeSearchUserOpTarge.scrollForward();
-        } else {
-            Log.log('滑动失败');
-        }
-    },
-
     swipeRecommendListOp() {
-        this.swipeFansListOpTarge = this.id(V.Common.swipeFansListOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
+        this.swipeFansListOpTarge = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
 
         if (this.swipeFansListOpTarge) {
             this.swipeFansListOpTarge.scrollForward();
@@ -188,9 +185,9 @@ let Common = {
 
 
     swipeFansListOp() {
-        this.swipeFansListOpTarge = this.id(V.Common.swipeFansListOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
+        this.swipeFansListOpTarge = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
 
         if (this.swipeFansListOpTarge) {
             this.swipeFansListOpTarge.scrollForward();
@@ -200,10 +197,24 @@ let Common = {
         //Log.log(this.swipeFansListOpTarge);
     },
 
+    //滑动用户作品列表
+    swipeWorksOp() {
+        let swipe = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
+
+        if (swipe) {
+            swipe.scrollForward();
+        } else {
+            Log.log('滑动失败');
+        }
+        //Log.log(this.swipeFansListOpTarge);
+    },
+
     swipeFocusListOp() {
-        this.swipeFocusListOpTarge = this.id(V.Common.swipeFocusListOp).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
+        this.swipeFocusListOpTarge = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
         if (this.swipeFocusListOpTarge) {
             this.swipeFocusListOpTarge.scrollForward();
         } else {
@@ -211,22 +222,11 @@ let Common = {
         }
     },
 
-    swipeCommentListOp() {
-        this.swipeCommentListOpTarget = this.id(V.Common.swipeCommentListOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-        if (this.swipeCommentListOpTarget) {
-            this.swipeCommentListOpTarget.scrollForward();
-        } else {
-            Log.log('滑动失败');
-        }
-        //Log.log(this.swipeCommentListOpTarget);
-    },
-
+    //搜索的图文列表滑动
     swipeWorkOp() {
-        let tag = this.id(V.Search.container).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
+        let tag = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView';
+        }).findOne();
         if (tag) {
             tag.scrollForward();
         } else {

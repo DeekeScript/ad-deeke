@@ -40,6 +40,10 @@
       },
       {
         "count": 3,
+        "title": "小红薯·同行截流"
+      },
+      {
+        "count": 3,
         "title": "小红薯·其他功能"
       },
       {
@@ -48,7 +52,15 @@
       },
       {
         "count": 3,
+        "title": "KS·其他功能"
+      },
+      {
+        "count": 3,
         "title": "视频号·万能引流"
+      },
+      {
+        "count": 3,
+        "title": "视频号·同行截流"
       }
     ]
   },
@@ -131,7 +143,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -165,7 +177,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -309,7 +321,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_city_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -343,7 +355,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_city_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -1059,7 +1071,7 @@
             "type": "checkboxGroup",
             "label": "功能",
             "name": "task_dy_qingsong_tuoke_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信",
@@ -1160,7 +1172,7 @@
             "type": "checkboxGroup",
             "label": "功能",
             "name": "task_dy_zan_back_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信",
@@ -1242,9 +1254,25 @@
           },
           {
             "type": "checkboxGroup",
+            "label": "性别",
+            "name": "task_dy_friend_gender",
+            "columnCount": 5,
+            "children": [
+              "女",
+              "男",
+              "未知"
+            ],
+            "values": [
+              "0",
+              "1",
+              "2"
+            ]
+          },
+          {
+            "type": "checkboxGroup",
             "label": "功能",
             "name": "task_dy_friend_change_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信",
@@ -1299,7 +1327,7 @@
             "type": "checkboxGroup",
             "label": "功能",
             "name": "task_dy_toker_uid_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信"
@@ -1351,7 +1379,7 @@
       "hidden": false,
       "icon": "img/rocket.png",
       "jsFile": "tasks/task_dy_search_user.js",
-      "columns": 1,
+      "columns": 2,
       "settingPage": {
         "params": [
           {
@@ -1431,7 +1459,7 @@
     },
     {
       "title": "AI回复",
-      "hidden": false,
+      "hidden": true,
       "icon": "img/ai-back.png",
       "jsFile": "tasks/task_dy_ai_back.js",
       "columns": 1,
@@ -1496,16 +1524,15 @@
     {
       "title": "团购营销",
       "hidden": false,
+      "runType": "floatSwitch",
+      "autoOpen": true,
+      "packageName": "com.ss.android.ugc.aweme",
       "columns": 1,
       "icon": "img/team-buy.png",
       "jsFile": "tasks/task_dy_team_buy.js",
       "minVersion": 290700,
       "settingPage": {
         "params": [
-          {
-            "type": "notice",
-            "title": "1.团购功能可能需要多次授权位置服务，请先手动操作一遍流程，再使用软件运行~\n\n2.每次启动该功能，请确保DY界面在首页或者团购页~\n\n3.确保用户列表可以被操作"
-          },
           {
             "type": "textArea",
             "label": "门店名称",
@@ -1562,6 +1589,10 @@
             "value": 50,
             "min": 20,
             "step": 1
+          },
+          {
+            "type": "notice",
+            "title": "1.手动进入团购评论页面执行（点击右侧开始按钮）\n\n2.确保用户列表可以被操作"
           }
         ]
       }
@@ -1784,7 +1815,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_xhs_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "hidden": true,
             "children": [
               "女",
@@ -1821,7 +1852,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_xhs_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -1930,7 +1961,7 @@
             "type": "checkboxGroup",
             "label": "功能",
             "name": "task_xhs_fans_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信",
@@ -1970,8 +2001,77 @@
       }
     },
     {
+      "title": "评论区截流",
+      "hidden": false,
+      "columns": 2,
+      "icon": "img/speech-say-xhs.png",
+      "jsFile": "tasks/task_xhs_toker_comment.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "输入账号（多账号使用逗号隔开）",
+            "name": "task_xhs_toker_comment_account",
+            "value": ""
+          },
+          {
+            "type": "textArea",
+            "label": "评论关键词（多关键词使用逗号隔开）",
+            "name": "task_xhs_toker_comment_kw",
+            "value": ""
+          },
+          {
+            "type": "textArea",
+            "label": "IP筛选（多个使用逗号隔开）",
+            "name": "task_xhs_toker_comment_ip",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "每轮休息时间（秒）",
+            "name": "task_xhs_toker_comment_sleep_second",
+            "value": 600,
+            "max": 3600,
+            "min": 0,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "title": "智能询盘",
+      "hidden": false,
+      "icon": "img/user-get-xhs.png",
+      "jsFile": "tasks/task_xhs_search_inquiry.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "询盘关键词",
+            "value": "",
+            "name": "task_xhs_search_inquiry"
+          },
+          {
+            "type": "textArea",
+            "label": "触发关键词（多个使用逗号隔开）",
+            "name": "task_xhs_search_inquiry_kws",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "刷视频数量",
+            "name": "task_xhs_search_inquiry_count",
+            "value": 10,
+            "max": 1000,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
       "title": "用户ID私信",
-      "columns": 1,
+      "columns": 2,
       "icon": "img/private-2.png",
       "jsFile": "tasks/task_xhs_toker_uid.js",
       "settingPage": {
@@ -1996,7 +2096,7 @@
             "type": "checkboxGroup",
             "label": "功能",
             "name": "task_xhs_toker_uid_op",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "关注",
               "私信"
@@ -2016,6 +2116,7 @@
     {
       "title": "AI回复",
       "columns": 1,
+      "hidden": true,
       "icon": "img/ai-back.png",
       "jsFile": "tasks/task_xhs_ai_back.js",
       "settingPage": {
@@ -2137,7 +2238,7 @@
     },
     {
       "title": "推荐营销",
-      "icon": "img/finger.png",
+      "icon": "img/finger_ks.png",
       "jsFile": "tasks/task_ks_toker.js",
       "columns": 1,
       "settingPage": {
@@ -2214,7 +2315,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_ks_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -2248,7 +2349,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_ks_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -2307,7 +2408,7 @@
     },
     {
       "title": "同城营销",
-      "icon": "img/city.png",
+      "icon": "img/city_ks.png",
       "columns": 1,
       "jsFile": "tasks/task_ks_toker_city.js",
       "settingPage": {
@@ -2393,7 +2494,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_ks_city_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -2427,7 +2528,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_ks_city_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -2490,7 +2591,7 @@
       "runType": "floatSwitch",
       "packageName": "com.smile.gifmaker",
       "autoOpen": true,
-      "icon": "img/rocket.png",
+      "icon": "img/rocket_ks.png",
       "jsFile": "tasks/task_ks_search_user.js",
       "columns": 1,
       "settingPage": {
@@ -2569,10 +2670,73 @@
       }
     },
     {
+      "title": "评论区截流",
+      "hidden": false,
+      "icon": "img/speech-say-ks.png",
+      "jsFile": "tasks/task_ks_toker_comment.js",
+      "columns": 2,
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "输入账号（多账号使用逗号隔开）",
+            "name": "task_ks_toker_comment_account",
+            "value": ""
+          },
+          {
+            "type": "textArea",
+            "label": "评论关键词（多关键词使用逗号隔开）",
+            "name": "task_ks_toker_comment_kw",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "每轮休息时间（秒）",
+            "name": "task_ks_toker_comment_sleep_second",
+            "value": 600,
+            "max": 3600,
+            "min": 0,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "title": "智能询盘",
+      "hidden": false,
+      "icon": "img/user-get-ks.png",
+      "jsFile": "tasks/task_ks_search_inquiry.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "询盘关键词",
+            "value": "",
+            "name": "task_ks_search_inquiry"
+          },
+          {
+            "type": "textArea",
+            "label": "触发关键词（多个使用逗号隔开）",
+            "name": "task_ks_search_inquiry_kws",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "刷视频数量",
+            "name": "task_ks_search_inquiry_count",
+            "value": 10,
+            "max": 1000,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
       "title": "推荐营销",
-      "icon": "img/finger.png",
+      "icon": "img/finger_wx.png",
       "jsFile": "tasks/task_wx_toker.js",
-      "columns": 1,
+      "columns": 2,
       "settingPage": {
         "params": [
           {
@@ -2647,7 +2811,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_wx_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -2683,7 +2847,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_wx_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -2742,7 +2906,7 @@
     },
     {
       "title": "同城营销",
-      "icon": "img/city.png",
+      "icon": "img/city_wx.png",
       "columns": 1,
       "jsFile": "tasks/task_wx_toker_city.js",
       "settingPage": {
@@ -2828,7 +2992,7 @@
             "type": "checkboxGroup",
             "label": "性别",
             "name": "toker_wx_city_run_sex",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "女",
               "男",
@@ -2864,7 +3028,7 @@
             "type": "checkboxGroup",
             "label": "运行时间",
             "name": "toker_wx_city_run_hour",
-            "columnCount": 6,
+            "columnCount": 5,
             "children": [
               "0时",
               "1时",
@@ -2920,6 +3084,69 @@
           }
         ]
       }
+    },
+    {
+      "title": "评论区截流",
+      "hidden": false,
+      "columns": 2,
+      "icon": "img/speech-say-wx.png",
+      "jsFile": "tasks/task_wx_toker_comment.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "输入昵称（多昵称使用逗号隔开）",
+            "name": "task_wx_toker_comment_account",
+            "value": ""
+          },
+          {
+            "type": "textArea",
+            "label": "评论关键词（多关键词使用逗号隔开）",
+            "name": "task_wx_toker_comment_kw",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "每轮休息时间（秒）",
+            "name": "task_wx_toker_comment_sleep_second",
+            "value": 600,
+            "max": 3600,
+            "min": 0,
+            "step": 1
+          }
+        ]
+      }
+    },
+    {
+      "title": "智能询盘",
+      "hidden": false,
+      "icon": "img/user-get-wx.png",
+      "jsFile": "tasks/task_wx_search_inquiry.js",
+      "settingPage": {
+        "params": [
+          {
+            "type": "textArea",
+            "label": "询盘关键词",
+            "value": "",
+            "name": "task_wx_search_inquiry"
+          },
+          {
+            "type": "textArea",
+            "label": "触发关键词（多个使用逗号隔开）",
+            "name": "task_wx_search_inquiry_kws",
+            "value": ""
+          },
+          {
+            "type": "numberRange",
+            "label": "刷视频数量",
+            "name": "task_wx_search_inquiry_count",
+            "value": 10,
+            "max": 1000,
+            "min": 1,
+            "step": 1
+          }
+        ]
+      }
     }
   ],
   "bottomMenus": [
@@ -2933,6 +3160,11 @@
       "title": "话术设置",
       "icon": "img/speech.png",
       "type": "speech"
+    },
+    {
+      "title": "精准客户",
+      "icon": "img/customer.png",
+      "type": "grab"
     },
     {
       "title": "系统设置",
@@ -2972,7 +3204,7 @@
             "name": "setting_baidu_wenxin_role",
             "value": "1",
             "dataFrom": "role",
-            "hidden": true,
+            "hidden": false,
             "options": []
           },
           {

@@ -1,6 +1,6 @@
 let Common = require('app/ks/Common.js');
 let statistics = require('common/statistics.js');
-let V = require('version/KsV.js'); 
+let V = require('version/KsV.js');
 
 
 let User = {
@@ -29,7 +29,17 @@ let User = {
         Common.click(sendTag.parent());
         Common.sleep(2000);
 
-        let textTag = Common.id(V.User.privateMsg[4]).isVisibleToUser(true).findOnce();
+        let res = this.privateMsgTwo(msg);
+        if (res) {
+            Common.back(1);
+        }
+        return res;
+    },
+
+    privateMsgTwo(msg) {
+        let textTag = Common.id(V.User.privateMsg[4]).isVisibleToUser(true).filter(v => {
+            return v.isEditable();
+        }).findOnce();
         if (!textTag) {
             Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
             Common.back();
@@ -59,7 +69,7 @@ let User = {
         statistics.privateMsg();
         Common.sleep(Math.random() * 1000);
         Log.log("成功：返回2次");
-        Common.back(2);
+        Common.back(1);
         return true;
     },
 
