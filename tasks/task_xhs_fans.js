@@ -15,6 +15,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -110,10 +111,11 @@ let task = {
                     //作品数和粉丝数，仅仅针对“粉丝列表”
                     if (selectText.indexOf('粉丝') !== -1) {
                         let workTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('笔记').filter(v => {
-                            return v.parent() != null && v.parent().className() == 'android.widget.RelativeLayout';
+                            return v.parent() != null && v.parent().className() == 'android.widget.LinearLayout';
                         }));
+                        Log.log('workTag', workTag);
                         let fansTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('粉丝').filter(v => {
-                            return v.parent() != null && v.parent().className() == 'android.widget.RelativeLayout';
+                            return v.parent() != null && v.parent().className() == 'android.widget.LinearLayout';
                         }));
                         let workCount = User.getListWorkCount(workTag);
                         if (workCount < config.minWork) {
@@ -235,5 +237,6 @@ let task = {
     }
 }
 
+System.setAccessibilityMode('fast');
 task.run();
 FloatDialogs.show('提示', '已完成');

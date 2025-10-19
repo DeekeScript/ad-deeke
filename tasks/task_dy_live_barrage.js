@@ -3,10 +3,6 @@ let DyIndex = require('app/dy/Index.js');
 let DySearch = require('app/dy/Search.js');
 let DyUser = require('app/dy/User.js');
 let DyLive = require('app/dy/Live.js');
-// let DyComment = require('app/dy/Comment.js');
-
-// let dy = require('app/iDy');
-// let config = require('config/config');
 let storage = require("common/storage");
 let machine = require("common/machine");
 
@@ -18,6 +14,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         let comments = storage.get('task_dy_live_barrage_comments');
         if (comments) {
             let tmp = comments.split("\n");
@@ -48,7 +45,9 @@ let task = {
             }
 
             DySearch.intoSearchList(account, 2);
-            DySearch.intoLiveRoom(account);
+            if (!DySearch.intoLiveRoom(account)) {
+                return true;
+            }
         } else {
             account = account.substring(1);
             App.gotoIntent('snssdk1128://user/profile/' + account);
@@ -82,14 +81,13 @@ let task = {
 let account = storage.get('task_dy_live_barrage_account', 'string');
 if (!account) {
     tCommon.showToast('直播账号不能为空');
-    //console.hide();();
     System.exit();
 }
 
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
-
+System.setAccessibilityMode('fast');
 while (true) {
     task.log();
     try {

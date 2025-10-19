@@ -13,11 +13,12 @@ let task = {
     index: -1,
     nicknames: [],
     contents: [],
-    run(input, kw, sleepSecond) {
-        return this.testTask(input, kw, sleepSecond);
+    run(input, kw) {
+        return this.testTask(input, kw);
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -40,7 +41,7 @@ let task = {
         return false;
     },
 
-    testTask(input, kw, sleepSecond) {
+    testTask(input, kw) {
         //首先进入页面
         this.index++;
         KsIndex.intoSearchPage();
@@ -62,8 +63,8 @@ let task = {
         }
 
         //获取最新的前三视频
-        let i = 3;
-        while (i-- > 0) {
+        let i = 0;
+        while (true) {
             let title = KsVideo.getContent();
             let commentCount = KsVideo.getCommentCount();
             if (commentCount === 0 || this.contents.includes(title)) {
@@ -78,34 +79,9 @@ let task = {
 
             KsVideo.openComment(commentCount);
             tCommon.sleep(2000 + 1000 * Math.random());
-            let rp = 0;
-            let lastComment = undefined;
-            let maxSwipe = 1200;
+
             while (true) {
                 let comments = KsComment.getList();
-                maxSwipe--;
-                if (maxSwipe <= 0) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('滑动了1200次了');
-                    break;
-                }
-
-                if (JSON.stringify(comments) === lastComment) {
-                    rp++;
-                } else {
-                    rp = 0;
-                }
-                // Log.log(JSON.stringify(comments), lastComment, rp);
-
-                if (rp >= 3) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('评论扫描完了');
-                    break;
-                }
-                lastComment = JSON.stringify(comments);
-
                 for (let k in comments) {
                     if (comments[k]['content'] == "" || !this.includesKw(comments[k]['content'], kw) || this.nicknames.includes(comments[k].nickname)) {
                         Log.log('数据：', comments[k]['content'], !this.includesKw(comments[k]['content'], kw), this.nicknames.includes(comments[k].nickname));
@@ -170,25 +146,30 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                tCommon.swipeCommentListOp();
+                tCommon.sleep(500);
+                if (!tCommon.swipeCommentListOp()) {
+                    tCommon.back();
+                    tCommon.sleep(1000);
+                    Log.log('评论操作完了');
+                    break;
+                }
                 tCommon.sleep(1500 + 500 * Math.random());
             }
-            Log.log('下一个视频', i);
+            Log.log('下一个视频', i++);
             this.contents.push(title);
-            KsVideo.next();
+            if (!KsVideo.next()) {
+                Log.log('操作完了');
+                break;
+            }
             tCommon.sleep(4000 + Math.random() * 2000);
         }
 
         tCommon.back(5, 1500);
         tCommon.backApp();
         if (this.index === input.length - 1) {
-            System.toast('一轮完成，休息' + sleepSecond + '秒');
-            Log.log('一轮完成，休息' + sleepSecond + '秒');
-            tCommon.sleep(sleepSecond * 1000);//休眠十分钟
+            return 1;
         } else {
-            System.toast('一个账号完成，休息sleepSecond秒');
-            Log.log('一个账号完成，休息sleepSecond秒');
-            tCommon.sleep(sleepSecond * 1000);//休眠sleepSecond秒
+            Log.log('一个账号完成');
         }
         this.contents = [];
         return true;//重启
@@ -214,17 +195,22 @@ if (!Access.isMediaProjectionEnable()) {
     System.exit();
 }
 
-let sleepSecond = machine.get('task_ks_toker_comment_sleep_second');
+System.setAccessibilityMode('fast');
 tCommon.openApp();
 while (true) {
     task.log();
     try {
-        let r = task.run(input, kw, sleepSecond);
+        let r = task.run(input, kw);
         if (r === 'exit') {
             if (thr) {
                 tCommon.sleep(3000);
                 FloatDialogs.show('找不到用户，停止执行');
             }
+            break;
+        }
+
+        if (r === 1) {
+            FloatDialogs.show('完成');
             break;
         }
 

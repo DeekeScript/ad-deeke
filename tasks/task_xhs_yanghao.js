@@ -6,7 +6,6 @@ let storage = require("common/storage");
 let machine = require("common/machine");
 let baiduWenxin = require("service/baiduWenxin");
 let statistics = require("common/statistics");
-let V = require("version/XhsV.js");
 
 let task = {
     contents: [],
@@ -27,6 +26,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.getMachineType() === 1) {
             if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
@@ -42,10 +42,6 @@ let task = {
         DyIndex.intoSearchPage();
         DySearch.intoSearchList(keyword);
         tCommon.sleep(4000 + 2000 * Math.random());
-
-        let topTag = UiSelector().className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
-        let top = topTag ? topTag.bounds().top + topTag.bounds().height() : Device.height() / 6;
-        Log.log('top', top, topTag ? topTag.bounds() : null);
         let interval = storage.get('task_xhs_yanghao_interval', 'int');
         while (true) {
             let tags = DySearch.getList();
@@ -68,26 +64,19 @@ let task = {
                         continue;
                     }
 
-                    if (tags[i].tag.bounds().top < top) {
-                        Log.log('位置不对');
-                        continue;
-                    }
-
                     Log.log(tags[i].tag.bounds(), text);
-                    if (!tCommon.click(tags[i].tag, 0.15)) {
-                        Log.log('点击位置不对，执行下一个');
-                        continue;
-                    }
-                    tCommon.sleep(3000 + 2000 * Math.random());
+                    tags[i].tag.click();
+                    tCommon.sleep(3500 + 1500 * Math.random());
 
                     let title = Work.getContent();
                     Log.log('title', title);
                     if (!title) {
                         Log.log('界面更新了，需要滑动');
+                        tCommon.back();
+                        tCommon.sleep(500);
                         break;//很可能是更新了
                     }
                     Log.log('title:' + title);
-                    //let nickname = Work.getNickname();
                     statistics.viewVideo();
                     statistics.viewTargetVideo();
 
@@ -119,10 +108,12 @@ let task = {
 
                     machine.set('task_xhs_yanghao_' + md5, true);
                     this.contents.push(text);
+                    tCommon.back();
+                    tCommon.sleep(1000 + 500 * Math.random());
                     if (!UiSelector().className('android.widget.TextView').text(keyword).isVisibleToUser(true).findOne()) {
                         tCommon.back();
+                        tCommon.sleep(1000 + 500 * Math.random());
                     }
-                    tCommon.sleep(1000 + 500 * Math.random());
                 } catch (e) {
                     //判断是否在日记页面
                     if (Work.getType() != -1) {
@@ -154,6 +145,7 @@ if (!task.count) {
     System.exit();
 }
 
+System.setAccessibilityMode('fast');
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 // Engines.executeScript("unit/dialogClose.js");

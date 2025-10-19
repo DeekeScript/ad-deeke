@@ -1,6 +1,10 @@
-let Common = require('app/global/dy/Common');
+let tCommon = require('app/dy/Common');
 let machine = require('common/machine');
 let storage = require('common/storage');
+let baiduWenxin = require('service/baiduWenxin');
+let DyVideo = require('app/dy/Video');
+let DyUser = require('app/dy/User');
+
 let dy = {
     getAvatar() {
         return UiSelector().descContains('用户头像').isVisibleToUser(true).findOne();
@@ -26,20 +30,20 @@ let dy = {
         }
 
         if (!videoCountTag.isSelected()) {
-            Common.click(videoCountTag, 0.2);
+            tCommon.click(videoCountTag, 0.2);
             Log.log('点击了作品');
-            Common.sleep(1000 + 1000 * Math.random());
+            tCommon.sleep(1000 + 1000 * Math.random());
         }
 
-        let containerTag = Common.id('container').isVisibleToUser(true).findOne();
+        let containerTag = tCommon.id('container').isVisibleToUser(true).findOne();
         if (!containerTag) {
             Log.log('没有containerTag');
             return false;
         }
 
-        Common.click(containerTag, 0.3);
+        tCommon.click(containerTag, 0.3);
         Log.log('进入视频');
-        Common.sleep(3000 + 3000 * Math.random());
+        tCommon.sleep(3000 + 3000 * Math.random());
         //检查是否进入了视频
         if (this.getAvatar()) {
             Log.log('没有进入视频');
@@ -58,8 +62,8 @@ let dy = {
         }
 
         if (likeTag.desc().includes('未点赞')) {
-            Common.click(likeTag, 0.3);
-            Common.sleep(1000 + 1000 * Math.random());
+            tCommon.click(likeTag, 0.3);
+            tCommon.sleep(1000 + 1000 * Math.random());
             Log.log('点赞了', likeTag.bounds());
         }
 
@@ -67,18 +71,19 @@ let dy = {
         return true;
     },
 
-    commentVideo(msg) {
+    commentVideo(msgFunc) {
         let CommentCountTag = UiSelector().descContains('评论').className('android.widget.ImageView').isVisibleToUser(true).findOne();
         if (!CommentCountTag) {
             Log.log('没有找到评论按钮');
             return false;
         }
 
-        let count = Common.numDeal(CommentCountTag.desc());
+        let count = tCommon.numDeal(CommentCountTag.desc());
+        let title = DyVideo.getContent();
         if (count > 0) {
             Log.log('评论数大于0');
-            Common.click(CommentCountTag, 0.2);
-            Common.sleep(3000 + 2000 * Math.random());
+            tCommon.click(CommentCountTag, 0.2);
+            tCommon.sleep(3000 + 2000 * Math.random());
             let iptTag = UiSelector().className('android.widget.EditText').isVisibleToUser(true).filter(v => {
                 return v.isEditable();
             }).findOne();
@@ -86,11 +91,11 @@ let dy = {
                 Log.log('没有找到输入框');
                 return false;
             }
-            Common.click(iptTag, 0.2);
-            Common.sleep(1000 + 1000 * Math.random());
+            tCommon.click(iptTag, 0.2);
+            tCommon.sleep(1000 + 1000 * Math.random());
         } else {
-            Common.click(CommentCountTag, 0.2);
-            Common.sleep(2000 + 1000 * Math.random());
+            tCommon.click(CommentCountTag, 0.2);
+            tCommon.sleep(2000 + 1000 * Math.random());
         }
 
         let iptTag = UiSelector().className('android.widget.EditText').isVisibleToUser(true).filter(v => {
@@ -101,8 +106,8 @@ let dy = {
             Log.log('没有找到输入框');
             return false;
         }
-        iptTag.setText(msg);
-        Common.sleep(1000 + 1000 * Math.random());
+        iptTag.setText(msgFunc(title));
+        tCommon.sleep(1000 + 1000 * Math.random());
 
         // @ts-ignore
         let btnTag = UiSelector().className('android.widget.TextView').text('发送').isVisibleToUser(true).filter(v => {
@@ -113,8 +118,8 @@ let dy = {
             Log.log('没有找到发送按钮');
             return false;
         }
-        Common.click(btnTag, 0.2);
-        Common.sleep(1000 + 1000 * Math.random());
+        tCommon.click(btnTag, 0.2);
+        tCommon.sleep(1000 + 1000 * Math.random());
         Log.log('评论成功', msg);
         return true;
     },
@@ -135,8 +140,8 @@ let dy = {
             return false;
         }
 
-        Common.click(focusTag, 0.2);
-        Common.sleep(1000 + 1000 * Math.random());
+        tCommon.click(focusTag, 0.2);
+        tCommon.sleep(1000 + 1000 * Math.random());
         Log.log('关注成功');
         return true;
     },
@@ -150,8 +155,8 @@ let dy = {
             Log.log('没有更多按钮');
             return false;
         }
-        Common.click(moreTag, 0.3);
-        Common.sleep(1000 + 1000 * Math.random());
+        tCommon.click(moreTag, 0.3);
+        tCommon.sleep(1000 + 1000 * Math.random());
 
         let sendMsgTag = UiSelector().className('android.widget.TextView').textContains('发私信').filter(v => {
             return v.bounds().top > Device.height() / 2;
@@ -161,8 +166,8 @@ let dy = {
             return false;
         }
 
-        Common.click(sendMsgTag, 0.2);
-        Common.sleep(2000 + 1000 * Math.random());
+        tCommon.click(sendMsgTag, 0.2);
+        tCommon.sleep(2000 + 1000 * Math.random());
 
         let iptTag = UiSelector().className('android.widget.EditText').filter(v => {
             return v.isEditable();
@@ -172,8 +177,8 @@ let dy = {
             return false;
         }
 
-        Common.click(iptTag, 0.2);
-        Common.sleep(1000 + 1000 * Math.random());
+        tCommon.click(iptTag, 0.2);
+        tCommon.sleep(1000 + 1000 * Math.random());
 
         iptTag = UiSelector().className('android.widget.EditText').filter(v => {
             // @ts-ignore
@@ -185,15 +190,15 @@ let dy = {
         }
 
         iptTag.setText(msg);
-        Common.sleep(1000 + 1000 * Math.random());
+        tCommon.sleep(1000 + 1000 * Math.random());
         let btnTag = UiSelector().className('android.widget.ImageView').desc('发送').isVisibleToUser(true).findOne();
         if (!btnTag) {
             Log.log('没有找到发送按钮');
             return false;
         }
-        Common.click(btnTag, 0.25);
-        Common.sleep(1000 + 1000 * Math.random());
-        Common.back(2);
+        tCommon.click(btnTag, 0.25);
+        tCommon.sleep(1000 + 1000 * Math.random());
+        tCommon.back(2);
         Log.log('消息已发送', msg);
         return true;
     }
@@ -202,6 +207,7 @@ let dy = {
 let task = {
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -220,7 +226,15 @@ let task = {
         }
     },
 
+    log() {
+        let d = new Date();
+        let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        let allFile = "log/log-dy-toker-uid-android-" + file + ".txt";
+        Log.setFile(allFile);
+    },
+
     run() {
+        this.log();
         let config = task.getConfig();
         Log.log('配置', config);
 
@@ -232,7 +246,7 @@ let task = {
                 continue;
             }
             App.gotoIntent('snssdk1128://user/profile/' + uid);
-            Common.sleep(4000 + 2000 * Math.random());
+            tCommon.sleep(4000 + 2000 * Math.random());
 
             //看看是否存在用户，不存在则下一个
             let avatarTag = dy.getAvatar();
@@ -253,17 +267,17 @@ let task = {
                 }
 
                 if (config.type.includes(1)) {
-                    dy.commentVideo(task.getMsg(0).msg);
-                    Common.back();//返回到主页
+                    dy.commentVideo((title) => task.getMsg(0, title).msg);
+                    tCommon.back();//返回到主页
                     Log.log('评论返回到视频');
                 }
 
-                Common.back();//返回到主页
+                tCommon.back();//返回到主页
                 Log.log('返回到用户主页');
                 if (!dy.getAvatar()) {
                     Log.log('没有返回回来，再操作一次');
-                    Common.sleep(1000);
-                    Common.back();
+                    tCommon.sleep(1000);
+                    tCommon.back();
                 }
             }
 
@@ -272,12 +286,12 @@ let task = {
             }
 
             if (config.type.includes(3)) {
-                dy.privateMsg(task.getMsg(1).msg);
+                dy.privateMsg(task.getMsg(1, DyUser.getNickname()).msg);
             }
             Storage.putBool('dy_uid_' + uid, true);
 
-            Common.backHomeOnly();
-            Common.sleep(config.second / 2 * 1000 + config.second / 2 * 1000 * Math.random());
+            tCommon.backHomeOnly();
+            tCommon.sleep(config.second / 2 * 1000 + config.second / 2 * 1000 * Math.random());
         }
         FloatDialogs.show('已执行完毕');
         System.exit();
@@ -286,7 +300,7 @@ let task = {
 
 
 while (true) {
-    Common.openApp();
+    tCommon.openApp();
     try {
         task.run();
     } catch (e) {

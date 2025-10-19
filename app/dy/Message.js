@@ -3,150 +3,35 @@ let Comment = require('app/dy/Comment.js');
 let User = require('app/dy/User.js');
 let Video = require('app/dy/Video.js');
 let statistics = require('common/statistics');
-let V = require('version/V.js');
 let storage = require('common/storage.js');
 
 let Message = {
-    getNumForDetail(str) {
-        hour = /(\d+)小时前/.exec(str);
-        if (hour && hour[1]) {
-            return hour * 60;
-        }
-
-        minute = /(\d+)分钟前/.exec(str);
-        return minute && minute[1];
-    },
-
-    //监听回复用户消息
-    backMsg() {
-        let rp = 3;
-        while (rp--) {
-            //读取消息数量
-            let commentCountTags = Common.id(V.Message.backMsg[0]).isVisibleToUser(true).find();
-            if (!commentCountTags || commentCountTags.length === 0) {
-                Common.sleep(10 * 1000);//休眠10秒
-                Log.log('没消息，休息10秒');
-                return false;
-            }
-
-            for (let i in commentCountTags) {
-                if (isNaN(i)) {
-                    continue;
-                }
-
-                let msgTag = commentCountTags[i].parent().children().findOne(Common.id(V.Message.backMsg[2]).descContains(V.Message.backMsg[3]));
-                if (!msgTag) {
-                    continue;
-                }
-
-                Log.log('点击评论数量');
-                Common.click(msgTag);
-                Common.sleep(3000 + 2000 * Math.random());
-            }
-
-            let hudongTag = Common.id(V.Message.backMsg[2]).descContains(V.Message.backMsg[3]).isVisibleToUser(true).findOnce();
-
-            if (hudongTag) {
-                Common.click(hudongTag);
-                Common.sleep(3000 + 2000 * Math.random());
-            }
-            Log.log('点击成功');
-            break;
-        }
-
-        let contents = [];
-        let rpCount = 0;
-        let stopCount = 0;
-
-        while (true) {
-            let containers = Common.id(V.Message.backMsg[4]).descMatches("[\\s\\S]+[小时|分钟]前，[\\s\\S]+").isVisibleToUser(true).clickable(true).className(V.Message.backMsg[5]).find();
-            if (containers.length === 0) {
-                stopCount++;
-            }
-
-            for (let i in containers) {
-                if (isNaN(i)) {
-                    continue;
-                }
-
-                rpCount++;
-                if (contents.includes(containers[i].desc())) {
-                    continue;
-                }
-
-                let minutes = this.getNumForDetail(containers[i].desc());
-                if (!minutes && minutes < 60) {
-                    continue;
-                }
-
-                contents.push(containers[i].desc());
-
-                let zanTag = containers[i].children().findOne(Common.id(V.Message.backMsg[6]).descContains(V.Message.backMsg[7]));
-                if (zanTag) {
-                    zanTag.click();
-                    Common.sleep(500);
-                }
-
-                let commentTag = containers[i].children().findOne(Common.id(V.Message.backMsg[8]).descContains(V.Message.backMsg[9]));
-                if (!commentTag) {
-                    continue;
-                }
-
-                if (commentTag.click()) {
-                    Common.sleep(2000 + 1000 * Math.random());
-                }
-
-                let iptTag = Common.id(V.Message.backMsg[10]).isVisibleToUser(true).findOnce();
-                if (iptTag) {
-                    Comment.iptEmoj(1 + Math.round(Math.random() * 3));
-                    let rp = 3;
-                    while (rp--) {
-                        let submitTag = Common.id(V.Message.backMsg[11]).findOnce();
-                        if (!submitTag) {
-                            break;
-                        }
-
-                        Common.click(submitTag);
-                        Common.sleep(1000 + 1000 * Math.random());
-                    }
-                }
-            }
-
-            if (containers.length === rpCount) {
-                stopCount++;
-            } else {
-                stopCount = 0;
-            }
-
-            if (stopCount >= 4) {
-                Common.back();
-                return true;
-            }
-
-            Log.log('stopCount', containers.length, rpCount);
-            Common.swipe(0, 0.7);
-            Common.sleep(3000 + 2000 * Math.random());
-        }
-    },
-
+    /**
+     * 消息界面搜索用户
+     * @param {string} account 
+     */
     search(account) {
-        let searchTag = Common.id(V.Message.search[0]).clickable(true).desc(V.Message.search[1]).isVisibleToUser(true).findOnce();
-        if (!searchTag) {
-            throw new Error('遇到错误，找不到输入框');
-        }
-        Common.click(searchTag);
-        Common.sleep(2000);
+        //首次打开抖音进入消息，拿不到desc信息，目前这样尝试
+        let searchTag = UiSelector().className('android.widget.Button').desc('搜索').isVisibleToUser(true).findOnce() || UiSelector().className('android.widget.Button').clickable(true).isVisibleToUser(true).filter(v => {
+            return v.bounds().left > Device.width() / 2 && v.bounds().top < Device.height() / 5;
+        }).findOne();
+        searchTag.click();
+        Common.sleep(1500 + 500 * Math.random());
 
-        let iptTag = Common.id(V.Message.search[2]).clickable(true).textContains(V.Message.search[1]).isVisibleToUser(true).findOnce();
-        if (!iptTag) {
-            Log.log(Common.id(V.Message.search[2]).clickable(true).textContains(V.Message.search[1]).isVisibleToUser(true).findOne());
-            throw new Error('遇到错误，找不到输入框-2');
-        }
+        let iptTag = UiSelector().className('android.widget.EditText').filter(v => {
+            return v.isEditable();
+        }).isVisibleToUser(true).findOnce();
 
         iptTag.setText(account);
         Common.sleep(2000 + 1000 * Math.random());
+        return true;
     },
 
+    /**
+     * 搜索进入粉丝群页面
+     * @param {string} account 
+     * @param {number} index
+     */
     intoFansGroup(account, index) {
         this.search(account);
         let contents = [];
@@ -155,12 +40,12 @@ let Message = {
         while (true) {
             let rp = 0;
             let allRp = 0;
-            let groupTag = Common.id(V.Message.intoFansGroup[0]).text(V.Message.intoFansGroup[1]).isVisibleToUser(true).findOnce();
+            let groupTag = UiSelector().className('android.widget.TextView').text('群聊').isVisibleToUser(true).findOnce();
             if (!groupTag) {
                 throw new Error('找不到群聊');
             }
 
-            let contains = Common.id(V.Message.intoFansGroup[2]).isVisibleToUser(true).find();
+            let contains = Common.id('content_container').descContains(account).isVisibleToUser(true).find();
             if (contains.length === 0) {
                 throw new Error('找不到群聊-2');
             }
@@ -175,24 +60,20 @@ let Message = {
                     continue;
                 }
 
-                let titleTag = contains[i].children().findOne(Common.id(V.Message.intoFansGroup[3]));
-                if (!titleTag || !titleTag.text()) {
-                    continue;
-                }
-
                 allRp++;
-                if (contents.includes(titleTag.text())) {
+                if (contents.includes(contains[i].desc())) {
                     rp++;
                     continue;
                 }
 
-                contents.push(titleTag.text());
+                contents.push(contains[i].desc());
                 if (contents.length === index) {
                     contains[i].click();
                     Common.sleep(3000 + 2000 * Math.random());
                     return true;
                 }
             }
+
             if (allRp === rp) {
                 rpCount++;
             } else {
@@ -206,6 +87,14 @@ let Message = {
         }
     },
 
+    /**
+     * 进入粉丝群列表
+     * @param {array} contents 
+     * @param {function} getMsg 
+     * @param {function} machineInclude 
+     * @param {function} machineSet 
+     * @returns 
+     */
     intoGroupUserList(contents, getMsg, machineInclude, machineSet) {
         let tag = undefined;
         let config = {
@@ -229,138 +118,45 @@ let Message = {
         let iBase = 1 - base;
 
         Log.log('config', config);
+        //每进入这个界面，50%概率控件的“更多”没有出来，暂时这样补救
+        let moreTag = UiSelector().className('android.widget.Button').desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.Button').clickable(true).filter(v => {
+            return v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 0.75 && v.children().findOne(UiSelector().className('android.widget.ImageView').isVisibleToUser(true));
+        }).isVisibleToUser(true).findOne();
 
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-            tag = Common.id(V.Message.intoGroupUserList[0]).isVisibleToUser(true).findOnce();
-        } else if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            tag = Common.id(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).findOnce();
-        } else {
-            tag = UiSelector().className(V.Message.intoGroupUserList[0]).desc(V.Message.intoGroupUserList[1]).isVisibleToUser(true).clickable(true).findOnce();
-        }
+        moreTag.click();
+        Common.sleep(2000 + 1000 * Math.random());
 
-        let tag2 = undefined;
-        if (!tag) {
-            tag2 = UiSelector().className(V.Message.intoGroupUserList[0]).clickable(true).isVisibleToUser(true).filter(v => {
-                return v && v.bounds() && v.bounds().left + v.bounds().width() == Device.width() && v.bounds().top < Device.height() / 5;
-            }).findOne();
-        }
-
-        if (tag) {
-            Common.click(tag);
-            console.log('进群1');
-        } else if (tag2) {
-            tag2.click();
-            console.log('进群2');
-        } else {
-            throw new Error('找不到“更多“');
-        }
-
-        Common.sleep(2000 + 2000 * Math.random());
-
-        let groupTag;
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).isVisibleToUser(true).findOnce();
-
-            if (!groupTag) {
-                groupTag = UiSelector().descContains(V.Message.intoGroupUserList[2]).findOnce();
-
-                if (!groupTag) {
-                    throw new Error('找不到“groupTag“');
-                }
-            }
-
-            groupTag.click();
-            Common.sleep(2300);
-            Log.log(groupTag);
-
-            let groupTag2 = UiSelector().textContains(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOnce();
-
-            if (groupTag2) {
-                Common.click(groupTag2);
-                Common.sleep(3000);
-            }
-        } else {
-            let tag = Common.id(V.Message.intoGroupUserList[2]).text(V.Message.intoGroupUserList[3]).isVisibleToUser(true).findOne();
-            if (!tag) {
-                tag = Common.id(V.Message.intoGroupUserList[2]).text(V.Message.intoGroupUserList[3]).findOne();
-                if (!tag) {
-                    throw new Error('找不到“groupTag“');
-                }
-            }
-
-            Common.click(tag);
-            Common.sleep(2300);
-            Log.log(tag);
-
-            groupTag = Common.id(V.Message.intoGroupUserListAdd[0]).text(V.Message.intoGroupUserListAdd[1]).findOne();
-        }
+        let intoGroupListTag = UiSelector().className('android.widget.TextView').text('群聊成员').isVisibleToUser(true).findOne();
+        Common.click(intoGroupListTag);
+        Common.sleep(2000 + 1000 * Math.random());
+        Log.log(tag);
 
         let rpCount = 0;
         let rpContains = [];
         let runIndex = 0;
         while (true) {
-            let contains = Common.id(V.Message.intoGroupUserList[4]).clickable(true).isVisibleToUser(true).find();
+            let contains = UiSelector().id('com.ss.android.ugc.aweme:id/content').clickable(true).isVisibleToUser(true).find();
             if (0 == contains.length) {
                 return true;
             }
 
-            let isAddFirst = false;
             for (let i in contains) {
-                if (isNaN(i)) {
-                    continue;
-                }
-
                 Log.log('第几个：' + i);
-                if (contains[i].bounds().top < groupTag.bounds().top) {
-                    continue;
-                }
-
-                if (contains[i].bounds().top > Device.height()) {
-                    continue;
-                }
-
-                if (contains[i].bounds().top + contains[i].bounds().height() > Device.height()) {
-                    continue;
-                }
-
-                let titleTag;
-                if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-                    titleTag = contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[5])) || contains[i].children().findOne(Common.id(V.Message.intoGroupUserList[6]));
-                    if (!titleTag || !titleTag.text()) {
-                        Log.log('无内容');
-                        continue;
-                    }
+                rpContains.push(contains[i].desc());
+                if (rpContains[0] == rpContains[1]) {
+                    rpCount++;
                 } else {
-                    let t = contains[i].bounds().top;
-                    let h = contains[i].bounds().height();
-                    titleTag = Common.id(V.Message.intoGroupUserList[5]).filter(v => {
-                        return v && v.bounds() && v.bounds().top > t && v.bounds().top + v.bounds().height() < t + h && v.bounds().left >= 0;
-                    }).findOne() || Common.id(V.Message.intoGroupUserList[6]).filter(v => {
-                        return v && v.bounds() && v.bounds().top > t && v.bounds().top + v.bounds().height() < t + h && v.bounds().left >= 0;
-                    }).findOne();
-                    if (!titleTag || !titleTag.text()) {
-                        Log.log('无内容');
-                        continue;
-                    }
+                    rpCount = 0;
                 }
 
-                if (!isAddFirst) {
-                    rpContains.push(titleTag.text());
-                    if (rpContains[0] == rpContains[1]) {
-                        rpCount++;
-                    } else {
-                        rpCount = 0;
-                    }
-
-                    if (rpContains.length >= 2) {
-                        rpContains.shift();
-                    }
-                    Log.log('rpContains', rpContains, rpCount);
-                    isAddFirst = true;
+                if (rpContains.length >= 2) {
+                    rpContains.shift();
                 }
+                Log.log('rpContains', rpContains, rpCount);
 
                 runIndex++;
-                if (contents.includes(titleTag.text()) || machineInclude(titleTag.text())) {
+                if (contents.includes(contains[i].desc()) || machineInclude(contains[i].desc())) {
+                    FloatDialogs.toast('昵称重复，不操作');
                     continue;
                 }
 
@@ -370,14 +166,15 @@ let Message = {
                 }
 
                 Log.log('点击元素，准备进入个人中心');
-                Common.click(contains[i]);
-                Common.sleep(2000 + 2000 * Math.random());
+                contains = UiSelector().id('com.ss.android.ugc.aweme:id/content').clickable(true).isVisibleToUser(true).find();
+                contains[i].click();
+                Common.sleep(3000 + 2000 * Math.random());
                 statistics.viewUser();
                 let isPrivateAccount = User.isPrivate();
                 if (isPrivateAccount) {
                     Common.back();
-                    machineSet(titleTag.text());
-                    contents.push(titleTag.text());
+                    machineSet(contains[i].desc());
+                    contents.push(contains[i].desc());
                     continue;
                 }
                 Log.log('是否是私密账号：' + isPrivateAccount);
@@ -385,35 +182,40 @@ let Message = {
                 Log.log('即将进入视频');
                 if (Video.intoUserVideo()) {
                     //点赞
-                    if (Math.random() * 100 <= config.zanRate) {
-                        Common.sleep(base * config.zanWait);
-                        Video.clickZan();
-                        Log.log('点赞了');
-                        Common.sleep(iBase * config.zanWait);
-                    }
-
-                    if (Math.random() * 100 <= config.collectRate && !User.isFocus()) {
-                        Common.sleep(base * config.collectWait);
-                        Video.collect();
-                        Log.log('收藏了');
-                        Common.sleep(iBase * config.collectWait);
-                    }
-
-                    if (Math.random() * 100 <= config.commentRate) {
-                        let msg = getMsg(0, Video.getContent());
-                        if (msg) {
-                            Common.sleep(base * config.commentWait);
-                            Video.openComment(!!Video.getCommentCount());
-                            Log.log('开启评论窗口');
-                            Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                            Log.log('评论了');
-                            Common.sleep(iBase * config.commentWait);
-                            Common.back(2, 800);
-                        } else {
-                            Common.back();//从视频页面到用户页面
+                    try {
+                        if (Math.random() * 100 <= config.zanRate) {
+                            Common.sleep(base * config.zanWait);
+                            Video.clickZan();
+                            Log.log('点赞了');
+                            Common.sleep(iBase * config.zanWait);
                         }
-                    } else {
-                        Common.back();//返回
+
+                        if (Math.random() * 100 <= config.collectRate && !User.isFocus()) {
+                            Common.sleep(base * config.collectWait);
+                            Video.collect();
+                            Log.log('收藏了');
+                            Common.sleep(iBase * config.collectWait);
+                        }
+
+                        if (Math.random() * 100 <= config.commentRate) {
+                            let msg = getMsg(0, Video.getContent());
+                            if (msg) {
+                                Common.sleep(base * config.commentWait);
+                                Video.openComment(!!Video.getCommentCount());
+                                Log.log('开启评论窗口');
+                                Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                                Log.log('评论了');
+                                Common.sleep(iBase * config.commentWait);
+                                Common.back(2, 800);
+                            } else {
+                                Common.back();//从视频页面到用户页面
+                            }
+                        } else {
+                            Common.back();//返回
+                        }
+                    } catch (e) {
+                        Log.log('错误', e);
+                        User.backHome();
                     }
                 } else {
                     Log.log('未进入视频');
@@ -422,13 +224,6 @@ let Message = {
                 Common.sleep(500);
                 Common.swipe(1, 1, 0.3);
                 Common.sleep(1000);
-                if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                    let closeBtn = Common.id(V.User.bgGroundClose[0]).isVisibleToUser(true).findOne();
-                    if (closeBtn) {
-                        Common.click(closeBtn);
-                    }
-                }
-                Common.sleep(1500);
                 if (Math.random() * 100 <= config.focusRate) {
                     Common.sleep(base * config.focusWait);
                     User.focus();
@@ -440,17 +235,16 @@ let Message = {
                     if (config.privateLanv) {
                         Log.log('私信卡片');
                         User.privateMsgCard();
-                        Common.sleep(1500);
-                        Common.back(2);
+                        Common.sleep(500);
                     } else {
-                        User.privateMsg(getMsg(1, titleTag.text()).msg);
+                        User.privateMsg(getMsg(1, contains[i].desc()).msg);
                     }
                     Common.sleep(iBase * config.privateWait);
                 }
-
-                Log.log('设置已经操作的账号：' + titleTag.text());
-                machineSet(titleTag.text());
-                contents.push(titleTag.text());
+                Log.log('设置已经操作的账号：' + contains[i].desc());
+                machineSet(contains[i].desc());
+                contents.push(contains[i].desc());
+                Common.sleep(300);
                 Common.back();
                 Common.sleep(config.accountWait);
             }

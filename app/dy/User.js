@@ -1,535 +1,458 @@
 let Common = require('app/dy/Common.js');
+let Video = require('app/dy/Video.js');
+let Comment = require('app/dy/Comment.js');
 let statistics = require('common/statistics.js');
-let V = require('version/V.js');
 
 const User = {
-    //蓝V发送卡片
-    privateMsgCard() {
-        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
-            Log.log('私密账号');
+    /**
+     * 返回到用户主页
+     * @returns {boolean}
+     */
+    backHome() {
+        let i = 5;
+        let settingTag;
+        do {
+            settingTag = UiSelector().descContains('复制名字').clickable(true).findOne();
+            if (!settingTag) {
+                Common.back();
+                System.sleep(1000);
+                continue;
+            }
+            Log.log('返回到了用户主页');
+            return true;
+        } while (i-- > 0 && !settingTag);
+        Log.log('返回用户主页失败');
+        return false;
+    },
+
+    /**
+     * 用户页面进入私信页面
+     * @returns {boolean}
+     */
+    intoPrivatePage() {
+        //私密账号，目前可以私信（不确定是否可以禁用私信）
+        // if (UiSelector().text('私密账号').isVisibleToUser(true).findOnce()) {
+        //     Log.log('私密账号');
+        //     return false;
+        // }
+        if (this.isBlackUser()) {
             return false;
         }
 
-        let settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
+        let settingTag = UiSelector().desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().text('更多').clickable(true).isVisibleToUser(true).findOne();
         if (!settingTag) {
             Log.log('找不到setting按钮');
             return false;
         }
 
-        Common.click(settingTag);
+        settingTag.click();
         Log.log("私信");
-        Common.sleep(1000);
+        Common.sleep(700 + 500 * Math.random());
 
-        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
+        let sendTag = UiSelector().text('发私信').isVisibleToUser(true).findOne();
         if (!sendTag) {
-            Log.log('找不到发私信按钮');
-            return false;
+            throw new Error('找不到发私信按钮');
         }
 
-        Common.click(sendTag.parent());
-        Common.sleep(2000);
-
-        let moreTag = Common.id(V.User.privateMsgMore[0]).descContains(V.User.privateMsgMore[1]).findOnce();
-        if (!moreTag) {
-            Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
-            Common.back();
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
-            }
-            return false;
-        }
-        Common.click(moreTag);
-        Common.sleep(1000);
-
-        let toolTag = Common.id(V.User.privateMsgMore[2]).textContains(V.User.privateMsgMore[3]).findOnce();
-        if (!toolTag) {
-            Log.log('找不到发私信toolTag');//可能是企业号，输入框被隐藏了
-            Common.back(2);
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
-            }
-            return false;
-        }
-        Common.click(toolTag);
-        Common.sleep(4000 + 2000 * Math.random());
-
-        let higherTag = UiSelector().textContains(V.User.privateMsgMore[4]).findOnce();
-        if (!higherTag) {
-            Log.log('找不到发私信higherTag');
-            Common.back(2);
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
-            }
-            return false;
-        }
-
-        Common.click(higherTag);
-        Common.sleep(2000 + 2000 * Math.random());
-
-        let previewTag = UiSelector().textContains(V.User.privateMsgMore[5]).isVisibleToUser(true).find();
-        if (!previewTag) {
-            Log.log('找不到发私信higherTag');
-            Common.back(3);
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
-            }
-            return false;
-        }
-
-        let count = Common.getRandomInt(0, previewTag.length - 1);
-        Log.log('点击第几个：', count, previewTag[count]);
-        Gesture.click(previewTag[count].bounds().left - 200 * Math.random(), previewTag[count].bounds().top + 50 * Math.random());
-        Common.sleep(2000 + 2000 * Math.random());
-
-
-        let sendsTag = UiSelector().textContains(V.User.privateMsgMore[6]).findOne();
-        Log.log("私信被关闭了么？");
-        if (!sendsTag) {
-            Common.sleep(Math.random() * 1000);
-            Common.back(3);
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
-            }
-            Log.log("返回两次");
-            return false;
-        }
-
-        statistics.privateMsg();
-        Common.click(sendsTag);
-        Common.sleep(Math.random() * 1000);
-        Log.log("成功：返回1次");
-        Common.back(2);
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-            Common.back(1);
-        }
-        return true;
+        let res = sendTag.parent().click();
+        Common.sleep(2000 + 1000 * Math.random());
+        return res;
     },
-    //保证执行的时候在哪个页面，执行完成也是哪个界面
-    //返回false是失败，true是成功，-1是被封禁
-    privateMsg(msg) {
-        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
-            Log.log('私密账号');
-            return false;
-        }
 
-        let settingTag;
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
-            if (!settingTag) {
-                Log.log('找不到setting按钮');
+    /**
+     * 蓝V发送卡片
+     * @returns {boolean}
+     */
+    privateMsgCard(index) {
+        try {
+            if (!this.intoPrivatePage()) {
                 return false;
             }
-        } else {
-            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce() || UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).findOnce();
-            if (!settingTag) {
-                Log.log('找不到setting按钮');
+
+            let moreTag = UiSelector().desc('更多面板').isVisibleToUser(true).findOne();
+            if (!moreTag) {
+                throw new Error('找不到发私信输入框');//可能是企业号，输入框被隐藏了
+            }
+            Common.click(moreTag);
+            Common.sleep(1200 + 300 * Math.random());
+
+            let toolTag = UiSelector().text('经营工具').clickable(false).isVisibleToUser(true).findOne();
+            if (!toolTag) {
+                Log.log('找不到发私信toolTag');//可能是企业号，输入框被隐藏了
+                this.backHome();
                 return false;
             }
-        }
+            toolTag.parent().click();
+            Common.sleep(4000 + 2000 * Math.random());
 
-        Common.click(settingTag);
-        Log.log("私信");
-        Common.sleep(1000);
-
-        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
-        if (!sendTag) {
-            Log.log('找不到发私信按钮');
-            return false;
-        }
-
-        Common.click(sendTag.parent());
-        Common.sleep(2000);
-
-        let textTag = Common.id(V.User.privateMsg[6]).findOnce();
-        if (!textTag) {
-            Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
-            Common.back();
-            return false;
-        }
-        Common.click(textTag);
-        Common.sleep(500);
-
-        textTag = Common.id(V.User.privateMsg[6]).findOnce();
-        let iText = '';
-        for (let i = 0; i < msg.length; i++) {
-            iText = msg.substring(0, i + 1);
-            textTag.setText(iText);
-            Common.sleep(200 + 300 * Math.random());
-        }
-
-        Common.sleep(500);
-        let sendTextTag = Common.id(V.User.privateMsg[7]).findOnce();
-        if (!sendTextTag) {
-            Log.log('发送消息失败');
-            return false;
-        }
-
-        Common.click(sendTextTag);
-        Common.sleep(1000);
-        Log.log("私信发送完成");
-        let closePrivateMsg = UiSelector().textContains(V.User.privateMsg[8]).findOneBy(1000);
-        Log.log("私信被关闭了么？");
-        if (closePrivateMsg) {
-            Common.sleep(Math.random() * 1000);
-            Common.back(2);
-            if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
+            let higherTag = UiSelector().desc('高级在线预约').isVisibleToUser(true).findOne();
+            if (!higherTag) {
+                throw new Error('找不到发私信higherTag');
             }
-            Log.log("返回两次");
-            return -1;
-        }
-        statistics.privateMsg();
-        Common.sleep(Math.random() * 1000);
-        Log.log("成功：返回2次");
-        Common.back(2);
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-            Common.back(1);
+
+            Common.click(higherTag);
+            Common.sleep(2000 + 2000 * Math.random());
+
+            let previewTag = UiSelector().desc('预览').isVisibleToUser(true).find();
+            if (!previewTag) {
+                throw new Error('找不到发私信higherTag');
+            }
+            let count = Math.floor(Math.random() * previewTag.length);
+            if (index != undefined) {
+                count = index;
+            }
+            Log.log('点击第几个：', count, previewTag[count]);
+            Gesture.click(previewTag[count].bounds().left - 200 * Math.random(), previewTag[count].bounds().top + 50 * Math.random());
+            Common.sleep(2000 + 2000 * Math.random());
+
+            let sendsTag = UiSelector().desc('发送').clickable(true).isVisibleToUser(true).findOne()
+            if (!sendsTag) {
+                throw new Error("返回两次");
+            }
+
+            statistics.privateMsg();
+            Common.click(sendsTag);
+            Common.sleep(1000 + Math.random() * 1000);
+            this.backHome();
+            return true;
+        } catch (e) {
+            Log.log(e);
+            this.backHome();
         }
 
-        return true;
+        return false;
     },
 
-    //代码完全复制上面的，这个是已经进入了用户页开始私信
-    privateMsgTwo(msg, noback) {
-        let textTag = Common.id(V.User.privateMsg[6]).findOnce();
-        if (!textTag) {
-            Log.log('找不到发私信输入框');//可能是企业号，输入框被隐藏了
-            Common.back();
-            return false;
-        }
-        Common.click(textTag);
-        Common.sleep(500);
-
-        textTag = Common.id(V.User.privateMsg[6]).findOnce();
-        let iText = '';
-        for (let i = 0; i < msg.length; i++) {
-            iText = msg.substring(0, i + 1);
-            textTag.setText(iText);
-            Common.sleep(200 + 300 * Math.random());
-        }
-
-        Common.sleep(500);
-        let sendTextTag = Common.id(V.User.privateMsg[7]).findOnce();
-        if (!sendTextTag) {
-            Log.log('发送消息失败');
-            return false;
-        }
-
-        Common.click(sendTextTag);
-        Common.sleep(1000);
-        Log.log("私信发送完成");
-        let closePrivateMsg = UiSelector().textContains(V.User.privateMsg[8]).findOneBy(1000);
-        Log.log("私信被关闭了么？");
-        if (closePrivateMsg) {
-            Common.sleep(Math.random() * 1000);
-            Common.back(2);
-            if (!noback && App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-                Common.back(1);
+    /**
+     * 发送私信
+     * @param {string} msg 
+     * @param {boolean} inMsgPage 是否已经在私信页面
+     * @param {boolean} noBackHome 不返回主界面
+     * @returns {boolean}
+     */
+    privateMsg(msg, inMsgPage, noBackHome) {
+        try {
+            if (!inMsgPage && !this.intoPrivatePage()) {
+                return false;
             }
-            Log.log("返回两次");
-            return -1;
+
+            let textTag = UiSelector().className('android.widget.EditText').filter(v => {
+                return v.isEditable();
+            }).isVisibleToUser(true).findOne();
+            if (!textTag) {
+                throw new Error('找不到发私信输入框');//可能是企业号，输入框被隐藏了
+            }
+            textTag.setText(msg);
+            Common.sleep(100 + 100 * Math.random());
+
+            let sendTextTag = UiSelector().desc('发送').isVisibleToUser(true).clickable(true).findOne();
+            if (!sendTextTag || !sendTextTag.click()) {
+                throw new Error('发送消息失败');
+            }
+
+            Common.sleep(500 + 500 * Math.random());
+            Log.log("私信发送完成");
+            statistics.privateMsg();
+            if (!noBackHome) {
+                this.backHome();
+            }
+            return true;
+        } catch (e) {
+            Log.log(e);
+            if (!noBackHome) {
+                this.backHome();
+            }
         }
-        statistics.privateMsg();
-        Common.sleep(Math.random() * 1000);
-        Log.log("成功：返回2次");
-        Common.back(2);
-        if (!noback && App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-            Common.back(1);
-        }
-        return true;
+        return false;
     },
 
+    /**
+     * 返回用户昵称
+     * @returns {string}
+     */
     getNickname() {
-        //一般用户
-        let i = 3;
-        while (i--) {
-            let nickname = Common.id(V.User.getNickname[0]).isVisibleToUser(true).findOnce();
-            if (nickname && nickname.text()) {
-                if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
-                    return nickname.text();
-                }
-                return nickname.text();
-            }
-            Common.sleep(200);
+        let nicknameTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).descContains('复制名字').findOne() || UiSelector().className('android.widget.TextView').isVisibleToUser(true).findOne();
+        if (nicknameTag) {
+            return nicknameTag.text();
         }
 
         throw new Error('找不到昵称');
     },
 
-    //机构 媒体等账号 公司
+    /**
+     * 机构 媒体等账号 公司
+     * @returns {boolean}
+     */
     isCompany() {
-        return this.getDouyin() == this.getNickname();
+        return !UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('抖音号：').findOne();
     },
 
+    /**
+     * 获取抖音号
+     * @returns {string}
+     */
     getDouyin() {
-        let douyin = Common.id(V.User.getDouyin[0]).isVisibleToUser(true).findOnce();
-        Log.log('douyin', douyin);
-        if (douyin && douyin.text()) {
-            return douyin.text().replace(V.User.getDouyin[1], '');
+        let douyinTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('抖音号：').findOne();
+        if (douyinTag) {
+            return douyinTag.text().replace('抖音号：', '');
         }
 
-        //部分机型ID不一样
-        douyin = UiSelector().textContains(V.User.getDouyin[1]).findOnce();
-        if (douyin && douyin.text()) {
-            return douyin.text().replace(V.User.getDouyin[1], '');
+        let settingTag = UiSelector().desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().text('更多').clickable(true).isVisibleToUser(true).findOne();
+        if (!settingTag) {
+            Log.log('找不到setting按钮');
+            return false;
         }
 
-        //官方账号等等
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') == 330901) {
-            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
-            if (douyin) {
-                douyin = douyin.children();
-                if (douyin) {
-                    douyin = douyin.children().findOne(UiSelector().className('android.widget.TextView'));
-                    if (douyin && douyin.text()) {
-                        return douyin.text();
-                    }
-                }
-            }
-        } else if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
-            if (douyin && douyin.text()) {
-                return douyin.text();
-            }
-        } else {
-            douyin = Common.id(V.User.getDouyin[2]).isVisibleToUser(true).findOnce();
-            if (douyin) {
-                Log.log(douyin);
-                douyin = douyin.findOne(UiSelector().textMatches("[\\s\\S]+"));
-                Log.log(douyin);
-                if (douyin && douyin.text()) {
-                    return douyin.text();
-                }
-            }
+        settingTag.click();
+        Common.sleep(1000 + 500 * Math.random());
+
+        douyinTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('抖音号: ').findOne();
+        if (douyinTag) {
+            Common.back();
+            return douyinTag.text().replace('抖音号: ', '');
         }
 
-        return this.getNickname();
+        throw new Error('获取抖音号失败');
     },
 
+    /**
+     * 获取”获赞“数量
+     * @returns {number}
+     */
     getZanCount() {
-        let zan = Common.id(V.User.getZanCount[0]).findOnce();
-        if (!zan || !zan.text()) {
-            throw new Error('找不到赞');
-        }
-
-        return Common.numDeal(zan.text());
+        let textTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('获赞').findOne();
+        let zanTag = textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+        return Common.numDeal(zanTag.text());
     },
 
+    /**
+     * 返回关注控件
+     * @returns {object}
+     */
+    getFocusTag() {
+        let textTag = UiSelector().className('android.widget.TextView').text('关注').findOne();
+        return textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+    },
+
+    /**
+     * 获取”关注“数量
+     * @returns {number}
+     */
     getFocusCount() {
-        let focus = Common.id(V.User.getFocusCount[0]).findOnce();
-        if (!focus) {
-            throw new Error('找不到关注');
-        }
-
-        return Common.numDeal(focus.text());
+        return Common.numDeal(this.getFocusTag().text());
     },
 
+    getFansTag() {
+        let textTag = UiSelector().className('android.widget.TextView').text('粉丝').findOne();
+        return textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+    },
+
+    /**
+     * 获取”粉丝“数量
+     * @returns {number}
+     */
     getFansCount() {
-        let fans = Common.id(V.User.getFansCount[0]).findOnce();
-        if (!fans) {
-            throw new Error('找不到粉丝');
-        }
-
-        return Common.numDeal(fans.text());
+        return Common.numDeal(this.getFansTag().text());
     },
 
+    /**
+     * 获取介绍
+     * @returns {string}
+     */
     getIntroduce() {
-        let tags = Common.id(V.User.getIntroduce[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
-        let text = '';
-        if (!tags) {
-            return text;
-        }
-        for (let i in tags) {
-            if (tags[i].text().indexOf('IP：') === 0) {
-                continue;
-            } else if (/^[\d]+岁$/.test(tags[i].text())) {
-                continue;
-            } else if (tags[i].text() === '男' || tags[i].text() === '女') {
-                continue;
-            }
-            text += "\n" + tags[i].text();
-        }
-        return text.substring(1);
+        let introduceTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+            return v.bounds().top > textTag.bounds().bottom;
+        }).findOne()
+        return introduceTag.text();
     },
 
+    /**
+     * 获取Ip
+     * @returns {string}
+     */
     getIp() {
-        let tags = Common.id(V.User.getIp[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
-        let text = '';
-        if (!tags) {
-            return text;
+        let ipTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('IP：').findOne();
+        if (!ipTag) {
+            return '未知';
         }
-        for (let i in tags) {
-            if (tags[i].text().indexOf('IP：') === 0) {
-                return tags[i].text().replace('IP：', '');
-            }
-        }
-        return text;
+        return ipTag.text().replace('IP：', '');
     },
 
+    /**
+     * 获取年龄
+     * @returns {number}
+     */
     getAge() {
-        let tags = Common.id(V.User.getAge[0]).findOnce().children().find(UiSelector().textMatches("[\\s\\S]+"));
-        let text = 0;
-        if (!tags) {
-            return text;
+        let ageTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('岁').findOne();
+        if (!ageTag) {
+            return 0;
         }
-        for (let i in tags) {
-            if (/^[\d]+岁$/.test(tags[i].text())) {
-                return tags[i].text().replace('岁', '');
-            }
-        }
-        return text;
+        return Common.numDeal(ageTag.text());;
     },
 
+    /**
+     * 获取作品数控件
+     * @returns {object}
+     */
     getWorksTag() {
-        let tags = Common.aId(V.User.getWorksTag[1]).textContains(V.User.getWorksTag[0]).findOnce();//rj5 或者 ptm
-        console.log("tags", tags);
-        if (!tags) {
+        let worksTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).descContains('作品').findOne();
+        console.log("worksTag", worksTag);
+        if (!worksTag) {
             return {
                 text: function () {
                     return 0;
                 }
             }
         }
-        console.log(tags);
-        return tags;
+        return worksTag;
     },
 
+    /**
+     * 获取作品数量
+     * @returns {number}
+     */
     getWorksCount() {
         let tag = this.getWorksTag();
         return Common.numDeal(tag.text());
     },
 
+    /**
+     * 是否开通了橱窗
+     * @returns {boolean}
+     */
     openWindow() {
-        //let file = UiSelector().textMatches([\\d]+件好物).findOnce();
-        // let tag = Common.id('nee').findOnce();
-        // if (!tag) {
-        //     return false;
-        // }
-        // return tag.children().findOne(text('进入橱窗')) ? true : false;
-        return false
+        return !!UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('商品橱窗').findOne();
     },
 
-    //比较耗时，需要优化
-    //比较耗时，需要优化
+    /**
+     * 获取性别  0女，1男，2未知
+     * @returns {string}
+     */
     getGender() {
-        let genderTag = Common.id(V.User.getIp[0]).findOnce().children().findOne(UiSelector().descContains("男"));
-        if (genderTag && genderTag.bounds().height() > 0 && genderTag.bounds().left > 0 && genderTag.bounds().top > 0) {
+        if (UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('男').findOne()) {
             return '1';
         }
 
-        genderTag = Common.id(V.User.getIp[0]).findOnce().children().findOne(UiSelector().descContains("女"));
-        if (genderTag && genderTag.bounds().height() > 0 && genderTag.bounds().left > 0 && genderTag.bounds().top > 0) {
+        if (UiSelector().className('android.widget.TextView').isVisibleToUser(true).textContains('女').findOne()) {
             return '0';
         }
 
         return '2';
     },
 
-    //是否是私密账号
-    isPrivate() {
-        Log.log("是否是私密账号？");
-        if (UiSelector().text(V.User.isPrivate[0]).findOnce() ? true : false) {
-            return true;
-        }
-
+    /**
+     * 黑名单账号（封禁和注销账号）
+     * @returns {boolean}
+     */
+    isBlackUser() {
         //帐号已被封禁
-        if (UiSelector().textContains(V.User.isPrivate[1]).findOnce()) {
+        if (UiSelector().textContains('封禁').isVisibleToUser(true).findOnce()) {
             return true;
         }
 
         //注销了
-        if (UiSelector().textContains(V.User.isPrivate[2]).findOnce()) {
+        if (UiSelector().textContains('账号已经注销').isVisibleToUser(true).findOnce()) {
             return true;
         }
-
-        Log.log("不是私密账号");
         return false;
     },
 
-    isTuangouTalent() {
-        // let tag = Common.id('nee').findOnce();
-        // if (!tag) {
-        //     return false;
-        // }
+    /**
+     * 是否是私密账号、注销账号、封禁账号
+     * @returns {boolean}
+     */
+    isPrivate() {
+        Log.log("是否是私密账号、注销账号、封禁账号？");
+        if (UiSelector().text('私密账号').isVisibleToUser(true).findOnce()) {
+            return true;
+        }
 
-        // return tag.children().findOne(text('团购推荐')) ? true : false;
-        return false
+        if (this.isBlackUser()) {
+            return true;
+        }
+        Log.log("不是私密账号、注销账号、封禁账号");
+        return false;
     },
 
+    /**
+     * 返回是否已关注控件
+     * @returns {object}
+     */
+    isFocusTag() {
+        return UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+            return v.hintText == '按钮';
+        }).textContains('已关注').findOne() || UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+            return v.hintText == '按钮';
+        }).textContains('互相关注').findOne();
+    },
+
+    /**
+     * 是否已关注
+     * @returns {boolean}
+     */
     isFocus() {
-        let hasFocusTag = Common.id(V.User.isFocus[0]).text(V.User.isFocus[1]).findOnce() || Common.id(V.User.isFocus[0]).text(V.User.isFocus[2]).findOnce();
-        if (hasFocusTag) {
-            return true;
-        }
-        return false;
+        return !!this.isFocusTag();
     },
 
+    /**
+     * 关注
+     * @returns {boolean}
+     */
     focus() {
-        let focusTag = Common.id(V.User.focus[0]).findOnce();//.text('关注')  .text('回关')
-        if (focusTag) {
-            Common.click(focusTag);
-            statistics.focus();
+        let focusTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+            return v.hintText == '按钮';
+        }).text('关注').findOne() || UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
+            return v.hintText == '按钮';
+        }).text('回关').findOne();
+
+        if (this.isFocus()) {
+            Log.log('已关注');
             return true;
         }
 
-        let hasFocusTag = Common.id(V.User.focus[1]).text(V.User.focus[2]).findOnce() || Common.id(V.User.focus[1]).text(V.User.focus[3]).findOnce();
-        if (hasFocusTag) {
-            return true;
+        if (focusTag) {
+            let res = focusTag.click();
+            Common.sleep(500 + 500 * Math.random());
+            return res;
         }
 
         throw new Error('找不到关注和已关注');
     },
 
+    /**
+     * 取消关注
+     * @returns {boolean}
+     */
     cancelFocus() {
-        let hasFocusTag = Common.id(V.User.cancelFocus[0]).findOnce();//text(已关注) || text(互相关注)
-        if (hasFocusTag) {
-            hasFocusTag.click();
-            Log.log('点击了已关注')
-            Common.sleep(1500);
-            //真正地点击取消
-            let cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
-            Log.log('cancelTag', cancelTag);
-            if (!cancelTag || cancelTag.bounds().top + cancelTag.bounds().height() > Device.height()) {
-                let x = Math.random() * 500 + 100;
-                Gesture.swipe(x, Device.height() / 2, x, 200, 200);
-                Common.sleep(1500);
-                Log.log(V.User.cancelFocus[1], V.User.cancelFocus[2]);
-                cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOnce();
-                Log.log('cancelTag', cancelTag);
-                if (!cancelTag) {
-                    throw new Error('取消关注的核心按钮找不到');
-                }
-                Common.click(cancelTag);
-                Common.sleep(1000 + Math.random() * 500);
-                cancelTag = Common.id(V.User.cancelFocus[1]).text(V.User.cancelFocus[2]).findOneBy(1000);
-                if (cancelTag) {
-                    cancelTag.parent() ? cancelTag.parent().click() : Common.click(cancelTag);
-                }
-            } else {
-                cancelTag.parent() ? cancelTag.parent().click() : Common.click(cancelTag);
-            }
+        let focusTag = this.isFocusTag();
+        if (!focusTag) {
+            return false;
         }
+        focusTag.click();
+        Common.sleep(1500 + 500 * Math.random());
 
-        Common.sleep(2000);
-        //私密账号会再次弹出“取消关注”的底部弹窗，需要再次点击
-        let cancelBtn = UiSelector().text(V.User.cancelFocus[2]).findOne();
-        console.log('私密账号', UiSelector().textContains(V.User.cancelFocus[2]).findOne());
-        console.log(cancelBtn);
-
+        let cancelBtn = UiSelector().className('android.widget.TextView').text('取消关注').findOne();
         if (cancelBtn) {
-            Common.sleep(1000);
-            cancelBtn.click();
-            Common.sleep(1000);
+            cancelBtn.parent().click();
+            Common.sleep(1000 + 500 * Math.random());
         }
 
-        let focusTag = Common.id(V.User.cancelFocus[3]).findOnce();//.text('关注') 或者回关
-        if (focusTag) {
+        let cancelTag = UiSelector().className('android.widget.TextView').descContains('取消关注').clickable(true).findOne();
+        if (!cancelTag) {
+            this.backHome();
+            Log.log('该机型可能只需要1次即可取消');
             return true;
         }
 
-        throw new Error('找不到关注和已关注');
+        let res = cancelTag.click();
+        Common.sleep(1000 + 1000 * Math.random());
+        return res;
     },
 
+    /**
+     * 返回用户数据
+     * @returns {object}
+     */
     getUserInfo() {
         let res = {};
         res = {
@@ -542,7 +465,6 @@ const User = {
             // fansCount: this.getFansCount(),
             worksCount: 0,
             // openWindow: 0,//开启橱窗
-            // tuangouTalent: this.isTuangouTalent(),
             ip: this.getIp(),
             // isCompany: this.isCompany(),//是否是机构 公司
             gender: this.getGender(),
@@ -565,254 +487,127 @@ const User = {
     },
 
     contents: [],
+    /**
+     * 取消关注列表
+     * @param {object} machine 
+     * @returns {boolean}
+     */
     cancelFocusList(machine) {
-        let focus = Common.id(V.User.cancelFocusList[0]).findOnce();
+        let focus = this.getFocusTag();
         if (!focus) {
+            FloatDialogs.toast('找不到关注');
             throw new Error('找不到关注');
         }
 
-        Gesture.click(focus.bounds().centerX(), focus.bounds().centerY());
-        Common.sleep(5000);
-
-        let focusCountTag = Common.id(V.User.cancelFocusList[1]).findOnce();
-        if (!focusCountTag) {
-            throw new Error('找不到focus');
-        }
-
-        let focusCount = Common.numDeal(focusCountTag.text());
-        if (focusCount === 0) {
-            return true;
-        }
-
-        let errorCount = 0;
-        let loop = 0;
-        let arr = [];
+        Common.click(focus);
+        Common.sleep(4000 + 1000 * Math.random());
         while (true) {
-            let containers = Common.id(V.User.cancelFocusList[2]).filter((v) => {
-                return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height();
-            }).find();
-
+            let containers = Common.id('root_layout').isVisibleToUser(true).find();
             if (containers.length === 0) {
-                errorCount++;
                 Log.log('containers为0');
-            }
-
-            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
-            if (arr.length > 2) {
-                arr.shift();
+                FloatDialogs.toast('找不到关注列表');
+                throw new Error('找不到关注列表');
             }
 
             for (let i in containers) {
-                if (isNaN(i)) {
-                    continue;
-                }
-                let titleTag = containers[i].children().findOne(Common.id(V.User.cancelFocusList[3]));
-                Log.log("获取_addr：" + titleTag._addr);
-                if (!titleTag || this.contents.includes(titleTag.text())) {
+                Log.log("昵称：" + containers[i].desc());
+                if (!containers[i] || this.contents.includes(containers[i].text())) {
                     continue;
                 }
 
-                Log.log(this.contents.length, this.contents.includes(titleTag.text()));
-                let nickname = titleTag.text();
+                Log.log(this.contents.length, this.contents.includes(containers[i].desc()));
+                let nickname = containers[i].desc();
 
-                //顶部标题的tab外容器
-                let titleBarTag = Common.id(V.User.cancelFocusList[4]).findOnce();
-                if (titleBarTag && titleTag.bounds().top <= titleBarTag.bounds().top + titleBarTag.bounds().height()) {
-                    continue;
-                }
-
-                if (titleTag.bounds().height() < 0) {
-                    continue;
-                }
-
-                let hasFocusTag = containers[i].children().findOne(Common.id(V.User.cancelFocusList[5]));
+                let hasFocusTag = containers[i].children().findOne(UiSelector().isVisibleToUser(true).descContains('关注')) || containers[i].children().findOne(UiSelector().isVisibleToUser(true).textContains('关注'));;
                 if (!hasFocusTag) {
                     continue;
                 }
 
-                //第一种机型
-                Log.log(machine.get('task_dy_cancel_focus_mutual_switch', 'bool'), hasFocusTag.text());
-                if ((hasFocusTag.text() === '已关注' || hasFocusTag.desc() === '已关注') || (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && (hasFocusTag.text() === '互相关注' || hasFocusTag.desc() === '互相关注'))) {
-                    let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
-                    Log.log('setting', setting);
-                    if (!setting) {
-                        Log.log('找不到focus setting-1');
-                        errorCount++;
-                        continue;
-                    }
-
-                    setting.click();
-                    Common.sleep(2000);
-
-                    let cancelTag = Common.id(V.User.cancelFocusList[7]).text(V.User.cancelFocusList[8]).filter((v) => {
-                        return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height();
-                    }).findOnce();
-                    Common.click(cancelTag);
-                } else if (!machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && (hasFocusTag.text() === '互相关注' || hasFocusTag.desc() === '互相关注')) {
-                    continue;
-                } else if (hasFocusTag.text() !== V.User.cancelFocusList[9] && hasFocusTag.text() !== V.User.cancelFocusList[10]) {
-                    //既不是“已关注”也不是“相互关注” 还不是“关注”  适配老机型
-                    let setting = containers[i].children().findOne(Common.id(V.User.cancelFocusList[6]));
-                    if (!setting) {
-                        errorCount++;
-                        Log.log('找不到focus setting');
-                        continue;
-                    }
-
-                    Common.click(titleTag);
-                    Common.sleep(3000 + 1000 * Math.random());
-
-                    let focusTag = UiSelector().text(V.User.cancelFocusList[11]).findOnce();
-                    if (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && !focusTag) {
-                        focusTag = UiSelector().text(V.User.cancelFocusList[9]).findOnce();
-                    }
-
-                    if (!focusTag) {
-                        Common.back();
-                        this.contents.push(nickname);
-                        continue;
-                    }
-
-                    errorCount = 0;
+                let title = hasFocusTag.desc() || hasFocusTag.text();
+                Log.log(machine.get('task_dy_cancel_focus_mutual_switch', 'bool'), title);
+                if (title.indexOf('已关注') != -1 || (machine.get('task_dy_cancel_focus_mutual_switch', 'bool') && title.indexOf('互相关注') != -1)) {
+                    containers[i].click();
+                    Common.sleep(2000 + 1000 * Math.random());
                     this.cancelFocus();
-                    Common.sleep(1500);
-                    Common.back();
                 }
-
                 this.contents.push(nickname);
+                while (!UiSelector().id('android:id/text1').text('关注').selected(true).isVisibleToUser(true).findOne()) {
+                    Common.back(1, 500, 500);
+                }
                 Common.sleep(500);
             }
 
-            if (errorCount >= 3) {
-                throw new Error('遇到3次错误');
-            }
-
             Log.log('滑动');
-            Common.swipeFocusListOp();
-            Common.sleep(1500);
-
-            if (arr[0] === arr[1]) {
-                loop++;
-            } else {
-                loop = 0;
-            }
-
-            if (loop >= 3) {
+            if (!Common.swipeFocusListOp()) {
                 return true;
             }
+            Common.sleep(1500 + 1000 * Math.random());
         }
     },
 
+    /**
+     * 设置用户昵称
+     * @param {array} contents 
+     * @param {string} account 
+     * @param {string} nickname 
+     * @param {object} machine 
+     */
     fansIncListOp(contents, account, nickname, machine) {
+        nickname = Encrypt.md5(nickname);
         machine.set('task_dy_toker_fans_inc_main_' + account + '_' + nickname, true);
         contents.push(nickname);
         Common.sleep(500 + 500 * Math.random());
     },
 
-    //快速涨粉
-    fansIncList(getMsg, DyVideo, DyComment, machine, settingData, contents, meNickname) {
-        let account;
-        if (settingData && settingData.account) {
-            account = settingData.account;
-        }
+    /**
+     * 快速涨粉
+     * @param {function} getMsg 
+     * @param {object} machine 
+     * @param {object} settingData 
+     * @param {array} contents 
+     * @param {string} meNickname 
+     * @returns {boolean}
+     */
+    fansIncList(getMsg, machine, settingData, contents, meNickname) {
+        let account = settingData.account;
+        let fansTag = this.getFansTag();
+        Common.click(fansTag);
+        Common.sleep(2000 + 1000 * Math.random());
 
-        let times = 3;
-        while (times--) {
-            let fans = Common.id(V.User.fansIncList[0]).findOnce();
-            if (!fans) {
-                throw new Error('找不到粉丝');
-            }
-
-            Common.click(fans);
-            Common.sleep(2000);
-            fans = Common.id(V.User.fansIncList[0]).findOnce();
-            if (fans) {
-                continue;
-            }
-            break;
-        }
-
-        if (times <= 0) {
-            return true;
-        }
-
-        let topTag = Common.id(V.User.fansIncList[1]).isVisibleToUser(true).findOnce();
-        let errorCount = 0;
-        let loop = 0;
         let arr = [];
         while (true) {
-            let containers = Common.id(V.User.fansIncList[2]).isVisibleToUser(true).find();
+            let containers = Common.id('root_layout').isVisibleToUser(true).find();
             Log.log("containers长度：" + containers.length);
-
             if (containers.length === 0) {
-                errorCount++;
                 Log.log('containers为0');
-            }
-
-            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
-            if (arr.length >= 3) {
-                arr.shift();
+                FloatDialogs.toast('找不到粉丝列表');
+                throw new Error('找不到粉丝列表');
             }
 
             for (let i in containers) {
-                Log.log("i:" + i + ":" + (isNaN(i) ? "yes" : "no"));
-                if (isNaN(i)) {
+                Log.log("title", containers[i].desc());
+                if (containers[i].children().findOne(UiSelector().desc('进入他的主页'))) {
+                    Log.log('自己，不操作');
                     continue;
                 }
 
-                let titleTag = containers[i].children().findOne(Common.id(V.User.fansIncList[3]));
-                if (!titleTag || !titleTag.bounds()) {
-                    continue;
-                }
-
-                if (titleTag.bounds().top < topTag.bounds().top + topTag.bounds().height()) {
-                    continue;
-                }
-
-                if (!titleTag || contents.includes(titleTag.text())) {
-                    continue;
-                }
-
-                Log.log("title", titleTag.text());
-
-                if (290701 != App.getAppVersionCode('com.ss.android.ugc.aweme')) {
-                    if (containers[i].children().findOne(Common.id(V.User.fansIncList[4]))) {
-                        //rp++;//是自己（从自己的粉丝页面搜索进入之后，第一个用户很可能是自己）
-                        continue;
-                    }
-                }
-
-                Log.log(contents.length, contents.includes(titleTag.text()));
-                let nickname = titleTag.text();
-
-                if (titleTag.bounds().height() < 0) {
-                    continue;
-                }
-
+                let nickname = containers[i].desc();
                 if (machine.get('task_dy_toker_inc_main_' + account + '_' + nickname, 'bool')) {
                     Log.log('重复');
+                    FloatDialogs.toast('重复');
                     continue;
                 }
 
                 //进入用户首页
-                let intoUserCount = 3;
-                while (intoUserCount--) {
-                    Common.click(titleTag);
-                    Common.sleep(1500 + 1000 * Math.random());
-                    try {
-                        this.getNickname();
-                    } catch (e) {
-                        Log.log('点击进入失败', e);
-                        continue;
-                    }
-                    break;
-                }
+                containers = Common.id('root_layout').isVisibleToUser(true).find();
+                containers[i].click();
+                Common.sleep(3000 + 1000 * Math.random());
 
                 if (this.isPrivate()) {
                     Log.log('私密账号');
-                    machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
+                    this.fansIncListOp(contents, account, nickname, machine);
                     Common.back();
-                    Common.sleep(1000);
+                    Common.sleep(500 + 500 * Math.random());
                     continue;
                 }
 
@@ -822,29 +617,7 @@ const User = {
                 }
 
                 let rateCurrent = Math.random() * 100;
-                //查看是否头像点赞 id=pgn
                 this.fansIncListOp(contents, account, nickname, machine);
-
-                //注意31.7.0已经取消了头像赞
-                Log.log("点击头像概率：" + settingData.task_dy_fans_inc_head_zan_rate);
-                if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701 && rateCurrent <= settingData.task_dy_fans_inc_head_zan_rate * 1) {
-                    Log.log("准备点击头像");
-                    let header = Common.id(V.User.fansIncList[5]).isVisibleToUser(true).findOne();
-                    Log.log(header);
-                    if (header) {
-                        Common.click(header);
-                        Common.sleep(1000);
-                        let zanTag = Common.id(V.User.fansIncList[6]).textContains(V.User.fansIncList[7]).isVisibleToUser(true).findOne();
-                        Common.click(zanTag);
-                        Common.sleep(1000);
-                        Common.back(1);
-                        Common.sleep(1000);
-                    }
-                    Common.back();
-                    Common.sleep(1000);
-                    continue;
-                }
-
                 //查看粉丝和作品数是否合格
                 let worksCount = 0;
 
@@ -858,191 +631,103 @@ const User = {
 
                 if (worksCount == 0) {
                     Common.back();
-                    Common.sleep(1000);
+                    Common.sleep(500 + 500 * Math.random());
                     continue;
                 }
 
                 rateCurrent -= settingData.task_dy_fans_inc_head_zan_rate * 1;
-                if (DyVideo.intoUserVideo()) {
+                if (Video.intoUserVideo()) {
                     Common.sleep(1000 * settingData.task_dy_fans_inc_user_video_wait * 1);//视频休眠
                     Log.log("视频休眠：" + settingData.task_dy_fans_inc_user_video_wait);//视频休眠
                     if (rateCurrent <= settingData.task_dy_fans_inc_video_zan_rate * 1) {
-                        !DyVideo.isZan() && DyVideo.clickZan();
-                        Common.sleep(1000);
-                        Common.back(2);
-                        Common.sleep(1000);
+                        !Video.isZan() && Video.clickZan();
+                        Common.sleep(500 + 500 * Math.random());
+                        this.backHome();
+                        Common.back(1, 500, 500);
                         continue;
                     }
 
                     rateCurrent -= settingData.task_dy_fans_inc_video_zan_rate * 1;
 
                     if (rateCurrent <= settingData.task_dy_fans_inc_comment_rate * 1) {
-                        let videoTitle = DyVideo.getContent();
-                        DyVideo.openComment(!!DyVideo.getCommentCount());
-                        DyComment.commentMsg(getMsg(0, videoTitle).msg);
+                        let videoTitle = Video.getContent();
+                        Video.openComment(!!Video.getCommentCount());
+                        Comment.commentMsg(getMsg(0, videoTitle).msg);
                         Common.sleep(1000 + 1000 * Math.random());
-                        DyComment.zanComment(Common, settingData.task_dy_fans_inc_comment_zan_count * 1, meNickname);
-                        Common.sleep(1000);
-                        Common.back(2);
-                        Common.sleep(1000);
+                        System.setAccessibilityMode('!fast');//非快速模式
+                        Comment.zanComment(settingData.task_dy_fans_inc_comment_zan_count * 1, meNickname);
+                        System.setAccessibilityMode('fast');//快速模式
+                        Common.sleep(500 + 500 * Math.random());
+                        this.backHome();
+                        Common.back(1, 500, 500);
                         continue;
                     }
 
                     rateCurrent -= settingData.task_dy_fans_inc_comment_rate * 1;
                     if (rateCurrent <= settingData.task_dy_fans_inc_collection_rate * 1) {
-                        DyVideo.collect();
-                        Common.sleep(1000);
-                        Common.back(2);
-                        Common.sleep(1000);
+                        Video.collect();
+                        this.backHome();
+                        Common.back(1, 500, 500);
                         continue;
                     }
 
-                    Common.sleep(1000);
-                    Common.back(2);
-                    Common.sleep(1000);
+                    Common.sleep(500 + 500 * Math.random());
+                    this.backHome();
+                    Common.back(1, 500, 500);
                     continue;
                 }
-            }
-
-            if (errorCount >= 3) {
-                throw new Error('遇到3次错误');
             }
 
             Log.log('滑动');
-            Common.swipeFansListOp();
-            Common.sleep(1500);
-
-            if (arr[0] === arr[1]) {
-                loop++;
-            } else {
-                loop = 0;
-            }
-            Log.log('loop', loop);
-
-            if (loop >= 3) {
+            if (!Common.swipeFansListOp()) {
                 return true;
             }
+            Common.sleep(1500);
         }
     },
 
-    //type=0关注截流，type=1粉丝截流
-    focusUserList(type, getMsg, DyVideo, DyComment, machine, settingData, contents, meNickname) {
-        let account;
-        if (settingData && settingData.account) {
-            account = settingData.account
-        } else {
-            account = settingData
-        }
-        let times = 3;
-        while (times--) {
-            if (type === 0) {
-                let focus = Common.id(V.User.focusUserList[0]).findOnce();
-                if (!focus) {
-                    throw new Error('找不到关注');
-                }
+    /**
+     * type=0关注截流，type=1粉丝截流
+     * @param {number} type 
+     * @param {function} getMsg 
+     * @param {object} machine 
+     * @param {object} settingData 
+     * @param {array} contents 
+     * @param {string} meNickname 
+     * @returns 
+     */
+    focusUserList(type, getMsg, machine, settingData, contents, meNickname) {
+        let account = settingData
+        let tag = type == 0 ? this.getFocusTag() : this.getFansTag();
+        Common.click(tag);
+        Common.sleep(2000 + 1000 * Math.random());
 
-                Common.click(focus);
-                Common.sleep(2000);
-                focus = Common.id(V.User.focusUserList[0]).findOnce();
-                if (focus) {
-                    continue;
-                }
-                break;
-            } else {
-                let fans = Common.id(V.User.focusUserList[1]).findOnce();
-                if (!fans) {
-                    throw new Error('找不到粉丝');
-                }
-
-                Common.click(fans);
-                Common.sleep(2000);
-                fans = Common.id(V.User.focusUserList[1]).findOnce();
-                if (fans) {
-                    continue;
-                }
-                break;
-            }
-        }
-
-        if (times <= 0) {
-            FloatDialogs.show(type === 0 ? '关注列表都已操作' : '粉丝列表都已操作');
-            return false;//设置了隐私，不能操作
-        }
-
-        let topTag = Common.id(V.User.focusUserList[2]).isVisibleToUser(true).findOnce();
-        let topTagTop = topTag.bounds().top + topTag.bounds().height();
-        let errorCount = 0;
-        let loop = 0;
-        let arr = [];
         while (true) {
-            let containers = Common.id(V.User.focusUserList[3]).isVisibleToUser(true).find();
+            let containers = Common.id('root_layout').isVisibleToUser(true).find();
             Log.log("containers长度：" + containers.length);
 
             if (containers.length === 0) {
-                errorCount++;
                 Log.log('containers为0');
+                throw new Error('操作列表为0');
             }
-
-            arr.push(containers ? (containers[0] && containers[0]._addr) : null);
-            if (arr.length >= 3) {
-                arr.shift();
-            }
-
-            errorCount = 0;
 
             for (let i in containers) {
-                Log.log("i:" + i + ":" + (isNaN(i) ? "yes" : "no"));
-                if (isNaN(i)) {
+                Log.log("title", containers[i].desc());
+                if (containers[i].children().findOne(UiSelector().desc('进入他的主页'))) {
+                    Log.log('自己，不操作');
                     continue;
                 }
 
-                let titleTag = containers[i].children().findOne(Common.id(V.User.focusUserList[4]));
-                if (!titleTag) {
-                    continue;
-                }
-
-                if (titleTag.bounds().top < topTagTop) {
-                    continue;
-                }
-
-                if (!titleTag || contents.includes(titleTag.text())) {
-                    continue;
-                }
-
-                Log.log("title", titleTag.text());
-
-                if (containers[i].children().findOne(Common.id(V.User.focusUserList[5]))) {
-                    //rp++;//是自己（从自己的粉丝页面搜索进入之后，第一个用户很可能是自己）
-                    continue;
-                }
-
-                Log.log(contents.length, contents.includes(titleTag.text()));
-                let nickname = titleTag.text();
-
-                if (titleTag.bounds().height() < 0) {
-                    continue;
-                }
-
+                let nickname = containers[i].desc();
                 if (machine.get('task_dy_toker_focus_' + account + '_' + nickname, 'bool')) {
                     Log.log('重复');
                     continue;
                 }
 
                 //进入用户首页
-                let intoUserCount = 3;
-                while (intoUserCount--) {
-                    Common.click(titleTag);
-                    Common.sleep(1500 + 1000 * Math.random());
-                    try {
-                        this.getNickname();
-                    } catch (e) {
-                        Log.log('点击进入失败', e);
-                        continue;
-                    }
-                    break;
-                }
-
+                containers[i].click();
                 statistics.viewUser();
+                Common.sleep(3000 + 2000 * Math.random());
 
                 if (this.isPrivate()) {
                     Log.log('私密账号');
@@ -1091,17 +776,17 @@ const User = {
                 let commentRate = Math.random() * 100;
                 let zanRate = Math.random() * 100;
 
-                if ((commentRate <= settingData.commentRate * 1 || zanRate <= settingData.zanRate * 1) && DyVideo.intoUserVideo()) {
+                if ((commentRate <= settingData.commentRate * 1 || zanRate <= settingData.zanRate * 1) && Video.intoUserVideo()) {
                     if (zanRate <= settingData.zanRate * 1) {
-                        !DyVideo.isZan() && DyVideo.clickZan();
+                        !Video.isZan() && Video.clickZan();
                     }
 
                     if (commentRate <= settingData.commentRate * 1) {
-                        let videoTitle = DyVideo.getContent();
-                        DyVideo.openComment(!!DyVideo.getCommentCount());
-                        DyComment.commentMsg(getMsg(0, videoTitle).msg);
+                        let videoTitle = Video.getContent();
+                        Video.openComment(!!Video.getCommentCount());
+                        Comment.commentMsg(getMsg(0, videoTitle).msg);
                         Common.sleep(1000 + 1000 * Math.random());
-                        DyComment.zanComment(Common, 5, meNickname);
+                        Comment.zanComment(5, meNickname);
                     }
 
                     Common.back(1, 800);
@@ -1113,7 +798,7 @@ const User = {
                     return true;
                 }
 
-                Common.back(1, 800);
+                Common.back(1, 1500);
                 contents.push(nickname);
                 if (UiSelector().descContains('更多').clickable(true).filter((v) => {
                     return v && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() / 3;
@@ -1124,281 +809,103 @@ const User = {
                 Common.sleep(500 + 500 * Math.random());
             }
 
-            if (errorCount >= 3) {
-                throw new Error('遇到3次错误');
-            }
-
             Log.log('滑动');
-            type === 1 ? Common.swipeFansListOp() : Common.swipeFocusListOp();
+            let res = type === 1 ? Common.swipeFansListOp() : Common.swipeFocusListOp();
             Common.sleep(1500);
-
-            if (arr[0] == arr[1]) {
-                loop++;
-            } else {
-                loop = 0;
-            }
-            Log.log('loop', loop);
-
-            if (loop >= 5) {
+            if (!res) {
+                Log.log('滑动到底了');
                 return true;
             }
         }
     },
 
-    //进入关注列表 我的，不是其他的关注列表
+    /**
+     * 进入关注列表 我的，不是其他的关注列表
+     * @returns {boolean}
+     */
     intoFocusList() {
-        let fans = Common.id(V.User.intoFocusList[0]).isVisibleToUser(true).findOnce();
-        if (!fans) {
-            throw new Error('找不到关注列表');
-        }
-
-        if (fans.text() == 0) {
-            return false;
-        }
-
-        Gesture.click(fans.bounds().centerX(), fans.bounds().centerY());
-        Common.sleep(2000);
-
-        let focusCountTag = Common.id(V.User.intoFocusList[1]).findOnce();
-        if (!focusCountTag) {
-            throw new Error('找不到focusCountTag');
-        }
-
-        let focusCount = Common.numDeal(focusCountTag.text());
-        if (focusCount === 0) {
-            return false;
-        }
-        return true;
+        let focusTag = this.getFocusTag();
+        return Common.click(focusTag);
     },
 
+    /**
+     * 通过关注列表搜索指定用户
+     * @param {string} keyword 
+     * @returns {boolean}
+     */
     focusListSearch(keyword) {
-        let searchBox = Common.id(V.User.focusListSearch[0]).isVisibleToUser(true).findOnce();
-        Common.click(searchBox);
+        let searchBox = UiSelector().className('android.widget.EditText').filter(v => {
+            return v.isEditable();
+        }).isVisibleToUser(true).findOne();
+        searchBox.setText(keyword);
         Common.sleep(1000 + 1000 * Math.random());
 
-        searchBox = Common.id(V.User.focusListSearch[0]).isVisibleToUser(true).findOnce();
-        searchBox.setText(keyword);
+        let nickTag = Common.id('root_layout').filter(v => {
+            return v.children().findOne(UiSelector().text('DeekeScript').isVisibleToUser(true));
+        }).isVisibleToUser(true).findOne();
 
-        let nickTag = Common.id(V.User.focusListSearch[1]).text(keyword).findOnce();//昵称查找
         Log.log('nickTag', keyword, nickTag);
         if (!nickTag) {
-            nickTag = Common.id(V.User.focusListSearch[2]).textContains(keyword).findOnce();//账号查找
-            if (!nickTag) {
-                return false;
-            }
+            return false;
         }
 
-        Common.click(nickTag);
-        Common.sleep(3000);
+        nickTag.click();
+        Common.sleep(3000 + 2000 * Math.random());
         return true;
     },
 
-    //粉丝回访
+    /**
+     * 粉丝回访
+     * @param {array} nicknames 
+     * @returns {boolean}
+     */
     viewFansList(nicknames) {
-        let fans = Common.id(V.User.viewFansList[0]).isVisibleToUser(true).findOnce();
+        let fans = this.getFansTag();
         if (!fans) {
             throw new Error('找不到粉丝');
         }
 
-        Gesture.click(fans.bounds().centerX(), fans.bounds().centerY());
-        Common.sleep(2000);
-
-        let fansCountTag = Common.id(V.User.viewFansList[1]).findOnce();
-        if (!fansCountTag) {
-            throw new Error('找不到fans');
-        }
-
-        let fansCount = Common.numDeal(fansCountTag.text());
-        if (fansCount === 0) {
-            return true;
-        }
-
-        let errorCount = 0;
+        Common.click(fans);
+        Common.sleep(2000 + 1000 * Math.random());
         let contents = [];
-        let loop = 0;
         while (true) {
-            let containers = Common.id(V.User.viewFansList[2]).filter((v) => {
-                return v && v.bounds() && v.bounds().width() > 0 && v.bounds().height() > 0 && v.bounds().top + v.bounds().height() < Device.height() - 200;
-            }).find();
-
+            let containers = containers = Common.id('root_layout').isVisibleToUser(true).find();
             if (containers.length === 0) {
                 errorCount++;
                 Log.log('containers为0');
             }
 
-            let rp = 0;
             for (let i in containers) {
-                if (isNaN(i)) {
-                    continue;
-                }
-                let titleTag = containers[i].children().findOne(Common.id(V.User.viewFansList[3]));
-                if (!titleTag || contents.includes(titleTag.text())) {
-                    rp++;
-                    continue;
-                }
-
-                Log.log(contents.length, contents.includes(titleTag.text()));
-                let nickname = titleTag.text();
-
+                Log.log(contents.length, contents.includes(containers[i].desc()));
+                let nickname = containers[i].desc();
                 if (nicknames.includes(nickname)) {
                     continue;
                 }
 
-                let titleBarTag = Common.id(V.User.viewFansList[4]).findOnce();
-                if (titleBarTag && titleTag.bounds().top <= titleBarTag.bounds().top + titleBarTag.bounds().height()) {
-                    continue;
-                }
-
-                if (titleTag.bounds().height() < 0) {
-                    continue;
-                }
-
-                let rp = 3;
-                while (rp--) {
-                    Common.click(titleTag);
-                    Common.sleep(1000);
-                    Common.sleep(4000 * Math.random() + 2500);
-                    Common.back();
-                    Common.sleep(500);
-                    break;
-                }
+                containers[i].click();
+                Common.sleep(2000 + 3000 * Math.random());
                 nicknames.push(nickname);
                 contents.push(nickname);
-            }
-
-            if (errorCount >= 3) {
-                throw new Error('遇到3次错误');
+                Common.back(1, 500, 500);
             }
 
             Log.log('滑动');
-            Common.swipeFansListOp();
-            Common.sleep(500);
-            Log.log(rp, containers.length);
-            if (rp === containers.length) {
-                loop++;
-            } else {
-                loop = 0;
-            }
-            if (loop >= 3) {
+            if (!Common.swipeFansListOp()) {
                 return true;
             }
+            Common.sleep(500);
         }
     },
 
-    hasAlertInput() {
-        if (290701 <= App.getAppVersionCode('com.ss.android.ugc.aweme')) {
-            return false;
-        }
-
-        return Common.id(V.User.hasAlertInput[0]).findOne();
-    },
-
-    zanHead() {
-        Log.log("准备点击头像");
-        let header = Common.id(V.User.head[0]).isVisibleToUser(true).findOne();
-        Log.log(header);
-        if (header) {
-            Common.click(header);
-            Common.sleep(1000 + 1000 * Math.random());
-            let zanTag = Common.id(V.User.head[1]).textContains(V.User.head[2]).isVisibleToUser(true).findOne();
-            Common.click(zanTag);
-            Common.sleep(1000);
-            Common.back(1);
-            Common.sleep(1000);
-        } else {
-            Common.back();
-            Common.sleep(1000);
-        }
-    },
-
+    /**
+     * 从用户页面点击头像，进入直播间
+     * @returns {boolean}
+     */
     intoLive() {
-        let header = Common.id(V.User.head[0]).isVisibleToUser(true).findOne();
+        let header = UiSelector().descContains('用户头像').descContains('直播中').isVisibleToUser(true).findOne();
         Log.log(header);
-        if (header) {
-            Common.click(header);
-            return true;
-        }
-        return false;
+        return header.click();
     },
-
-    privateMsgCard(index) {
-        if (Common.id(V.User.privateMsg[0]).text(V.User.privateMsg[1]).findOnce()) {
-            Log.log('私密账号');
-            return false;
-        }
-
-        let settingTag;
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            settingTag = Common.id(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
-            if (!settingTag) {
-                Log.log('找不到setting按钮');
-                return false;
-            }
-        } else {
-            settingTag = UiSelector().className(V.User.privateMsg[2]).desc(V.User.privateMsg[3]).isVisibleToUser(true).findOnce();
-            if (!settingTag) {
-                Log.log('找不到setting按钮');
-                return false;
-            }
-        }
-
-        Common.click(settingTag);
-        Log.log("私信");
-        Common.sleep(1000);
-
-        let sendTag = Common.id(V.User.privateMsg[4]).text(V.User.privateMsg[5]).findOnce();
-        if (!sendTag) {
-            Log.log('找不到发私信按钮');
-            return false;
-        }
-
-        Common.click(sendTag.parent());
-        Common.sleep(4000 + 2000 * Math.random());
-
-        let tag = Common.id(V.User.more[0]).descContains(V.User.more[1]).findOnce();
-        if (!tag) {
-            Log.log('找不到“更多”');//点击更多，弹出“经营工具”
-            Common.back();
-            return false;
-        }
-
-        Common.click(tag);
-        Common.sleep(500);
-
-        let jingyingTag = Common.id(V.User.more[2]).textContains(V.User.more[3]).findOne();
-        Common.click(jingyingTag);
-        Common.sleep(4000 + 1200 * Math.random());
-
-        let highTag = UiSelector().textContains(V.User.more[4]).descContains(V.User.more[4]).isVisibleToUser(true).findOne();
-        Log.log(highTag);
-        if (!highTag) {
-            Log.log('没有找到高级在线预约');
-            return false;
-        }
-
-        Log.log('点击高级在线预约');
-        Common.click(highTag);
-        Common.sleep(3000 + 1200 * Math.random());
-
-        let cardsTag = UiSelector().textContains(V.User.more[5]).descContains(V.User.more[5]).isVisibleToUser(true).findOne();
-        if (!cardsTag) {
-            Log.log('没有卡片');
-            return false;
-        }
-
-        Gesture.click(cardsTag.bounds().left + Device.width() / 2 * Math.random(), cardsTag.bounds().top - 160 * Math.random());
-        Common.sleep(500 + 500 * Math.random());
-
-        let sendTags = UiSelector().textContains(V.User.more[6]).descContains(V.User.more[6]).clickable(true).isVisibleToUser(true).findOne();
-        if (!sendTags) {
-            Log.log('没有发送按钮');
-            return false;
-        }
-
-        Log.log(sendTags.bounds());
-        Common.click(sendTags);
-        Common.sleep(1000 + 1000 * Math.random());
-    }
 }
 
 module.exports = User;

@@ -2,10 +2,8 @@ let tCommon = require('app/dy/Common.js');
 let DyIndex = require('app/dy/Index.js');
 let DySearch = require('app/dy/Search.js');
 let DyUser = require('app/dy/User.js');
-let DyVideo = require('app/dy/Video.js');
 let storage = require('common/storage.js');
 let machine = require('common/machine.js');
-let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
 let task = {
@@ -25,6 +23,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -35,14 +34,14 @@ let task = {
 
     testTask(settingData) {
         //首先进入点赞页面
+        Log.log(settingData);
         DyIndex.intoMyPage();
         this.me = {
             nickname: DyUser.isCompany() ? DyUser.getDouyin() : DyUser.getNickname(),
             douyin: DyUser.getDouyin(),
-            //focusCount: DyUser.getFocusCount(),
         }
 
-        tCommon.toast(JSON.stringify({
+        Log.log(JSON.stringify({
             '账号：': this.me.douyin,
             '昵称：': this.me.nickname,
         }));
@@ -64,7 +63,7 @@ let task = {
             }
         }
 
-        return DyUser.fansIncList(this.getMsg, DyVideo, DyComment, machine, settingData, this.contents, this.me.nickname);
+        return DyUser.fansIncList(this.getMsg, machine, settingData, this.contents, this.me.nickname);
     },
 }
 
@@ -94,15 +93,13 @@ let tmp = settingData.task_dy_fans_inc_accounts.split("\n");
 
 tCommon.openApp();
 Engines.executeScript("unit/dialogClose.js"); //开启线程  自动关闭弹窗
+System.setAccessibilityMode('fast');//快速模式
 Log.log('日志开始', tmp);
 task.log();
 
 while (true) {
     try {
-        let index = Math.round(Math.random() * tmp.length);
-        if (index > 0) {
-            index -= 1;
-        }
+        let index = Math.floor(Math.random() * tmp.length);
         settingData.account = tmp[index];
 
         if (task.run(settingData)) {

@@ -1,7 +1,6 @@
 let storage = require("common/storage.js");
 let Common = require("app/xhs/Common.js");
 let User = require("app/xhs/User.js");
-let V = require("version/XhsV.js");
 
 let Work = require("app/xhs/Work.js");
 
@@ -15,6 +14,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }

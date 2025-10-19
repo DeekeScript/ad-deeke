@@ -37,6 +37,7 @@ if (!storage.get('setting_baidu_wenxin_switch', 'bool')) {
     System.exit();
 }
 
+System.setAccessibilityMode('fast');
 task.log();
 Log.log('config', config);
 while (true) {

@@ -1,26 +1,29 @@
-
-let cStorage = require('common/storage.js');
-let V = require('version/V.js');
-
 const Common = {
-    //封装的方法
-    logs: [],
+    /**
+     * 通过ID获取控件
+     * @param {string} name 
+     * @returns Object
+     */
     id(name) {
-        return UiSelector().id('com.ss.android.ugc.aweme:id/' + name);
+        return UiSelector().id(this.packageName() + ':id/' + name);
     },
 
+    /**
+     * 通过android:id获取控件
+     * @param {string} name 
+     * @returns Object
+     */
     aId(name) {
-        //android:id/text1
         return UiSelector().id('android:id/' + name);
     },
 
+    /**
+     * 休眠
+     * @param {number} time 
+     */
     sleep(time) {
-        time > 200 ? Log.log("js休眠时间：" + time) : null;
+        Log.log("js休眠时间：" + time);
         System.sleep(time);
-    },
-
-    packageName() {
-        return 'com.ss.android.ugc.aweme';
     },
 
     clickRange(tag, top, bottom) {
@@ -52,29 +55,33 @@ const Common = {
         return false;
     },
 
+    /**
+     * 获取包名
+     * @returns string
+     */
+    packageName() {
+        return 'com.ss.android.ugc.aweme';
+    },
+
+    /**
+     * 返回主页
+     * @returns boolean
+     */
     backHome() {
         this.openApp();
-        let i = 0;
-        while (i++ < 5) {
-            let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
-            if (!homeTag) {
-                Log.log(this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce());
-                this.back();
-                this.sleep(1000);
-                continue;
-            }
-            Log.log("找到了homeTag");
-            break;
-        }
+        this.backHomeOnly();
         return true;
     },
 
+    /**
+     * 仅返回主页
+     * @returns boolean
+     */
     backHomeOnly() {
         let i = 0;
         while (i++ < 5) {
-            let homeTag = this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce();
+            let homeTag = UiSelector().descContains('首页').isVisibleToUser(true).findOne();
             if (!homeTag) {
-                Log.log(this.id(V.Common.backHome[0]).isVisibleToUser(true).findOnce());
                 this.back();
                 this.sleep(1000);
                 continue;
@@ -85,74 +92,102 @@ const Common = {
         return true;
     },
 
+    /**
+     * 点击控件
+     * @param {Object} tag 
+     * @param {number} rate 
+     * @returns boolean
+     */
     click(tag, rate) {
         if (!rate) {
             rate = 0.05;
         }
 
         let p = 1 - rate * 2;
-        let width = tag.bounds().width() * rate + Math.random() * (tag.bounds().width() * p);
-        let height = tag.bounds().height() * rate + Math.random() * (tag.bounds().height() * p);
+        let width = tag.bounds().width() * (rate + Math.random() * p);
+        let height = tag.bounds().height() * (rate + Math.random() * p);
 
         try {
-            Gesture.click(tag.bounds().left + Math.round(width), tag.bounds().top + Math.round(height));
+            return Gesture.click(tag.bounds().left + Math.floor(width), tag.bounds().top + Math.floor(height));
         } catch (e) {
-            this.log(e);
+            Log.log(e);
             try {
-                Gesture.click(tag.bounds().left + Math.round(width), tag.bounds().top);
+                return Gesture.click(tag.bounds().left + Math.floor(width), tag.bounds().top + 1);
             } catch (e) {
-                this.log(e);
+                Log.log(e);
                 return false;
             }
         }
+    },
 
-        this.sleep(500);
+    /**
+     * 打开抖音
+     * @returns {boolean}
+     */
+    openApp() {
+        this.log('打开应用');
+        let tag = UiSelector().isVisibleToUser(true).findOne();
+        if (tag && tag.getPackageName() == this.packageName()) {
+            return true;
+        }
+        App.launch(this.packageName());//打开抖音
+        this.sleep(8000);
+        this.log('进入应用');
         return true;
     },
 
-    openApp() {
-        this.log('openApp', System.currentPackage(), cStorage.getPackage());
-        if (cStorage.getPackage() && System.currentPackage() !== cStorage.getPackage() && cStorage.getPackage() !== 'top.deeke.script') {
-            App.launch(cStorage.getPackage());
-            this.sleep(2000);
-        }
-
-        App.launch('com.ss.android.ugc.aweme');//打开抖音
-        this.sleep(8000);
-    },
-
+    /**
+     * 返回app
+     */
     backApp() {
         App.backApp();
     },
 
 
+    /**
+     * 打印日志
+     */
     log() {
         //这里需要做日志记录处理
         Log.log(arguments);
+        if (arguments.length == 1) {
+            FloatDialogs.toast(arguments[0]);
+        }
     },
 
+    /**
+     * 模拟返回
+     * @param i
+     * @param time
+     * @param randTime
+     */
     back(i, time, randTime) {
         if (i === undefined) {
             i = 1;
         }
+
+        if (time == undefined) {
+            time = 700;
+        }
+
+        this.log('返回次数： ' + i);
         while (i--) {
             Gesture.back();
-            if (!time) {
-                this.sleep(700 + Math.random() * 200);
-                continue;
-            }
-
             if (randTime) {
                 this.sleep(time + randTime * Math.random());
                 continue;
             }
             this.sleep(time);
         }
-        this.log('back ' + i);
     },
 
+    /**
+     * 提取字符串中的数字
+     * @param {string} text 
+     * @returns {string}
+     */
     numDeal(text) {
-        text = /[\d\.\,]+[\w|万]*/.exec(text);
+        text = /[\d\.]+[\w|万]*/.exec(text);
         if (!text) {
             return 0;
         }
@@ -165,6 +200,13 @@ const Common = {
         return text[0] * 1;//可能存在多个逗号
     },
 
+    /**
+     * 向上滑或者下滑 【这个方法稳定性可能不太好，不太推荐使用】
+     * @param {number} type 0表示向上滑
+     * @param {number} sensitivity 
+     * @param {number} rate 
+     * @returns 
+     */
     swipe(type, sensitivity, rate) {
         let left = Math.random() * Device.width() * 0.8 + Device.width() * 0.2;
         let bottom = Device.height() * 2 / 3 * sensitivity + Device.height() / 6 * Math.random();
@@ -181,91 +223,120 @@ const Common = {
         Gesture.swipe(left, top, left, bottom, 200 + 100 * Math.random());//从上往下滑
     },
 
-    swipeSearchUserOp() {
-        this.swipeSearchUserOpTarge = this.id(V.Common.swipeSearchUserOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-
-        if (this.swipeSearchUserOpTarge) {
-            this.swipeSearchUserOpTarge.scrollForward();
-        } else {
+    /**
+     * 滑动搜索用户列表
+     * @returns boolean
+     */
+    swipeSearchUserOp(filterRootLayout) {
+        let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').scrollable(true).filter(v => {
+            if (filterRootLayout) {
+                return v.children().findOne(UiSelector().id('com.ss.android.ugc.aweme:id/root_layout').isVisibleToUser(true));
+            }
+            return true;
+        }).isVisibleToUser(true).findOne();
+        if (!tag) {
             Log.log('滑动失败');
+            return 0;
         }
+
+        if (tag.scrollForward()) {
+            Log.log('滑动成功');
+            return true;
+        }
+        Log.log('滑动到底了');
+        return false;
     },
 
+    /**
+     * 滑动粉丝列表
+     * @returns {boolean}
+     */
     swipeFansListOp() {
-        this.swipeFansListOpTarge = this.id(V.Common.swipeFansListOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-
-        if (this.swipeFansListOpTarge) {
-            this.swipeFansListOpTarge.scrollForward();
-        } else {
-            Log.log('滑动失败');
-        }
-        //Log.log(this.swipeFansListOpTarge);
+        return this.swipeSearchUserOp(true);
     },
 
+    /**
+     * 滑动关注列表
+     * @returns {boolean}
+     */
     swipeFocusListOp() {
-        this.swipeFocusListOpTarge = this.id(V.Common.swipeFocusListOp).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-        if (this.swipeFocusListOpTarge) {
-            this.swipeFocusListOpTarge.scrollForward();
-        } else {
-            Log.log('滑动失败');
-        }
-        //Log.log(this.swipeFocusListOpTarge);
-
+        return this.swipeSearchUserOp(true);
     },
 
+    /**
+     * 滑动评论列表
+     * @returns {boolean}
+     */
     swipeCommentListOp() {
-        this.swipeCommentListOpTarget = this.id(V.Common.swipeCommentListOp[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-        if (this.swipeCommentListOpTarget) {
-            this.swipeCommentListOpTarget.scrollForward();
-        } else {
-            Log.log('滑动失败');
-        }
-        //Log.log(this.swipeCommentListOpTarget);
+        return this.swipeSearchUserOp();
     },
 
+    /**
+     * 搜索列表滑动到左侧
+     * @returns {boolean}
+     */
     swipeSearchTabToLeft() {
-        let tag = this.id(V.C.userListTop).isVisibleToUser(true).findOne() || this.id(V.C.userListTop).findOne();
-        if (tag) {
-            tag.scrollForward();
-        } else {
-            Log.log('滑动列表');
-        }
-    },
-
-    //粉丝群列表滑动
-    swipeFansGroupListOp() {
-        let tag = this.id(V.Message.fansSwipe[0]).scrollable(true).filter((v) => {
-            return v && v.bounds() && v.bounds().top > 0 && v.bounds().left >= 0 && v.bounds().width() == Device.width() && v.bounds().top >= 0;
-        }).findOnce();
-        console.log(tag);
-        if (tag) {
-            tag.scrollForward();
-        } else {
+        let tag = UiSelector().scrollable(true).className('android.widget.HorizontalScrollView').isVisibleToUser(true).findOne();
+        if (!tag) {
             Log.log('滑动失败');
+            return 0;
         }
-        //Log.log(this.swipeCommentListOpTarget);
+        if (tag.scrollForward()) {
+            Log.log('滑动成功');
+            return true;
+        }
+        Log.log('滑动失败');
+        return false;
     },
 
-    //关闭弹窗
+    /**
+     * 粉丝群列表滑动
+     * @returns {boolean}
+     */
+    swipeFansGroupListOp() {
+        return this.swipeSearchUserOp();
+    },
+
+    /**
+     * 消息列表滑动
+     * @param type {boolean}
+     * @returns {boolean}
+     */
+    swipeMessageList(type) {
+        let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').scrollable(true).filter(v => {
+            return v.bounds().height() > Device.height() / 2;
+        }).isVisibleToUser(true).findOne();
+        if (type == true) {
+            return tag.scrollBackward();
+        }
+        return tag.scrollForward();
+    },
+
+    /**
+     * 互动消息列表滑动
+     * @returns {boolean}
+     */
+    swipeMessageDetailsList() {
+        return this.swipeSearchUserOp();
+    },
+
+     /**
+     * 作品赞列表滑动
+     * @returns {boolean}
+     */
+    swipeWorkZanList() {
+        return this.swipeSearchUserOp();
+    },
+
+    /**
+     * 关闭弹窗
+     * @param type
+     */
     closeAlert(type) {
         this.log('开启线程监听弹窗');
         let k = 0;
 
         while (true) {
-            //检测是否只有当前的线程，是的话则关闭
-            // console.log("---线程数量：" + Engines.getEngines());
-            // if (Engines.getEngines() == 1) {
-            //     Engines.close();
-            // }
-
             if (!type) {
                 this.sleep(10000);
                 continue;
@@ -310,15 +381,14 @@ const Common = {
                     a = UiSelector().text('暂不公开').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().text('忽略本次').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().descContains('不再提醒').clickable(true).filter(f).isVisibleToUser(true).findOne();
                 }
 
+                if (!a) {
+                    a = UiSelector().descContains('暂不使用').filter(f).isVisibleToUser(true).clickable(true).findOne();
+                }
+
                 if (a) {
                     a.click();
                     Log.log(a);
                     Log.log("可能的弹窗点击了");
-                }
-
-                if (k % 50 == 0) {
-                    Log.log("对象清理");
-                    System.cleanUp();//清理线程垃圾
                 }
             } catch (e) {
                 this.log("close dialog 异常了");
@@ -331,6 +401,12 @@ const Common = {
         }
     },
 
+    /**
+     * 执行方法后修复
+     * @param func
+     * @param time
+     * @param randomTime
+     */
     sleepFunc(func, time, randomTime) {
         if (!randomTime) {
             randomTime = 0;
@@ -339,24 +415,37 @@ const Common = {
         this.sleep(time + randomTime * Math.random());
     },
 
+    /**
+     * 显示提示
+     * @param msg
+     * @param time
+     * @param randomTime
+     */
     toast(msg, time, randomTime) {
         if (!randomTime) {
             randomTime = 0;
         }
 
-        //toast(msg);
+        FloatDialogs.toast(msg);
         this.log(msg);
         if (time) {
             this.sleep(time + randomTime * Math.random());
         }
     },
 
+    /**
+     * 显示提示
+     * @param msg
+     */
     showToast(msg) {
-        System.toast(msg);
+        FloatDialogs.toast(msg);
         Log.log(msg);
     },
 
-    //关键词拆分
+    /**
+     * 切分关键词
+     * @param msg
+     */
     splitKeyword(keyword) {
         keyword = keyword.replace(/，/g, ',');
         keyword = keyword.split(',');
@@ -373,6 +462,12 @@ const Common = {
         return ks;
     },
 
+    /**
+     * 检测标题是否包含关键词
+     * @param contain
+     * @param title
+     * @returns {boolean}
+     */
     containsWord(contain, title) {
         contain = this.splitKeyword(contain);
         for (let con of contain) {
@@ -395,6 +490,12 @@ const Common = {
         return false;
     },
 
+    /**
+     * 获取标题中是否不包含的关键字
+     * @param contain
+     * @param title
+     * @returns {boolean}
+     */
     noContainsWord(noContain, title) {
         noContain = this.splitKeyword(noContain);
         for (let con of noContain) {
@@ -417,10 +518,11 @@ const Common = {
         return noContain;
     },
 
-    playAudio(file) {
-        media.playMusic(file);
-    },
-
+    /**
+     * 判断是否有备注
+     * @param remark
+     * @returns {boolean}
+     */
     getRemark(remark) {
         return remark.indexOf('#') == 0 || remark.indexOf('＃') == 0;
     }

@@ -27,6 +27,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.getMachineType() === 1) {
             if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
@@ -76,7 +77,7 @@ if (!task.count) {
 // tCommon.openApp(); //已经自动打开了，不需要再次打开
 //开启线程  自动关闭弹窗
 //Engines.executeScript("unit/dialogClose.js");
-
+System.setAccessibilityMode('fast');
 while (true) {
     task.log();
     try {

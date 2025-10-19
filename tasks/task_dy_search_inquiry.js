@@ -8,12 +8,8 @@ let machine = require('common/machine.js');
 let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
-// let dy = require('app/iDy');
-// let config = require('config/config');
-
 let task = {
     contents: [],
-    lib_id: undefined,
     kws: [],
     count: 10,
     run(keyword, kws) {
@@ -31,6 +27,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.getMachineType() === 1) {
             if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
@@ -53,13 +50,13 @@ let task = {
         DyIndex.intoHome();
         DyIndex.intoSearchPage();
         DySearch.homeIntoSearchVideo(keyword);
-        tCommon.sleep(5000);
+        tCommon.sleep(4000 + 2000 * Math.random());
         while (true) {
+            tCommon.sleep(1000 + 1000 * Math.random());
             if (DyVideo.isLiving()) {
                 Log.log('直播');
-                tCommon.sleep(2000 + Math.random() * 2000);
-                DyVideo.next();
-                tCommon.sleep(2000);
+                tCommon.sleep(1000 + Math.random() * 1000);
+                DyVideo.next(true);
                 continue;
             }
 
@@ -68,7 +65,6 @@ let task = {
             if (closeTag) {
                 Log.log('评论窗口');
                 tCommon.click(closeTag);
-                tCommon.sleep(2000);
                 continue;
             }
 
@@ -79,9 +75,7 @@ let task = {
             let md5 = Encrypt.md5(nickname + "_" + title);
             if (machine.get('task_dy_search_inquiry_' + md5, 'bool') || commentCount <= 0) {
                 Log.log('重复视频');
-                tCommon.sleep(2000 + Math.random() * 2000);
-                DyVideo.next();
-                tCommon.sleep(2000);
+                DyVideo.next(true);
                 continue;
             }
 
@@ -90,18 +84,10 @@ let task = {
             }
 
             //刷视频
-            let processBar = DyVideo.getProcessBar();
-            //Log.log('processBar', processBar, processBar && processBar.bounds().height(), processBar && processBar.bounds().top);
-            if (storage.getPackage() !== 'org.autojs.autoxjs.v6') {
-                if (processBar) {
-                    let sleepSec = 10 + 10 * Math.random() - 5;
-                    Log.log('休眠' + sleepSec + 's');
-                    tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-                } else {
-                    let sleepSec = (5 + 10 * Math.random() - 5);
-                    Log.log('休眠' + sleepSec + 's');
-                    tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-                }
+            if (DyVideo.getProcessBar()) {
+                let sleepSec = 10 + 10 * Math.random() - 5;
+                Log.log('休眠' + sleepSec + 's');
+                tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
             } else {
                 let sleepSec = (5 + 10 * Math.random() - 5);
                 Log.log('休眠' + sleepSec + 's');
@@ -109,24 +95,15 @@ let task = {
             }
 
             Log.log('看看是不是广告');
-            //看看是不是广告，是的话，不操作作者
             if (DyVideo.viewDetail()) {
-                let clickRePlayTag = tCommon.id('fw2').filter((v) => {
-                    return v && v.bounds() && v.bounds().top > 0 && v.bounds().top + v.bounds().height() < Device.height() && v.bounds().width() > 0 && v.bounds().left > 0;
-                }).findOnce();
-                if (clickRePlayTag) {
-                    Log.log('点击重播');
-                    clickRePlayTag.click();
-                    tCommon.sleep(1000);
-                }
-                Gesture.click(500 + Math.random() * 200, 500 + Math.random() * 300);
-                tCommon.sleep(1500);
+                DyVideo.next(true);
+                continue;
             } else {
                 Log.log('不是广告，准备进入主页');
             }
 
             DyVideo.openComment(!!commentCount);
-            tCommon.sleep(3000);
+            tCommon.sleep(2000 + 2000 * Math.random());
             let rpCount = 0;
             while (true) {
                 Log.log('获取评论列表-开始');
@@ -140,6 +117,11 @@ let task = {
                 let rp = 0;
                 for (let i in comments) {
                     Log.log('title', comments[i].nickname, comments[i].content);
+                    if (!comments[i].content) {
+                        Log.log('没有内容');
+                        continue;
+                    }
+
                     if (contains.indexOf(comments[i].nickname + '_' + comments[i].content) !== -1) {
                         rp++;
                         continue;
@@ -151,19 +133,17 @@ let task = {
                         continue;
                     }
 
-                    if (comments[i].isZan) {
+                    if (comments[i].isZan || comments[i].isAuthor) {
                         rp++;
                         continue;
                     }
 
-                    if (comments[i].isAuthor) {
-                        rp++;
-                        continue;
+                    try {
+                        DyComment.clickZan(comments[i]);
+                    } catch (e) {
+                        Log.log(e, '赞找不到了');
                     }
-
-                    DyComment.clickZan(comments[i]);
                     DyComment.intoUserPage(comments[i]);
-                    //Log.log(comment);
                     Log.log('进入用户主页-2');
                     let userNickname;
                     try {
@@ -185,16 +165,22 @@ let task = {
                     if (DyVideo.intoUserVideo()) {
                         //随机评论视频
                         tCommon.sleep(5000 + 5000 * Math.random());
-                        DyVideo.clickZan();
-                        let msg = this.getMsg(0, DyVideo.getContent());
-                        if (msg) {
-                            DyVideo.openComment(!!DyVideo.getCommentCount());
-                            Log.log('开启评论窗口');
-                            DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                            Log.log('评论了');
-                            tCommon.back(2, 800);
-                        } else {
-                            tCommon.back();//从视频页面到用户页面
+                        try {
+                            DyVideo.clickZan();
+                            let msg = this.getMsg(0, DyVideo.getContent());
+                            if (msg) {
+                                DyVideo.openComment(!!DyVideo.getCommentCount());
+                                Log.log('开启评论窗口');
+                                DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                                Log.log('评论了');
+                                tCommon.back(2, 800);
+                            } else {
+                                tCommon.back();//从视频页面到用户页面
+                            }
+                        } catch (e) {
+                            //异常了，回到主要
+                            Log.log('操作异常了', e);
+                            DyUser.backHome();
                         }
                     } else {
                         Log.log('未进入视频');
@@ -215,7 +201,10 @@ let task = {
                 }
 
                 Log.log('滑动评论');
-                tCommon.swipeCommentListOp();
+                if (!tCommon.swipeCommentListOp()) {
+                    Log.log('到底了');
+                    break;
+                }
                 tCommon.sleep(2000);
             }
 
@@ -227,56 +216,25 @@ let task = {
     },
 }
 
-
-// if (storage.getMachineType() !== 1) {
-//     let libs = Http.post('dke', 'speechLibList', { type: 0 });
-//     if (libs.code !== 0 || libs.data.total === 0) {
-//         tCommon.showToast('请先在线上添加话术');
-//          //console.hide();();
-//         System.exit();
-//     }
-
-//     let opts = [];
-//     for (let i in libs.data.data) {
-//         opts.push(libs.data.data[i]['name'] + "[ID=" + libs.data.data[i]['id'] + "]");
-//     }
-//     let id = dialogs.select('请选择话术库', opts);
-//     if (id <= 0) {
-//         tCommon.showToast('取消了话术库选择');
-//          //console.hide();();
-//         System.exit();
-//     }
-//     task.lib_id = JSON.stringify([libs.data.data[id]['id']]);
-//     tCommon.showToast('你选择了话术库：' + libs.data.data[id]['name'] + "[ID=" + libs.data.data[id]['id'] + "]");
-// }
-
 let keyword = machine.get("task_dy_search_inquiry");
 if (!keyword) {
-    tCommon.showToast('你取消了执行');
-    //console.hide();();
+    FloatDialogs.show('请设置询盘关键词');
     System.exit();
 }
 
 let kws = machine.get('task_dy_search_inquiry_kws');
-
 if (!kws) {
-    tCommon.showToast('你取消了执行');
-    //console.hide();();
+    FloatDialogs.show('请设置触发关键词');
     System.exit();
 }
 
 task.count = machine.get('task_dy_search_inquiry_count', 'int');
-
 Log.log("count: " + task.count);
-if (!task.count) {
-    tCommon.showToast('你取消了执行');
-    //console.hide();();
-    System.exit();
-}
 
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
+System.setAccessibilityMode('!fast');//快速模式
 
 while (true) {
     task.log();

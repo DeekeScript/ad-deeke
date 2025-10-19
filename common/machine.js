@@ -379,7 +379,6 @@ let machine = {
                 toker_run_sex: ["0", "1", "2"],//0,1,2分别表示  女，男，未知
                 toker_run_min_age: 0,
                 toker_run_max_age: 120,
-                runTimes: this.get('task_dy_qingsong_tuoke_run_times', 'int'),
             }
         }
 

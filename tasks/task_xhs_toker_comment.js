@@ -23,6 +23,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -96,6 +97,7 @@ let task = {
             let maxSwipe = commentCount;//最多滑动次数
             while (maxSwipe-- > 0) {
                 let comments = XhsWork.getCommenList();//nicknameTag列表
+                console.log('评论条数：', comments.length);
                 for (let k in comments) {
                     let nickname = comments[k].nicknameTag.text();
                     if (comments[k]['content'] == "" || !this.includesKw(comments[k]['content'], kw) || this.nicknames.includes(nickname)) {
@@ -149,6 +151,11 @@ let task = {
                     }
                     tCommon.back();
                     tCommon.sleep(1000);
+                }
+
+                if (UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
+                    tCommon.back();//有时候会出现不能返回的情况，小红薯的设计bug
+                    tCommon.sleep(500);
                 }
 
                 if (UiSelector().className('android.widget.TextView').textContains('- 到底了 -').isVisibleToUser(true).findOne()) {
@@ -208,7 +215,7 @@ if (sleepSecond <= 0) {
 }
 
 tCommon.openApp();
-
+System.setAccessibilityMode('fast');
 while (true) {
     task.log();
     try {

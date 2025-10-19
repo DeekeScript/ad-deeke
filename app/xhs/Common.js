@@ -1,5 +1,3 @@
-let cStorage = require('common/storage.js');
-
 let Common = {
     //封装的方法
     logs: [],

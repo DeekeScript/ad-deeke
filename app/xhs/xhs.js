@@ -1,8 +1,6 @@
 let storage = require("common/storage.js");
-let V = require("version/XhsV.js");
 let Common = require("app/xhs/Common.js");
 let Index = require("app/xhs/Index.js");
-let User = require("app/xhs/User.js");
 let Work = require("app/xhs/Work.js");
 
 let xhs = {
@@ -116,9 +114,13 @@ let xhs = {
                         //笔记需要筛选IP
                         if (this.config.toker_view_video_ip) {
                             let ipTag = UiSelector().className('android.view.View').descMatches('\\d+[\\u4e00-\\u9fa5]+$').findOne();
+                            if (!ipTag) {
+                                Log.log('IP不符合');
+                                continue;
+                            }
                             let match = ipTag.desc().match(/\d+([\u4e00-\u9fa5]+)/);
                             Log.log('ipTag', ipTag, match);
-                            if (!ipTag || match.length != 2 || !Common.containsWord(this.config.toker_view_video_ip, match[1])) {
+                            if (match.length != 2 || !Common.containsWord(this.config.toker_view_video_ip, match[1])) {
                                 Common.back();
                                 Common.sleep(1000);
                                 Log.log('IP不符合', this.config.toker_view_video_ip, ipTag ? ipTag.desc() : '无');

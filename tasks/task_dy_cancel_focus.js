@@ -22,6 +22,7 @@ let task = {
     },
 }
 
+System.setAccessibilityMode('fast');//快速模式
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");

@@ -68,12 +68,14 @@ let Work = {
     },
 
     msg(type, msg) {
+        System.setAccessibilityMode('!fast');
         let inputTag = UiSelector().className('android.widget.EditText').filter(v => {
             return v.isEditable();
         }).findOne() || UiSelector().className('android.widget.TextView').desc('评论框').findOne();
 
         if (!inputTag) {
             Log.log('没有找到输入框');
+            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -85,6 +87,7 @@ let Work = {
         }).isVisibleToUser(true).findOne();
         if (!iptTag) {
             Log.log('输入框没有');
+            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -92,6 +95,7 @@ let Work = {
         Common.sleep(1500 + 500 * Math.random());
         let sendTag = UiSelector().className('android.widget.TextView').text('发送').isVisibleToUser(true).findOne();
         if (!sendTag) {
+            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -99,6 +103,7 @@ let Work = {
         statistics.comment();
         Log.log('发送了');
         Common.sleep(500 + 500 * Math.random());
+        System.setAccessibilityMode('fast');
     },
 
     commentListSwipe(type) {
@@ -131,34 +136,39 @@ let Work = {
     },
     getCommenList() {
         //通过评论内容，反向找到昵称（通过昵称进入用户主页）
-        let tags = UiSelector().className('android.widget.TextView').filter(v => {
-            return v.text().indexOf('回复') != -1 && v.parent().parent().bounds().left <= 1;
+        let tags = UiSelector().className('android.widget.LinearLayout').filter(v => {
+            return v.parent() && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView' && v.bounds().left <= 10;
         }).isVisibleToUser(true).find();
         if (tags.length == 0) {
             return tags;
         }
 
-        //苏州可以吗[害羞R]  2小时前 江苏 回复
-        //粉丝宝宝优先哈～ \n昨天 22:31 广东 回复
-        //太假，滤镜太夸张了 2天前 广东 回复
+        //最新版，评论和其他内容是分开的
         let childs = [];
         for (let i in tags) {
-            let index = tags[i].text().lastIndexOf('\n');
+            let _childs = tags[i].children().find(UiSelector().className('android.widget.TextView'));
+
+            let index = _childs[2].text().lastIndexOf('\n');
             if (index == -1) {
-                index = tags[i].text().lastIndexOf('  ');//怎么做 02-17  回复
+                index = _childs[2].text().lastIndexOf(' ');//02-17  回复
             }
             if (index == -1) {
-                Log.log('过滤了', tags[i].text());
+                Log.log('过滤了', _childs[2].text());
                 continue;
             }
 
-            let arr = tags[i].text().split(' ');
-            Log.log('评论内容', tags[i].text(), index, arr);
+            if (_childs[1].text() == '作者') {
+                Log.log('作者过滤了', _childs[2].text());
+                continue;
+            }
+            let arr = _childs[2].text().split(' ');
+            Log.log('评论内容', _childs[2].text(), index, arr);
             childs.push({
-                content: tags[i].text().substring(0, index),
+                content: _childs[1].text(),
                 ip: arr[arr.length - 2] || '-',
-                zanTag: tags[i].parent().parent().children().findOne(UiSelector().className('android.widget.ImageView')),
-                nicknameTag: tags[i].parent().findOne(UiSelector().className('android.widget.TextView')),
+                zanTag: _childs[_childs.length - 1].parent(),
+                nicknameTag: _childs[0],
+                nickname: _childs[0].text(),
             });
         }
         return childs;
@@ -309,18 +319,10 @@ let Work = {
 
         //图文
         if (type == 0) {
-            let textTags = UiSelector().className('android.widget.TextView').filter(v => {
-                if (v.parent() != null && v.parent().className() == 'android.widget.LinearLayout') {
-                    return true;
-                }
-                return false;
-            }).isVisibleToUser(true).find();
-            Log.log('textTags', textTags);
-            let text = '';
-            for (let i in textTags) {
-                text += textTags[i].text() + "\n";
-            }
-            return text;
+            let textTag = UiSelector().className('android.widget.TextView').filter(v => {
+                return v.parent() != null && !v.parent().parent() && v.parent().className() == 'android.widget.FrameLayout';
+            }).isVisibleToUser(true).findOne();
+            return textTag.text();
         }
         return false;
     },

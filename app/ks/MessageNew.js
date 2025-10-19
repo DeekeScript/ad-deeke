@@ -1,6 +1,5 @@
 let Common = require("app/ks/Common.js");
 let User = require('app/ks/User.js');
-let V = require('version/KsV.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
 let MessageNew = {

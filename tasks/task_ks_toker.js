@@ -23,6 +23,7 @@ let task = {
 
 //开启线程  自动关闭弹窗
 // Engines.executeScript("unit/dialogClose.js");
+System.setAccessibilityMode('fast');
 task.log();
 
 while (true) {

@@ -17,6 +17,11 @@ let User = {
         return UiSelector().className('').text('私密账号').findOne() ? true : false;
     },
 
+    getNickname() {
+        let nicknameTag = UiSelector().className('android.widget.TextView').findOne();
+        return nicknameTag.text();
+    },
+
     intoVideo() {
         let videoTag = UiSelector().className('android.widget.FrameLayout').filter(v => {
             return v.desc() && (v.desc().indexOf('视频') === 0 || v.desc().indexOf('笔记') === 0);
@@ -27,7 +32,7 @@ let User = {
         }
 
         //Common.click(videoTag, 0.3);//点击中间的60%
-        Gesture.click(videoTag.bounds().left + videoTag.bounds().width()*0.7, videoTag.bounds().top + videoTag.bounds().height()*0.6);
+        Gesture.click(videoTag.bounds().left + videoTag.bounds().width() * 0.7, videoTag.bounds().top + videoTag.bounds().height() * 0.6);
         statistics.viewVideo();
         statistics.viewTargetVideo();
         Common.sleep(4000 + 3000 * Math.random());
@@ -109,11 +114,9 @@ let User = {
         Common.sleep(1500 + 1200 * Math.random());
 
         //发送
-        let sendBtnTag = UiSelector().className('android.widget.TextView').filter(v => {
-            return v.parent().className() == 'android.widget.RelativeLayout';//这里可能有两个发送，最上面的是发送浏览记录，直接忽略
-        }).isVisibleToUser(true).text('发送').findOne();
-        Common.click(sendBtnTag, 0.2);
-        Log.log('点击发送', sendBtnTag);
+        let sendBtnTags = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('发送').find();
+        Common.click(sendBtnTags[sendBtnTags.length - 1], 0.2);
+        Log.log('点击发送', sendBtnTags[sendBtnTags.length - 1]);
         statistics.privateMsg();
         Common.sleep(1500 + 500 * Math.random());
         Common.back();
@@ -168,12 +171,13 @@ let User = {
         }
 
         let workCount;
+        Log.log('text', text);
         if (text.indexOf('|') != -1) {
             workCount = tag.text().split('|')[0].replace('笔记', '').replace('·', '').replace(' ', '');
         } else {
             workCount = tag.text().replace('笔记', '').replace('·', '').replace(' ', '');
         }
-
+        Log.log('workCount', workCount);
         return this.dealNum(workCount);
     },
 
