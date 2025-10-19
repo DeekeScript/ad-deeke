@@ -18,6 +18,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -50,7 +51,6 @@ let task = {
             if (!res) {
                 System.toast('找不到用户账号：' + douyin);
                 this.intoErrorCount++;
-                Threads.shutDownAll();
                 tCommon.sleep(500);
                 if (this.intoErrorCount >= 3) {
                     return true;//完成了
@@ -64,15 +64,14 @@ let task = {
             if (!DyUser.intoLive()) {
                 return true;
             }
-            tCommon.sleep(5000 + 2000 * Math.random());
+            tCommon.sleep(7000 + 2000 * Math.random());
         }
 
-        this.intoErrorCount = 0;
-
-        let rp = 0;
+        this.intoErrorCount = 0
         while (true) {
+            let rp = 0;//为1则表示完成
             DyLive.openUserList();
-            let onlineTag = UiSelector().descContains('在线观众').textContains('在线观众').filter((v) => {
+            let onlineTag = UiSelector().descContains('在线观众').filter((v) => {
                 return v && v.bounds() && v.bounds().top && v.bounds().width() && v.bounds().height() && v.bounds().top + v.bounds().height() < Device.height();
             }).findOneBy(2000);
 
@@ -80,8 +79,6 @@ let task = {
                 throw new Error('找不到“在线观众”tag');
             }
 
-            let addr = undefined;
-            let hiddenI = 0;
             let ignoreIndex = 0;
             while (true) {
                 let users = DyLive.getUsers();
@@ -92,7 +89,7 @@ let task = {
                     break;
                 }
 
-                if (rp >= 3) {
+                if (rp == 1) {
                     tCommon.back();
                     tCommon.sleep(1000);
                     Log.log('扫描完了');
@@ -100,38 +97,36 @@ let task = {
                 }
 
                 for (let k in users) {
-                    Log.log('index', ignoreIndex);
+                    if (k == 0) {
+                        continue;
+                    }
+                    Log.log('index', ignoreIndex, users[k].tag);
                     if (ignoreIndex++ <= preIndex) {
                         continue;
                     }
 
-                    if (!tCommon.clickRange(users[k].tag, onlineTag.bounds().top, Device.height() - users[k].tag.bounds().height())) {
+                    if (!tCommon.clickRange(users[k].tag, onlineTag.bounds().top, users[0].tag.bounds().top)) {
                         Log.log('边界超出');
                         continue;
                     }
 
-                    tCommon.sleep(1000 + 2000 * Math.random());
+                    tCommon.sleep(2000 + 1000 * Math.random());
                     let nickname = DyLive.getNickname();
+                    if(!nickname){
+                        tCommon.sleep(1000);
+                        nickname = DyLive.getNickname();
+                        Log.log('再次获取昵称');
+                    }
+
                     if (nickname == '') {
                         Log.log('没有点击成功');
-                        if (hiddenI++ >= 3) {
-                            break;
-                        }
-                        continue;
-                    }
-                    hiddenI = 0;
-
-                    if (k == 0) {
-                        if (nickname === addr) {
-                            rp++;
-                        } else {
-                            rp = 0;
-                        }
-                        addr = nickname;
+                        rp = 1;
+                        break;
                     }
 
                     if (this.nicknames.includes(nickname)) {
                         tCommon.back();
+                        tCommon.sleep(800);
                         Log.log('重复-');
                         continue;
                     }
@@ -139,6 +134,7 @@ let task = {
                     if (machine.get('task_dy_toker_live_' + douyin + '_' + nickname, 'bool')) {
                         Log.log('重复');
                         tCommon.back();
+                        tCommon.sleep(800);
                         continue;
                     }
 
@@ -174,17 +170,23 @@ let task = {
                     let comment_user_video_rate = machine.get('task_dy_toker_live_comment_user_video_rate', 'int');
                     if (comment_user_video_rate > Math.random() * 100 && DyVideo.intoUserVideo()) {
                         Log.log('有视频，直接操作视频引流');
-                        DyVideo.clickZan();
-                        tCommon.sleep(1000);
-                        let msg = this.getMsg(0, DyVideo.getContent());
-                        if (msg) {
-                            DyVideo.openComment(!!DyVideo.getCommentCount());
-                            Log.log('开启评论窗口');
-                            DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                            Log.log('评论了');
-                            tCommon.back(2);
-                        } else {
-                            tCommon.back();//从视频页面到用户页面
+                        try {
+                            DyVideo.clickZan();
+                            tCommon.sleep(1000);
+                            let msg = this.getMsg(0, DyVideo.getContent());
+                            if (msg) {
+                                DyVideo.openComment(!!DyVideo.getCommentCount());
+                                Log.log('开启评论窗口');
+                                DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                                Log.log('评论了');
+                                tCommon.back(2);
+                            } else {
+                                tCommon.back();//从视频页面到用户页面
+                            }
+                        } catch (e) {
+                            Log.log('异常了', e);
+                            tCommon.sleep(2000);
+                            DyUser.backHome();
                         }
                     }
 
@@ -195,14 +197,11 @@ let task = {
                     tCommon.sleep(machine.get('task_dy_toker_live_focus_rate', 'int') * 1000);
                 }
 
-                if (hiddenI++ >= 3) {
-                    break;
-                }
                 Log.log('下一页');
                 DyLive.swipeFansList();
                 tCommon.sleep(2000);
             }
-            System.toast('休眠2分钟后继续执行');
+            FloatDialogs.toast('休眠2分钟后继续执行');
             tCommon.sleep(120 * 1000);//休眠2分钟
         }
     },
@@ -222,6 +221,7 @@ if (!preIndex) {
 }
 
 tCommon.openApp();
+System.setAccessibilityMode('fast');
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 

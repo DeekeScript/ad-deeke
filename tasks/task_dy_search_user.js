@@ -1,22 +1,15 @@
 let tCommon = require('app/dy/Common.js');
 let DyIndex = require('app/dy/Index.js');
 let DySearch = require('app/dy/Search.js');
-let DyUser = require('app/dy/User.js');
-let DyVideo = require('app/dy/Video.js');
 let storage = require('common/storage.js');
 let machine = require('common/machine.js');
-let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require('service/baiduWenxin.js');
-
-// let dy = require('app/iDy');
-// let config = require('config/config');
 
 let task = {
     contents: [],
     count: 100,
     fans: 20000,
     params: { clickZan: false, comment: false, },
-    lib_id: undefined,
     run(settingData) {
         return this.testTask(settingData);
     },
@@ -30,6 +23,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.getMachineType() === 1) {
             if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
@@ -53,9 +47,6 @@ let task = {
         return DySearch.userList(
             (v) => machine.get('task_dy_search_user_' + v, 'bool'),
             () => this.decCount(),
-            DyUser,
-            DyComment,
-            DyVideo,
             (v) => machine.set('task_dy_search_user_' + v, true),
             (v, title, age, gender) => this.getMsg(v, title, age, gender),
             this.params
@@ -65,27 +56,24 @@ let task = {
 
 
 let settingData = machine.getSearchUserSettingRate();//commentRate
-settingData.isFirst = false;//首个视频必操作，关闭
 Log.log('settingData', settingData);
 settingData.keyword = settingData.keyword.replace(/\s+/g, '')
 
 if (!settingData.keyword) {
-    tCommon.showToast('未设置关键词，停止运行');
-    //console.hide();();
+    FloatDialogs.toast('未设置关键词，停止运行');
     System.exit();
 }
 
 task.count = settingData.opCount;
 if (!task.count) {
-    tCommon.showToast('未设置操作次数，停止运行');
-    //console.hide();();
+    FloatDialogs.toast('未设置操作次数，停止运行');
     System.exit();
 }
 
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
-
+System.setAccessibilityMode('fast');//快速模式
 while (true) {
     task.log();
     try {

@@ -2,10 +2,8 @@ let tCommon = require('app/dy/Common.js');
 let DyIndex = require('app/dy/Index.js');
 let DySearch = require('app/dy/Search.js');
 let DyUser = require('app/dy/User.js');
-let DyVideo = require('app/dy/Video.js');
 let storage = require('common/storage.js');
 let machine = require('common/machine.js');
-let DyComment = require('app/dy/Comment.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
 let task = {
@@ -23,6 +21,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -49,7 +48,7 @@ let task = {
             }
         }
 
-        return DyUser.focusUserList(0, this.getMsg, DyVideo, DyComment, machine, settingData, this.contents);
+        return DyUser.focusUserList(0, this.getMsg, machine, settingData, this.contents);
     },
 }
 
@@ -60,12 +59,12 @@ console.log(machine.getMsg(0));
 console.log(settingData.opCount);
 
 if (!settingData.account) {
-    tCommon.showToast('未设置账号，取消执行');
-    //console.hide();();
+    FloatDialogs.toast('未设置账号，取消执行');
     System.exit();
 }
 
 tCommon.openApp();
+System.setAccessibilityMode('fast');
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 

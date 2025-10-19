@@ -1,4 +1,3 @@
-let V = require('version/V.js');
 let tCommon = require("app/dy/Common");
 let DyUser = require("app/dy/User");
 let DySearch = require("app/dy/Search");
@@ -17,6 +16,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -46,22 +46,20 @@ let task = {
         DySearch.intoSearchVideo();
 
         let rateCount = storage.get('task_dy_toker_live_video_zan_head_rate', 'int') + storage.get('task_dy_toker_live_video_focus_rate', 'int') + storage.get('task_dy_toker_live_video_zan_comment_rate', 'int');
-        let zanHeadRate = 0;
         let zanCommentRate = 0;
         let focuRate = 0;
         if (rateCount > 0) {
-            zanHeadRate = storage.get('task_dy_toker_live_video_zan_head_rate', 'int') / rateCount;
             zanCommentRate = storage.get('task_dy_toker_live_video_zan_comment_rate', 'int') / rateCount;
             focuRate = storage.get('task_dy_toker_live_video_focus_rate', 'int') / rateCount;
         }
-        Log.log('总的点赞：', rateCount, zanCommentRate, zanHeadRate, focuRate);
 
+        Log.log('总的点赞：', rateCount, zanCommentRate, focuRate);
         while (true) {
             tCommon.sleep(4000 + Math.random() * 2000);
             //看看是不是直播
-            if (tCommon.id(V.Live.getUserCountTag[0]).isVisibleToUser(true).findOne()) {
+            if (DyVideo.isLiving()) {
                 Log.log('直播，下一个');
-                DyVideo.next();
+                DyVideo.next(true);
                 continue;
             }
 
@@ -70,7 +68,7 @@ let task = {
             statistics.viewVideo();
             if (commentCount === 0 || this.contents.includes(title)) {
                 Log.log('下一个视频');
-                DyVideo.next();
+                DyVideo.next(true);
                 continue;
             }
 
@@ -78,8 +76,6 @@ let task = {
             DyVideo.openComment(commentCount);
             tCommon.sleep(2000 + 1000 * Math.random());
 
-            let rp = 0;
-            let lastComment = [];
             let firstComment = true;
             while (true) {
                 let comments = DyComment.getList();
@@ -87,24 +83,6 @@ let task = {
                     DyComment.closeCommentWindow();
                     tCommon.sleep(1000);
                     Log.log('没有评论内容');
-                    break;
-                }
-
-                if (lastComment.length == 2 && lastComment[0] == lastComment[1]) {
-                    rp++;
-                } else {
-                    rp = 0;
-                }
-
-                lastComment.push(comments[0].nickname + ':' + comments[0].content);
-                if (lastComment.length > 2) {
-                    lastComment.shift();
-                }
-
-                if (rp >= 3) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('评论扫描完了');
                     break;
                 }
 
@@ -123,8 +101,8 @@ let task = {
                         continue;
                     }
 
-                    if (comments[k]['content'] == "" || !this.includesKw(comments[k]['content'], commentKw) || this.nicknames.includes(comments[k].nickname)) {
-                        Log.log('数据：', comments[k]['content'], !this.includesKw(comments[k]['content'], commentKw), this.nicknames.includes(comments[k].nickname));
+                    if (!comments[k]['content'] || !this.includesKw(comments[k]['content'], commentKw) || this.nicknames.includes(comments[k].nickname)) {
+                        Log.log('数据：', comments[k]['content'], commentKw, this.nicknames.includes(comments[k].nickname));
                         continue;
                     }
 
@@ -135,17 +113,7 @@ let task = {
 
                     Log.log('找到了关键词', comments[k]['content']);
                     let opRate = Math.random();
-                    //赞头像暂时没有
-                    if (opRate <= zanHeadRate) {
-                        DyComment.intoUserPage(comments[k]);
-                        if (DyUser.isPrivate()) {
-                            tCommon.back();
-                        } else {
-                            DyUser.zanHead();
-                            tCommon.sleep(1000 + 1000 * Math.random());
-                            tCommon.back();
-                        }
-                    } else if (opRate <= zanHeadRate + zanCommentRate) {
+                    if (opRate <= zanCommentRate) {
                         try {
                             Log.log('点赞');
                             if (!DyComment.isZan()) {
@@ -174,13 +142,18 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                tCommon.swipeCommentListOp();
+                if (!tCommon.swipeCommentListOp()) {
+                    tCommon.back();
+                    tCommon.sleep(1000);
+                    Log.log('评论扫描完了');
+                    break;
+                }
                 tCommon.sleep(1500 + 500 * Math.random());
             }
             //判断是不是在视频页，不是则返回
             let retryCount = 3;
             while (retryCount-- > 0) {
-                if (!tCommon.id(V.Video.header[0]).textContains(V.Video.header[1]).findOne()) {
+                if (!UiSelector().text('搜索').findOne()) {
                     Log.log('找不到视频的搜索，返回');
                     tCommon.back();
                     tCommon.sleep(1500 + 500 * Math.random());
@@ -190,7 +163,7 @@ let task = {
             }
             Log.log('下一个视频');
             this.contents.push(title);
-            DyVideo.next();
+            DyVideo.next(true);
         }
     },
 }
@@ -198,12 +171,13 @@ let task = {
 let input = machine.get('task_dy_toker_live_video_comment_keyword');
 Log.log("input内容：" + machine.get('task_dy_toker_live_video_comment_keyword', 'string'));
 if (!input) {
-    System.toast('请输入评论关键词');
+    FloatDialogs.toast('请输入评论关键词');
     System.exit();
 }
 
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
+System.setAccessibilityMode('fast');
 
 while (true) {
     task.log();

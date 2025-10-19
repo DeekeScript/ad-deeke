@@ -17,6 +17,7 @@ let task = {
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }

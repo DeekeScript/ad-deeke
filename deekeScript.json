@@ -73,10 +73,10 @@
         "params": [
           {
             "type": "numberRange",
-            "label": "观看时长（秒）",
+            "label": "延长观看时长（秒）",
             "name": "toker_view_video_second",
             "max": 60,
-            "min": 5,
+            "min": 0,
             "value": 12,
             "step": 1
           },
@@ -241,11 +241,18 @@
       "settingPage": {
         "params": [
           {
+            "type": "text",
+            "label": "城市名称",
+            "name": "toker_city_name",
+            "value": "",
+            "notice": "* 不填写则操作默认城市\n* 注意，填写的城市必须在抖音同城的列表中"
+          },
+          {
             "type": "numberRange",
-            "label": "观看时长（秒）",
+            "label": "延长观看时长（秒）",
             "name": "toker_city_view_video_second",
             "max": 30,
-            "min": 5,
+            "min": 0,
             "value": 12,
             "step": 1
           },
@@ -648,15 +655,6 @@
             "label": "评论关键词（多关键词使用逗号隔开）",
             "name": "task_dy_toker_comment_kw",
             "value": ""
-          },
-          {
-            "type": "numberRange",
-            "label": "每轮休息时间（秒）",
-            "name": "task_dy_toker_comment_sleep_second",
-            "value": 600,
-            "max": 3600,
-            "min": 0,
-            "step": 1
           }
         ]
       }
@@ -686,7 +684,7 @@
           },
           {
             "type": "numberRange",
-            "label": "点赞/评论视频概率",
+            "label": "点赞/评论视频频率（%）",
             "name": "task_dy_toker_live_comment_user_video_rate",
             "value": 0,
             "max": 100,
@@ -711,6 +709,10 @@
             "max": 100,
             "min": 5,
             "step": 5
+          },
+          {
+            "type": "notice",
+            "title": "注意：本功能需要特定抖音版本"
           }
         ]
       }
@@ -845,6 +847,10 @@
             "max": 1000,
             "min": 1,
             "step": 1
+          },
+          {
+            "type": "notice",
+            "title": "* 搜索视频，对视频标题符合关键词的评论区用户（评论内容匹配到”触发关键词“）进行操作"
           }
         ]
       }
@@ -864,7 +870,7 @@
           },
           {
             "type": "numberRange",
-            "label": "点赞概率",
+            "label": "点赞频率（%）",
             "name": "task_dy_search_zan_rate",
             "value": 10,
             "max": 100,
@@ -873,7 +879,7 @@
           },
           {
             "type": "numberRange",
-            "label": "评论概率",
+            "label": "评论频率（%）",
             "name": "task_dy_search_comment_rate",
             "value": 10,
             "max": 100,
@@ -882,7 +888,7 @@
           },
           {
             "type": "numberRange",
-            "label": "关注概率",
+            "label": "关注频率（%）",
             "name": "task_dy_search_focus_rate",
             "value": 10,
             "max": 100,
@@ -970,12 +976,6 @@
       }
     },
     {
-      "title": "精准投放",
-      "hidden": true,
-      "icon": "img/hot.png",
-      "jsFile": "tasks/task_dy_toker_fans.js"
-    },
-    {
       "title": "喜欢截流",
       "hidden": false,
       "icon": "img/precise-user.png",
@@ -986,7 +986,8 @@
             "type": "textArea",
             "label": "对方账号",
             "value": "",
-            "name": "task_dy_consum_account"
+            "name": "task_dy_consum_account",
+            "notice": "* 如果对方是你关注的账号，可以使用“+抖音号”的方式"
           },
           {
             "type": "numberRange",
@@ -1204,7 +1205,8 @@
             "label": "运行次数",
             "name": "task_dy_friend_change_run_count",
             "value": 10,
-            "max": 300,
+            "step": 5,
+            "max": 1000,
             "min": 1
           },
           {
@@ -1369,7 +1371,7 @@
           },
           {
             "type": "notice",
-            "title": "功能说明：蓝V账号，需要创建卡片，这个功能将会自动分享第一个卡片"
+            "title": "注意：本功能需要特定抖音版本\n功能说明：蓝V账号，需要创建卡片，这个功能将会自动分享第一个卡片"
           }
         ]
       }
@@ -1379,7 +1381,7 @@
       "hidden": false,
       "icon": "img/rocket.png",
       "jsFile": "tasks/task_dy_search_user.js",
-      "columns": 2,
+      "columns": 1,
       "settingPage": {
         "params": [
           {
@@ -1453,13 +1455,17 @@
             "label": "行业关键词",
             "name": "searchUserSetting_keyword",
             "value": ""
+          },
+          {
+            "type": "notice",
+            "title": "注意：本功能需要特定抖音版本"
           }
         ]
       }
     },
     {
       "title": "AI回复",
-      "hidden": true,
+      "hidden": false,
       "icon": "img/ai-back.png",
       "jsFile": "tasks/task_dy_ai_back.js",
       "columns": 1,
@@ -1535,12 +1541,6 @@
         "params": [
           {
             "type": "textArea",
-            "label": "门店名称",
-            "name": "task_dy_team_buy_text",
-            "value": ""
-          },
-          {
-            "type": "textArea",
             "label": "操作次数",
             "name": "task_dy_team_buy_op_count",
             "value": "10"
@@ -1592,7 +1592,7 @@
           },
           {
             "type": "notice",
-            "title": "1.手动进入团购评论页面执行（点击右侧开始按钮）\n\n2.确保用户列表可以被操作"
+            "title": "1.手动进入团购评论页面执行（点击右侧开始按钮）\n\n2.确保用户列表可以被操作\n\n注意：本功能需要特定抖音版本"
           }
         ]
       }
@@ -1690,7 +1690,7 @@
           },
           {
             "type": "numberRange",
-            "label": "回复作品首评概率",
+            "label": "回复作品首评频率（%）",
             "name": "task_dy_toker_live_video_comment_first_comment_rate",
             "value": 0,
             "max": 100,
@@ -2199,7 +2199,7 @@
           },
           {
             "type": "numberRange",
-            "label": "评论概率",
+            "label": "评论频率（%）",
             "name": "task_xhs_yanghao_comment_rate",
             "value": 15,
             "max": 100,
@@ -2208,7 +2208,7 @@
           },
           {
             "type": "numberRange",
-            "label": "点赞概率",
+            "label": "点赞频率（%）",
             "name": "task_xhs_yanghao_zan_rate",
             "value": 20,
             "max": 100,
@@ -2217,7 +2217,7 @@
           },
           {
             "type": "numberRange",
-            "label": "收藏概率",
+            "label": "收藏频率（%）",
             "name": "task_xhs_yanghao_collect_rate",
             "value": 5,
             "max": 100,
@@ -2688,15 +2688,6 @@
             "label": "评论关键词（多关键词使用逗号隔开）",
             "name": "task_ks_toker_comment_kw",
             "value": ""
-          },
-          {
-            "type": "numberRange",
-            "label": "每轮休息时间（秒）",
-            "name": "task_ks_toker_comment_sleep_second",
-            "value": 600,
-            "max": 3600,
-            "min": 0,
-            "step": 1
           }
         ]
       }
@@ -3194,35 +3185,28 @@
         "params": [
           {
             "type": "switch",
-            "label": "开启{NAME}智能AI话术",
+            "label": "开启扣子智能AI话术",
             "value": false,
             "name": "setting_baidu_wenxin_switch"
           },
           {
-            "type": "radio",
-            "label": "请选择角色",
-            "name": "setting_baidu_wenxin_role",
-            "value": "1",
-            "dataFrom": "role",
+            "type": "textArea",
+            "label": "角色描述",
+            "name": "setting_baidu_wenxin_role_text",
             "hidden": false,
-            "options": []
+            "value": "你是一个评论大师，可以对用户的标题进行犀利的评论，同时能赢得用户的好感度"
           },
           {
             "type": "text",
-            "label": "{NAME} Key",
-            "value": "如：NZmgn5urWoHhKWe8XbGMdbUp",
-            "name": "setting_baidu_wenxin_key"
-          },
-          {
-            "type": "text",
-            "label": "{NAME} Secret",
+            "label": "access_token",
             "name": "setting_baidu_wenxin_secret",
             "value": "如：brIq133KaAPNEkn109avxl7MXUHHW0kg"
           },
           {
-            "type": "notice",
-            "title": "如果开启超级霸屏，请配置账号收藏的表情图",
-            "hidden": true
+            "type": "text",
+            "label": "bot_id",
+            "name": "setting_baidu_wenxin_bot",
+            "value": ""
           },
           {
             "type": "numberRange",
@@ -3235,7 +3219,7 @@
           },
           {
             "type": "notice",
-            "title": "* 开启后，将使用{NAME}官方AI角色（可自定义）进行评论和私信，让拓客变得更简单~",
+            "title": "* 开启后，将使用扣子平台智能体，让拓客更简单~ \n* 注意：相关设置可进入扣子平台获取",
             "textColor": "#AA0000",
             "textSize": 16
           }

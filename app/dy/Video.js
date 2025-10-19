@@ -1,26 +1,37 @@
 let Common = require('app/dy/Common.js');
 let statistics = require('common/statistics.js');
-let V = require('version/V.js');
 
 const Video = {
-    next() {
-        let left = Device.width() * 0.2 + Device.width() * 0.7 * Math.random();
-        let bottom = Device.height() * (0.7 + 0.10 * Math.random());
-        let left2 = left + Math.random() * 20;
-        let r = 100 * Math.random();
-        let top = Device.height() * (0.3 - 0.10 * Math.random());
-        let duration = 100 + 30 * Math.random();
-
-        Log.log("滑动参数：" + left + ":" + bottom + ":" + left2 + ":" + top + ":" + duration);
-        Gesture.swipe(left, bottom, left2, top, duration);
-        Common.sleep(600);
+    /**
+     * 滑动视频  （非fast模式下运行，否则视频划不动）
+     * @returns {boolean}
+     */
+    next(fast) {
+        //推荐页面滑动视频
+        if (fast) {
+            System.setAccessibilityMode('!fast');
+        }
+        let tag = UiSelector().id('com.ss.android.ugc.aweme:id/viewpager').desc('视频').scrollable(true).isVisibleToUser(true).findOne();
+        if (!tag) {
+            tag = UiSelector().id('com.ss.android.ugc.aweme:id/viewpager').filter(v => {
+                //注意，这里的过滤，防止左滑进入用户页面
+                return v.bounds().height() < Device.height();
+            }).scrollable(true).className('androidx.viewpager.widget.ViewPager').isVisibleToUser(true).findOne();
+        }
+        let res = tag.scrollForward();
+        if (fast) {
+            System.setAccessibilityMode('fast');
+        }
+        return res;
     },
 
+    /**
+     * 获取点赞标签
+     * @returns {object}
+     */
     getZanTag() {
-        let tag = Common.id(V.Video.getZanTag[0]).filter((v) => {
-            return v && v.bounds() && v.bounds().left > 0 && v.bounds().top > 0 && v.bounds().left + v.bounds().width() <= Device.width() && v.bounds().top + v.bounds().height() < Device.height();
-        }).isVisibleToUser(true).findOnce();
-        console.log(tag);
+        let tag = UiSelector().className('android.widget.LinearLayout').descContains('点赞').clickable(true).isVisibleToUser(true).findOne();
+        Log.log(tag);
         if (tag) {
             //900 1208 180 201
             console.log(tag.bounds().left, tag.bounds().top, tag.bounds().width(), tag.bounds().height());
@@ -30,29 +41,45 @@ const Video = {
         throw new Error('没有找到赞标签');
     },
 
+    /**
+     * 获取点赞数量
+     * @returns {number}
+     */
     getZanCount() {
         let zan = this.getZanTag();
         return Common.numDeal(zan.desc());
     },
 
+    /**
+     * 是否已赞
+     * @returns {boolean}
+     */
     isZan() {
         let zan = this.getZanTag();
-        return zan.desc().indexOf(V.Video.isZan[0]) !== -1;
+        return zan.desc().indexOf('已点赞') !== -1;
     },
 
+    /**
+     * 点赞
+     * @returns {boolean}
+     */
     clickZan() {
         let zanTag = this.getZanTag();
         if (zanTag) {
-            //zanTag.click();
-            Common.click(zanTag);
+            let res = zanTag.click();
             statistics.zan();
-            return true;
+            return res;
         }
-        throw new Error('点赞失败');
+        Log.log('点赞失败');
+        return false;
     },
 
+    /**
+     * 获取评论标签
+     * @returns {object}
+     */
     getCommentTag() {
-        let tag = Common.id(V.Video.getCommentTag[0]).isVisibleToUser(true).findOnce();
+        let tag = UiSelector().className('android.widget.LinearLayout').descContains('评论').clickable(true).isVisibleToUser(true).findOne();
         Log.log("评论标签：：：", tag.desc(), tag);
         if (tag) {
             return tag;
@@ -61,15 +88,23 @@ const Video = {
         throw new Error('没有找到评论标签');
     },
 
+    /**
+     * 获取评论数量
+     * @returns {number}
+     */
     getCommentCount() {
         let comment = this.getCommentTag();
         return Common.numDeal(comment.desc());
     },
 
-    //评论  type 为true表示有评论数，否则为无评论数
+    /*
+     * 打开评论
+     * @param {number} type
+     * @returns {boolean}
+     */
     openComment(type) {
         let comment = this.getCommentTag();
-        Common.click(comment);
+        let res = comment.click();
         if (type) {
             Common.sleep(2000 + 1500 * Math.random());
         } else {
@@ -77,11 +112,15 @@ const Video = {
             Common.back();
         }
 
-        return true;
+        return res;
     },
 
+    /*
+     * 获取收藏控件
+     * @returns {object}
+     */
     getCollectTag() {
-        let tag = Common.id(V.Video.getCollectTag[0]).isVisibleToUser(true).findOnce();
+        let tag = UiSelector().className('android.widget.LinearLayout').descContains('收藏').clickable(true).isVisibleToUser(true).findOne();
         if (tag) {
             return tag;
         }
@@ -89,23 +128,39 @@ const Video = {
         throw new Error('没有找到收藏标签');
     },
 
+    /*
+     * 获取收藏数量
+     * @returns {number}
+     */
     getCollectCount() {
         let collect = this.getCollectTag();
         return Common.numDeal(collect.desc());
     },
 
+    /*
+     * 收藏
+     * @returns {boolean}
+     */
     collect() {
         let tag = this.getCollectTag();
-        return Common.click(tag);
+        return tag.click();
     },
 
+    /*
+     * 是否收藏
+     * @returns {boolean}
+     */
     isCollect() {
         let tag = this.getCollectTag();
-        return tag.desc().indexOf(V.Video.isCollect[0]) === -1;
+        return tag.desc().indexOf('已收藏') !== -1;
     },
 
+    /*
+     * 分享控件获取
+     * @returns {object}
+     */
     getShareTag() {
-        let tag = Common.id(V.Video.getShareTag[0]).isVisibleToUser(true).findOnce();
+        let tag = UiSelector().className('android.widget.LinearLayout').descContains('分享').clickable(true).isVisibleToUser(true).findOne();
         if (tag) {
             return tag;
         }
@@ -113,14 +168,21 @@ const Video = {
         throw new Error('没有找到分享标签');
     },
 
+    /*
+     * 获取分享数量
+     * @returns {number}
+     */
     getShareCount() {
         let share = this.getShareTag();
         return Common.numDeal(share.desc());
     },
 
+    /*
+     * 获取视频内容控件
+     * @returns {object}
+     */
     getContentTag() {
-        Log.log('getContentTag', V.Video.getContentTag[0]);
-        let tag = Common.id(V.Video.getContentTag[0]).isVisibleToUser(true).findOnce();
+        let tag = Common.id('desc').isVisibleToUser(true).findOne();
         if (tag) {
             console.log("视频标题内容：", tag);
             return tag;
@@ -129,163 +191,183 @@ const Video = {
         return false;//极端情况是可以没有内容的
     },
 
+    /**
+     * 获取视频内容
+     * @returns {object}
+     */
     getContent() {
         let tag = this.getContentTag();
         return tag ? tag.text() : '';
     },
 
+    /**
+     * 获取标题上方的昵称控件
+     * @returns {object}
+     */
     getTitleTag() {
-        let tag = Common.id(V.Video.getTitleTag[0]).isVisibleToUser(true).findOnce();
+        let tag = Common.id('title').isVisibleToUser(true).findOnce();
         if (tag) {
             return tag;
         }
         throw new Error('找不到标题内容');
     },
 
+    /**
+     * 获取标题上的昵称
+     * @returns {string}
+    */
     getAtNickname() {
-        return this.getTitleTag().text().replace(V.Video.getAtNickname[0], '');
+        let tag = this.getTitleTag();
+        if (!tag) {
+            return false;
+        }
+        return this.getTitleTag().text().replace('@', '');
     },
 
-    getTimeTag() {
-        let tag = Common.id(V.Video.getTimeTag[0]).isVisibleToUser(true).findOnce();
+    getAvatarTag() {
+        let tag = Common.id('user_avatar').isVisibleToUser(true).findOnce();
         if (tag) {
             return tag;
         }
-        throw new Error('找不到标题内容');
+        throw new Error('找不到头像');
     },
 
-    getTime() {
-        if (330901 == App.getAppVersionCode('com.ss.android.ugc.aweme')) {
-            this.getTimeTag().text().split(V.Video.getTimeTag[1])[0];
+    /**
+     * 获取用户的视频的发布时间
+     * @returns {object}
+     */
+    getTimeTag() {
+        let tag = UiSelector().descContains('发布时间').isVisibleToUser(true).findOne();
+        if (tag) {
+            return tag;
         }
-        return this.getTimeTag().text();
+        throw new Error('找不到发布时间');
     },
 
-    //是否直播中
+    /**
+     * 获取用户的视频的发布时间
+     * @returns {string}
+     */
+    getTime() {
+        //发布时间：2025-09-29 07:00 IP属地：湖北
+        let tag = this.getTimeTag();
+        return tag.desc().split(' IP属地')[0].replace('发布时间：', '');
+    },
+
+    /**
+     * 是否直播中
+     * @returns {string}
+     */
     isLiving() {
         //两种方式，一种是屏幕上展示，一种是头像
-        let tags;
-        if (App.getAppVersionCode('com.ss.android.ugc.aweme') < 310701) {
-            tags = Common.id(V.Video.isLiving[0]).descContains(V.Video.isLiving[1]).filter((v) => {
-                return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
-            }).isVisibleToUser(true).exists();
-        } else {
-            tags = Common.id(V.Video.isLiving[0]).textContains(V.Video.isLiving[1]).filter((v) => {
-                return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
-            }).isVisibleToUser(true).exists();
-        }
-        if (tags) {
+        if (UiSelector().text('点击进入直播间').isVisibleToUser(true).findOne()) {
             return true;
         }
 
         console.log("直播1检测完成");
-        tags = Common.id(V.Video.isLiving[2]).descContains(V.Video.isLiving[3]).filter((v) => {
+        let tag = UiSelector().descContains('直播中').filter((v) => {
             return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.7 && v.bounds().left > Device.width() * 0.8;
-        }).isVisibleToUser(true).exists();//Common.id('xpk')   Common.id('yz4')
+        }).isVisibleToUser(true).exists();
 
         console.log("直播2检测完成");
-        return tags ? true : false;
+        return tag ? true : false;
     },
 
-    //头像查找经常出问题，这里做3次轮训
-    getAvatar(times) {
-        if (!times) {
-            times = 1;
-        }
-        try {
-            let name = V.Video.getAvatar[0];
-            let tag = Common.id(name).isVisibleToUser(true).findOnce();
-            if (tag) {
-                return tag;
-            }
-            throw new Error('找不到头像' + times);
-        } catch (e) {
-            if (times < 3) {
-                Log.log(Common.id(V.Video.getAvatar[0]).find());
-                return this.getAvatar(++times);
-            }
-        }
-
-        throw new Error('找不到头像');
-    },
-
-    getLivingAvatarTag() {
-        let tag = Common.id(V.Video.getLivingAvatarTag[0]).clickable(true).descContains(V.Video.getLivingAvatarTag[1]).filter((v) => {
-            return v && v.bounds() && v.bounds().top > Device.height() / 7 && v.bounds().top < Device.height() * 0.8 && v.bounds().left > 0;
-        }).isVisibleToUser(true).findOnce();
-        if (tag) {
-            return tag;
-        }
-        throw new Error('找不到直播头像' + times);
-    },
-
-    getLivingNickname() {
-        return this.getLivingAvatarTag().desc().replace(V.Video.getLivingNickname[0], '');
-    },
-
-    //有没有查看详情  有的话大概率是广告  广告的话，不能操作广告主
+    /**
+     * 有没有【点击查看、查看详情】 有的话大概率是广告  广告的话，不能操作广告主
+     * @returns {boolean}
+     */
     viewDetail() {
-        let tags = UiSelector().text(V.Video.viewDetail[0]).descContains(V.Video.viewDetail[0]).isVisibleToUser(true).findOne();
+        let tags = UiSelector().descMatches('(查看|了解详情)').isVisibleToUser(true).findOne() || UiSelector().textMatches('(查看|了解详情)').isVisibleToUser(true).findOne();
         if (tags) {
             return true;
         }
 
-        tags = UiSelector().text(V.Video.viewDetail[0]).isVisibleToUser(true).findOne();
-        return tags || false;
+        return false;
     },
 
+    /**
+     * 进入用户主页
+     * @returns {boolean}
+     */
     intoUserPage() {
-        let head = this.getAvatar(3);
-        Log.log(head);
-        Common.click(head, 0.3);
-        Common.sleep(2000 + Math.random() * 1000);
+        let nicknameTag = this.getTitleTag();
+        Log.log(nicknameTag);
+        let res = nicknameTag.click();
+        Common.sleep(3000 + Math.random() * 1000);
         statistics.viewUser();//目标视频数量加1
+        return res;
     },
 
+    /**
+     * 同城进入用户主页
+     * @returns {boolean}
+     */
+    intoLocalUserPage() {
+        let nicknameTag = this.getAvatarTag();
+        Log.log(nicknameTag);
+        let res = nicknameTag.click();
+        Common.sleep(3000 + Math.random() * 1000);
+        statistics.viewUser();//目标视频数量加1
+        return res;
+    },
+
+    /**
+     * 获取用户昵称  不再通过头像获取，因为经常出问题
+     * @returns {string}
+     */
     getNickname() {
-        let avatar = this.getAvatar(3);
-        return avatar.desc();
+        return this.getAtNickname();
     },
 
-    getDistanceTag(loop) {
-        let name = V.Video.getDistanceTag[0];
-        if (loop) {
-            name = V.Video.getDistanceTag[1];
-        }
+    /*
+    * 获取距离
+    * @param {boolean} loop
+    * @returns {string}
+    */
+    getDistanceTag() {
+        let tag = UiSelector().descMatches('[m|公里]').filter(v => {
+            return !isNaN(v.desc().substring(0, 1));
+        }).isVisibleToUser(true).findOne();
 
-        let tag = Common.id(name).isVisibleToUser(true).findOneBy(1000);//等待作用
         console.log("同城--", tag ? '1' : '0', typeof (tag));
         if (tag) {
             console.log("同城--", tag);
             return tag;
         }
 
-        if (!loop) {
-            return this.getDistanceTag(1);
-        }
-
-        if (loop) {
-            return {
-                text: () => {
-                    return '100';//如果找不到，则设置为1000km，直接过滤掉
-                }
-            };
-        }
+        return {
+            desc: () => {
+                return '100';//如果找不到，则设置为1000km，直接过滤掉
+            }
+        };
     },
 
+    /**
+     * 获取同城视频距离
+     * @returns number
+     */
     getDistance() {
         let tag = this.getDistanceTag();
-        let f = parseFloat(tag.text().toString().replace('>', '').replace('<', '').replace('公里', '').replace('km', ''));
+        let f = parseFloat(tag.desc());
+        if (tag.desc().indexOf('公里') !== -1 || tag.desc().indexOf('km') !== -1) {
+            //公里，什么都不做
+        } else if (tag.desc().indexOf('米') !== -1 || tag.desc().indexOf('m') !== -1) {
+            f = f / 1000;
+        }
+
         if (isNaN(f)) {
             return 100;//默认100公里
         }
         return f;
     },
 
+    /**
+     * 获取视频发布时间
+     * @return {object}
+     */
     getInTimeTag() {
-        let name = V.Video.getInTimeTag[0];
-        let tag = Common.id(name).isVisibleToUser(true).findOneBy(1000);
-
+        let tag = UiSelector().descContains('发布时间：').isVisibleToUser(true).findOne();
         if (tag) {
             return tag;
         }
@@ -297,9 +379,13 @@ const Video = {
         }
     },
 
+    /**
+     * 获取视频发布时间 返回距离当前时间的秒数（过去）
+     * @return {number}
+     */
     getInTime() {
         let inTimeTag = this.getInTimeTag();
-        let time = inTimeTag.text().replace('· ', '');
+        let time = inTimeTag.desc().replace('发布时间：', '');
         let incSecond = 0;
         if (time.indexOf('分钟前') !== -1) {
             incSecond = time.replace('分钟前', '') * 60;
@@ -325,6 +411,12 @@ const Video = {
         return incSecond;
     },
 
+    /**
+     * 获取视频的详细信息
+     * @param {number} isCity 
+     * @param {object} params 
+     * @returns {object}
+     */
     getInfo(isCity, params) {
         if (!params) {
             params = {};
@@ -353,8 +445,6 @@ const Video = {
         if (isCity) {
             Log.log('同城数据1');
             info.distance = this.getDistance();
-            // Log.log('同城数据2');
-            // info.in_time = this.getInTime();
         }
 
         Log.log('同城数据结束', info);
@@ -362,21 +452,21 @@ const Video = {
         return info;
     },
 
+    /**
+     * 获取进度条
+     * @return {object}
+     */
     getProcessBar() {
-        //        let tag = Common.id('zhj').findOnce();
-        //        if (!tag) {
-        //            return false;
-        //        }
-        //
-        //        if (tag['info']['actions'] === 144205) {
-        //            return true;
-        //        }
-        return false;
+        return UiSelector().desc('进度条').isVisibleToUser(true).findOne();
     },
 
+    /**
+     * 进入非顶置的最小赞视频
+     * @return {boolean}
+     */
     intoUserVideo() {
-        let workTag = UiSelector().id(V.Video.intoUserVideo[0]).descContains(V.Video.intoUserVideo[1]).findOnce();
-        if (!workTag || Common.numDeal(workTag.text()) === 0) {
+        let workTag = UiSelector().descContains('作品').clickable(true).className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
+        if (!workTag || Common.numDeal(workTag.desc()) === 0) {
             return false;
         }
 
@@ -384,101 +474,61 @@ const Video = {
         let top = bottom - 400 - Math.random() * 200;
         let left = Device.width() * 0.1 + Math.random() * (Device.width() * 0.8);
         Gesture.swipe(left, bottom, left, top, 300);
-        Common.sleep(2500);
+        Common.sleep(2200 + 300 * Math.random());
 
         //这里需要判断是否是商家
-        workTag = UiSelector().id(V.Video.intoUserVideo[0]).descContains(V.Video.intoUserVideo[1]).isVisibleToUser(true).findOnce();
-        if (workTag && !workTag.parent().isSelected()) {
-            Common.click(workTag);
+        if (!workTag.isSelected()) {
+            workTag.click();
             Log.log('点击workTag');
             Common.sleep(2000);
         }
 
-        let containers = Common.id(V.Video.intoUserVideo[2]).isVisibleToUser(true).filter((v) => {
-            return v && v.bounds().width() <= Device.width() / 3;
-        }).find();
+        let containers = UiSelector().descMatches('(视频|图文)').className('android.view.View').filter(v => {
+            return v.desc().indexOf('置顶') === -1;
+        }).clickable(true).isVisibleToUser(true).find();
+        let videoIndex = 0;
+        let baseZanCount = 1000000000;
+        let res;
+
+        //老视频好像没有这种容器，新视频适用这个模式
+        if (containers.length > 0) {
+            for (let i in containers) {
+                let zanCount = parseInt(containers[i].desc().split('点赞数')[1]);
+                if (zanCount < baseZanCount) {
+                    baseZanCount = zanCount;
+                    videoIndex = i;
+                }
+            }
+
+            Log.log('最小赞', baseZanCount);
+            Log.log("容器", containers[videoIndex]);
+            //注意，这里偶尔通过tag.click点不进去
+            res = Common.click(containers[videoIndex]);
+        } else {
+            containers = UiSelector().id('com.ss.android.ugc.aweme:id/container').isVisibleToUser(true).find();
+            if (containers.length > 0) {
+                res = Common.click(containers[videoIndex]);
+            }
+        }
+
         if (containers.length === 0) {
             return false;
         }
 
-        let videoIndex = null;
-        let baseZanCount = 0;
-        let jc = 0
-        // for (let i in containers) {
-        //     if (isNaN(i)) {
-        //         continue;
-        //     }
-
-        //     //置顶的返回
-        //     Log.log("判断是否有置顶");
-        //     Log.log(Common.id(V.Video.intoUserVideo[3]).find());
-        //     if (containers[i].children().findOne(Common.id(V.Video.intoUserVideo[3]))) {
-        //         videoIndex = jc;
-        //         Log.log("置顶了:" + videoIndex);
-        //         break;
-        //     }
-        //     jc++
-        // }
-
-        let zhidingTag = Common.id(V.Video.intoUserVideo[3]).find();
-        if (containers.length > zhidingTag.length) {
-            videoIndex = zhidingTag.length;//点击第几个，这里不需要加1，因为控件是从0开始
-        } else {
-            videoIndex = 0;//没有置顶，或者都是置顶的的从0开始
-        }
-
-        //videoIndex = Math.floor(Math.random() * jc)
-        //videoIndex = 0;//首部作品操作
-
-        Log.log('最小赞', baseZanCount);
-        if (containers.length === 0 && baseZanCount === null) {
-            return false;
-        }
-
-        if (videoIndex == null || !containers[videoIndex]) {
-            return false;
-        }
-
-        Log.log("容器", containers[videoIndex]);
-        Common.click(containers[videoIndex], 0.2);
-        Common.sleep(3000 + Math.random() * 1000);
+        Common.sleep(4000 + Math.random() * 1000);
         statistics.viewVideo();
         statistics.viewTargetVideo();
+        return res;
+    },
+
+    /**
+     * 慢点
+     * @returns {boolean}
+     */
+    videoSlow() {
+        //Common.sleep(1000 + Math.random() * 1000);
         return true;
     },
-
-    videoSlow() {
-        Common.sleep(1000 + Math.random() * 1000);
-    },
-
-    clickZanForNewVideo(count) {
-        let nicks = [];
-        let rp = 0;
-        while (count--) {
-            nicks.push(this.getContent());
-            if (nicks.length > 2) {
-                nicks.shift();
-            }
-
-            if (nicks[0] === nicks[1]) {
-                count++;
-                rp++;
-            } else {
-                rp = 0;
-            }
-
-            if (rp >= 3) {
-                return false;
-            }
-
-            if (!this.isZan()) {
-                this.clickZan();
-                return true;
-            }
-            this.next();
-        }
-        return false;
-    }
 }
 
 

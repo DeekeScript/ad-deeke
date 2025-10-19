@@ -5,16 +5,6 @@ let storage = require('common/storage.js');
 let machine = require('common/machine.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 let statistics = require('common/statistics');
-let V = require("version/V.js");
-
-// let dy = require('app/iDy');
-// let config = require('config/config');
-
-/**
- * 赞回访
- */
-
-let videoCount = 500;
 
 let task = {
     contents: [],
@@ -31,6 +21,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -54,11 +45,7 @@ let task = {
         //查看是不是进入了指定页面，是的话才开始运行
         let config = this.getConfig();
         Log.log("配置信息：", config);
-        tCommon.id(V.C.userListTop).isVisibleToUser(true).waitFindOne();
-
-        let arr = [];//存储最新的20个
         let count = 0;
-        let repeatCount = 0;
         let errorCount = 0;
         let errorContainsCount = 0;
 
@@ -66,7 +53,9 @@ let task = {
             try {
                 tCommon.sleep(3000);
                 System.toast('开始执行，剩余数量：' + (config.runTimes - count));
-                let contains = tCommon.id(V.Comment.getList[0]).isVisibleToUser(true).find();
+                let contains = UiSelector().className('android.widget.LinearLayout').isVisibleToUser(true).filter(v => {
+                    return v.parent().className() == 'androidx.recyclerview.widget.RecyclerView';
+                }).find();
                 Log.log("找到的内容数量：", contains.length);
                 if (contains.length == 0) {
                     if (errorContainsCount++ >= 3) {
@@ -78,7 +67,7 @@ let task = {
 
                 for (let i in contains) {
                     tCommon.sleep(config.intevalSecond * 1000);
-                    let nicknameTag = contains[i].children().findOne(tCommon.id(V.Video.zanList[0]).isVisibleToUser(true));
+                    let nicknameTag = contains[i].children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
                     Log.log(nicknameTag);
                     if (!nicknameTag) {
                         System.generateWindowElements();
@@ -117,19 +106,6 @@ let task = {
 
                     Log.log("抖音号：", account);
                     machine.set("task_dy_zan_back_" + account, true);
-                    if (arr.indexOf(account) != -1) {
-                        repeatCount++;
-                        if (repeatCount >= 2) {
-                            System.toast('运行结束');
-                            return true;
-                        }
-                        tCommon.back();
-                        continue;
-                    } else {
-                        repeatCount = 0;
-                    }
-
-                    arr.push(account);
 
                     let fansCount = DyUser.getFansCount();
                     Log.log("粉丝数量：", fansCount);
@@ -178,7 +154,9 @@ let task = {
                     tCommon.sleep(config.homeWait * 1000);//主页停留
                     tCommon.swipe(0, 0.5);
                     tCommon.sleep(500);
-                    if (tCommon.id(V.Comment.getList[0]).isVisibleToUser(true).findOne()) {
+                    if (UiSelector().textContains('赞').isVisibleToUser(true).filter(v => {
+                        return v.isSelected();
+                    }).findOne()) {
                         Log.log('在列表页面了');
                     } else {
                         tCommon.back();//返回
@@ -187,11 +165,14 @@ let task = {
 
                 tCommon.sleep(1000);
                 Log.log("执行滑动");
-                task.swipe();
-                System.cleanUp();
+                if (!task.swipe()) {
+                    return true;
+                }
             } catch (e) {
                 Log.log(e);
-                if (!tCommon.id(V.Comment.getList[0]).isVisibleToUser(true).findOne()) {
+                if (!UiSelector().textContains('赞').isVisibleToUser(true).filter(v => {
+                    return v.isSelected();
+                }).findOne()) {
                     Log.log("找不到标签，返回了");
                     tCommon.back();
                     tCommon.sleep(2000);
@@ -204,10 +185,7 @@ let task = {
     },
 
     swipe() {
-        let scrolls = tCommon.id(V.Common.swipeCommentListOp[0]).scrollable(true).find();
-        for (let i in scrolls) {
-            scrolls[i].scrollForward();
-        }
+        return tCommon.swipeWorkZanList();
     }
 }
 

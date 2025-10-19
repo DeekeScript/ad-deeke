@@ -1,49 +1,80 @@
 let Common = require('app/ks/Common.js');
 let statistics = require('common/statistics.js');
-let V = require('version/KsV.js');
 let storage = require('common/storage.js');
 
 let Comment = {
     tag: undefined,//当前的tag标签
     containers: [],//本次遍历的内容  主要用于去重
+    /**
+     * 
+     * @param {UiObject} tag 
+     * @returns {UiObject}
+     */
     getAvatarTag(tag) {
         if (tag) {
-            return tag.children().findOne(Common.id(V.Comment.getAvatarTag[0]).desc(V.Comment.getAvatarTag[1]).isVisibleToUser(true));
+            return tag.children().findOne(Common.id('avatar').desc('头像').isVisibleToUser(true));
         }
-        return this.tag.children().findOne(Common.id(V.Comment.getAvatarTag[0]).desc(V.Comment.getAvatarTag[1]).isVisibleToUser(true));
+        return this.tag.children().findOne(Common.id('avatar').desc('头像').isVisibleToUser(true));
     },
 
+    /**
+     * 获取昵称控件
+     * @returns {UiObject}
+     */
     getNicknameTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getNicknameTag[0]));
+        return this.tag.children().findOne(Common.id('name'));
     },
 
+    /**
+     * 获取评论内容
+     * @returns {UiObject}
+     */
     getContentTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getContentTag[0]));
+        return this.tag.children().findOne(Common.id('comment'));
     },
 
+    /**
+     * 获取评论时间  09-07 浙江
+     * @returns {UiObject}
+     */
     getTimeTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getTimeTag[0]));
+        return this.tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/comment_created_time_and_loc'));
     },
 
+    /**
+     * 获取Ip 09-07 浙江
+     * @returns {UiObject}
+     */
     getIpTag() {
-        return this.tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/' + V.Comment.getIpTag[0]));
-        return Common.id(V.Comment.getIpTag[0]).filter(v => {
-            return v && v.bounds() && v.bounds().left >= this.tag.bounds().left && v.bounds().top > this.tag.bounds().top && v.bounds().top + v.bounds().height() < this.tag.bounds().top + this.tag.bounds().height();
-        }).findOne();
+        return this.getTimeTag();
     },
 
-
+    /**
+     * 获取点赞控件
+     * @param tag
+     * @returns {UiObject}
+     */
     getZanTag(tag) {
         if (tag) {
-            return tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/' + V.Comment.getZanTag[0]).isVisibleToUser(true));
+            return tag.children().findOne(UiSelector().descContains('点赞'));
         }
-        return this.tag.children().findOne(UiSelector().id('com.smile.gifmaker.comment_detail:id/' + V.Comment.getZanTag[0]).isVisibleToUser(true));
+        return this.tag.children().findOne(UiSelector().descContains('点赞'));
     },
 
+    /**
+     * 是否是作者
+     * @param tag
+     * @returns {UiObject}
+     */
     isAuthor() {
-        return this.tag.children().findOne(Common.id(V.Comment.isAuthor[0]).textContains(V.Comment.isAuthor[1])) ? true : false;
+        return this.tag.children().findOne(UiSelector().text('作者')) ? true : false;
     },
 
+    /**
+     * 获取昵称
+     * @param tag
+     * @returns {string|false}
+     */
     getNickname() {
         let tag = this.getNicknameTag();
         if (tag) {
@@ -52,6 +83,11 @@ let Comment = {
         return false;
     },
 
+    /**
+     * 获取内容
+     * @param tag
+     * @returns {string}
+     */
     getContent() {
         let tag = this.getContentTag();
         if (!tag || !tag.text()) {
@@ -61,30 +97,39 @@ let Comment = {
         return tag.text();
     },
 
-    getZanCountTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getZanCountTag[0]));
-    },
-
+    /**
+     * 获取点赞数
+     * @param tag
+     * @returns {string}
+     */
     getZanCount() {
-        return Common.numDeal(this.getZanCountTag().text());
+        return Common.numDeal(this.getZanTag().text());
     },
 
+    /**
+     * 是否点赞
+     * @returns {boolean}
+     */
     isZan() {
         let tag = this.getZanTag();
         if (!tag) {
             return false;
         }
-        return tag.isSelected();
+        return tag.children().getChildren(0).isSelected();
     },
 
     //data 是getList返回的参数
     clickZan(data) {
         let zanTag = this.getZanTag(data.tag);
-        zanTag && Common.click(zanTag);
+        zanTag && zanTag.click();
         statistics.zanComment();
         return true;
     },
 
+    /**
+     * 获取评论时间
+     * @returns {string}
+     */
     getTime() {
         let timestamp = Math.ceil(Date.parse(new Date()) / 1000);
         let incSecond = 0;
@@ -118,6 +163,10 @@ let Comment = {
         return timestamp - incSecond;
     },
 
+    /**
+     * 获取Ip
+     * @returns {string}
+     */
     getIp() {
         let tag = this.getIpTag();
         if (!tag) {
@@ -131,15 +180,20 @@ let Comment = {
         return msg.split(' ')[1];
     },
 
+    /**
+     * 滚动评论
+     * @returns {boolean}
+     */
     swipeTop() {
-        Common.swipeCommentListOp();
+        return Common.swipeCommentListOp();
     },
 
+    /**
+     * 获取列表
+     * @returns {Array}
+     */
     getList() {
-        let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
-            if (v && v.bounds()) {
-                Log.log('位置', v.bounds().top, v.bounds().height(), v.bounds().left, Device.height());
-            }
+        let contains = Common.id('comment_frame').isVisibleToUser(true).filter(v => {
             return v && v.bounds() && v.bounds().left <= 10 && v.bounds().top + v.bounds().height() < Device.height();//过滤评论回复内容
         }).find();
         Log.log("数量：", contains.length);
@@ -149,10 +203,6 @@ let Comment = {
         for (let i in contains) {
             //不需要二次回复的内容
             Log.log("左边距", contains[i].bounds().left);
-            // if (contains[i].bounds().left > 0) {
-            //     continue;
-            // }
-
             this.tag = contains[i];//主要给当前方法使用的，比如下面的this.getIp()方法等
             Log.log("tag", this.tag);
             try {
@@ -188,45 +238,59 @@ let Comment = {
         }
         return contents;
     },
-    //这里其实使用back最方便
+
+    /**
+     * 关闭评论窗口
+     * @returns {boolean}
+     */
     closeCommentWindow() {
-        let closeTag = Common.id(V.Comment.closeCommentWindow[0]).desc(V.Comment.closeCommentWindow[1]).isVisibleToUser(true).findOnce();
+        let closeTag = Common.id('tabs_panel_close').desc('关闭评论区').isVisibleToUser(true).findOnce();
         if (!closeTag) {
             return;
             //throw new Error('找不到关闭按钮');
         }
-        Common.click(closeTag);
+        closeTag.click();
         return true;
     },
 
-    //data 是getList返回的参数
+    /**
+     * 从评论内容进入用户页面
+     * data 是getList返回的参数
+     * @param {UiObject} data 
+     * @returns {boolean}
+     */
     intoUserPage(data) {
         let headTag = this.getAvatarTag(data.tag);
         Log.log('headTag', headTag);
-        //Log.log('headTag-', headTag.parent().parent());
-        Common.click(headTag);
+        let res = headTag.click();
         statistics.viewUser();
-        //headTag.parent().parent().click();
         Common.sleep(3000 + 1000 * Math.random());
+        return res;
     },
 
-    //视频评论
+    /**
+     * 视频评论
+     * @param {string} msg 
+     * @returns {boolean}
+     */
     commentMsg(msg) {
         if (UiSelector().className('android.widget.TextView').descContains('仅作者的好友可评论').isVisibleToUser(true).findOne()) {
             Log.log('仅作者的好友可评论');
             return;
         }
 
-        let iptTag = Common.id(V.Comment.commentMsg[0]).isVisibleToUser(true).findOnce();
+        let iptTag = Common.id('editor_holder_text').isVisibleToUser(true).findOnce();
 
         try {
-            Gesture.click(iptTag.bounds().left + iptTag.bounds().width() / 2 * Math.random(), iptTag.bounds().top + iptTag.bounds().height() * Math.random());
+            iptTag.parent().click();
             Common.sleep(1500 + 500 * Math.random());
         } catch (e) {
             Log.log(e);
         }
 
-        iptTag = Common.id(V.Comment.commentMsg[1]).isVisibleToUser(true).findOne();
+        iptTag = UiSelector().className('android.widget.EditText').filter(v => {
+            return v.isEditable();
+        }).isVisibleToUser(true).findOne()
         //获取是否评论图片
         Log.log("带图评论概率：" + storage.get("setting_comment_with_photo", "int"));
         if (storage.get("setting_comment_with_photo", "int") > Math.random() * 100) {
@@ -236,48 +300,23 @@ let Comment = {
         }
 
         Log.log('msg', msg);
-
-        let iText = '';
-        for (let i = 0; i < msg.length; i++) {
-            iText = msg.substring(0, i + 1);
-            iptTag.setText(iText);
-            Common.sleep(100 + 300 * Math.random());
-        }
-
+        iptTag.setText(msg);
         Common.sleep(500 + Math.random() * 1000);
-
-        let rp = 3;
-        while (rp--) {
-            try {
-                let submitTag = Common.id(V.Comment.commentMsg[2]).isVisibleToUser(true).findOne();
-                Log.log(submitTag);
-                if (!submitTag) {
-                    continue;
-                }
-                Common.click(submitTag);
-                Common.sleep(1000);
-                break;
-            } catch (e) {
-                Log.log(e);
-            }
-        }
-
         statistics.comment();
-
         //查看dg0位置有没有下来
-        iptTag = Common.id(V.Comment.commentMsg[2]).isVisibleToUser(true).findOne();
-        Log.log(iptTag);
-        if (iptTag) {
-            Common.back();
-            Log.log("点击失败：返回");
-        }
-
+        let btnTag = UiSelector().className('android.widget.Button').desc('发送').isVisibleToUser(true).findOne();
+        let res = btnTag.click();
         Common.sleep(1500 + 1500 * Math.random());
+        return res;
     },
 
-    //暂未变更
+    /**
+     * 评论收藏图片
+     * @returns {boolean}
+     */
     commentImage() {
-        let imgTag = Common.id(V.Comment.commentImage[0]).isVisibleToUser(true).findOne();
+        let imgTagParent = Common.id('emotion_bottom_tab').isVisibleToUser(true).findOne();
+        let imgTag = imgTagParent.children().getChildren(1);
         Log.log(imgTag);
 
         if (!imgTag) {
@@ -286,20 +325,11 @@ let Comment = {
         }
 
         Log.log("表情呢", imgTag);
-        Common.click(imgTag);
+        imgTag.click();
         Common.sleep(2000 + 500 * Math.random());
-        let tags = Common.id(V.Comment.commentImage[1]).isVisibleToUser(true).find();
-        Log.log(tags[1].bounds());
-        if (!tags) {
-            Common.sleep(2000 + 500 * Math.random());
-            tags = Common.id(V.Comment.commentImage[1]).isVisibleToUser(true).find();
-            Log.log("再次获取", tags);
-        }
-        Common.click(tags[1]);
-        Common.sleep(1000 + 500 * Math.random());
 
         console.log("开始找表情");
-        let imgs = Common.id(V.Comment.commentImage[2]).desc(V.Comment.commentImage[3]).isVisibleToUser(true).find();
+        let imgs = Common.id('emotion_img').desc('表情').isVisibleToUser(true).find();
 
         console.log("表情数量：" + imgs.length);
         let rand = Math.round(Math.random() * (imgs.length - 1));
@@ -309,8 +339,9 @@ let Comment = {
         if (rand == 0) {
             rand = 1;
         }
-        Common.click(imgs[rand]);
+        let res = imgs[rand].parent().click();
         Common.sleep(1000);
+        return res;
     },
 }
 

@@ -7,7 +7,6 @@ let storage = require('common/storage.js');
 let machine = require('common/machine.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 let statistics = require('common/statistics.js');
-let V = require('version/KsV.js');
 
 let iKs = {
     me: {},//当前账号的信息
@@ -141,17 +140,6 @@ let iKs = {
 
             Log.log('-昵称获取');
             let vNickname = KsVideo.getNickname();
-            //同类型的
-            let nicknames = storage.getExcNicknames();
-            if (nicknames) {
-                nicknames = nicknames.split(/[,|，]/);
-                if (nicknames.includes(vNickname)) {
-                    KsCommon.toast('排除的昵称');
-                    KsVideo.videoSlow();
-                    continue;
-                }
-            }
-
             let unique = vNickname + '_' + vContent;
             if (this.titles.includes(unique)) {
                 KsCommon.toast('重复视频');
@@ -267,11 +255,16 @@ let iKs = {
                 contains.push(comment.nickname);
                 try {
                     Log.log("点赞");
+                    if (this.configData.toker_view_video_ip && !comment.ip) {
+                        Log.log('IP不符合', comment.ip, this.configData.toker_view_video_ip);
+                        continue;
+                    }
+
                     if (this.configData.toker_view_video_ip && !KsCommon.containsWord(this.configData.toker_view_video_ip, comment.ip)) {
                         Log.log('IP不符合', comment.ip, this.configData.toker_view_video_ip);
                         continue;
                     }
-                    
+
                     KsComment.clickZan(comment);//////////////////////操作
                     Log.log("点赞2");
                     opCount--;
@@ -368,7 +361,7 @@ let iKs = {
                     //看看是不是进入了广告
                     Log.log('用户数据异常', e);
                     KsCommon.sleep(2000);
-                    if (UiSelector().text(V.Video.ad[0]).isVisibleToUser(true).exists()) {
+                    if (UiSelector().text('广告详情页').isVisibleToUser(true).exists()) {
                         Log.log('存在“反馈”字眼');
                         KsCommon.back();
                         KsCommon.sleep(500 + 500 * Math.random());

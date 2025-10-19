@@ -1,6 +1,5 @@
 let Common = require("app/xhs/Common.js");
 let User = require('app/xhs/User.js');
-let V = require('version/XhsV.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
 let MessageNew = {

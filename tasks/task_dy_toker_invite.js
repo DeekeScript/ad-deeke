@@ -18,6 +18,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -41,6 +42,7 @@ let task = {
                 tCommon.sleep(5000 + 3000 * Math.random());
                 Log.log('发送卡片');
                 DyUser.privateMsgCard(1);
+                tCommon.back();
                 tCommon.sleep(500 + 1000 * Math.random());
             } catch (e) {
                 Log.log("报错捕获：", e);
@@ -62,8 +64,7 @@ let task = {
 let accounts = storage.get('task_dy_toker_invite_account');
 Log.log('accounts', accounts);
 if (!accounts) {
-    tCommon.showToast('你取消了执行');
-    //console.hide();();
+    FloatDialogs.toast('你取消了执行');
     System.exit();
 }
 accounts = accounts.split("\n");
@@ -71,6 +72,7 @@ accounts = accounts.split("\n");
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 tCommon.openApp();//兜底，防止跑到外面去了
+System.setAccessibilityMode('fast');
 
 task.log();
 try {

@@ -29,6 +29,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.getMachineType() === 1) {
             if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
                 return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
@@ -50,13 +51,7 @@ let task = {
         //首先进入点赞页面
         XhsIndex.intoIndex();
         XhsIndex.intoSearchPage();
-        XhsSearch.intoSearchList(keyword);
-        let minTopTag = UiSelector().className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
-        let minTop = 0;
-        if (minTopTag) {
-            minTop = minTopTag.bounds().top + minTopTag.bounds().height();
-        }
-        Log.log('minTop: ' + minTop);
+        XhsSearch.intoSearchList(keyword)
         while (true) {
             let isFresh = false;
             let videos = XhsSearch.getList();//返回视频或者图文列表 [{content: 'content', tag: tag, isLiving: true}]
@@ -86,14 +81,9 @@ let task = {
                     break;
                 }
 
-                if (titleTag.bounds().top < minTop) {
-                    Log.log('超出上边界');
-                    continue;
-                }
-
                 Log.log(titleTag);
-                tCommon.click(titleTag, 0.15);
-                tCommon.sleep(4000 + 3000 * Math.random());
+                videos[i].tag.click();
+                tCommon.sleep(5000 + 2000 * Math.random());
                 statistics.viewVideo();
                 statistics.viewTargetVideo();
                 Log.log('进入图文或者视频');
@@ -179,10 +169,10 @@ let task = {
                     }
                     Log.log('找到了关键词', comments[k]['content']);
 
-                    XhsComment.clickZan(comments[k].zanTag);
+                    XhsComment.clickZan(comments[k].zanTag, 1);
                     this.nicknames.push(nickname);
                     machine.set('task_xhs_search_inquiry_' + md5User, true);
-                    XhsComment.intoUserPage(comments[k].nicknameTag);
+                    XhsComment.intoUserPage(comments[k].nicknameTag, 1);
                     //私密账号
                     if (XhsUser.isPrivate()) {
                         tCommon.back();
@@ -199,10 +189,6 @@ let task = {
                         if (msg) {
                             XhsWork.msg(0, msg.msg);///////////////////////////////////操作  评论视频
                             Log.log('评论了');
-                            // if (XhsWork.isVideo()) {
-                            //     tCommon.back();
-                            //     tCommon.sleep(1000 + 1000 * Math.random());
-                            // }
                         }
                         tCommon.back();//从视频页面到用户页面
                     } else {
@@ -214,11 +200,16 @@ let task = {
                         }
                     }
                     tCommon.back();
+                    if (UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
+                        tCommon.back();//有时候会出现不能返回的情况，小红薯的设计bug
+                        tCommon.sleep(500);
+                    }
+
                     tCommon.sleep(1000 + 1000 * Math.random());
                 } catch (e) {
                     Log.log(e);
                     //如果在用户页面，则返回
-                    if (UiSelector().className('android.view.View').descContains('头像').isVisibleToUser().findOne()) {
+                    if (UiSelector().className('android.view.View').descContains('头像').isVisibleToUser(true).findOne()) {
                         tCommon.back();
                         tCommon.sleep(1000 + 1000 * Math.random());
                         continue;

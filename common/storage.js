@@ -11,14 +11,6 @@ let storage = {
         return 1;
     },
 
-    setExcNicknames(nicknames) {
-        return Storage.put("excNicknames", nicknames);
-    },
-
-    getExcNicknames() {
-        return Storage.get("excNicknames");
-    },
-
     getSpeech() {
         let data = Storage.get('deekeScript:speech:default');
         console.log("speech内容");

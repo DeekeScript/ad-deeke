@@ -39,6 +39,7 @@ if (!storage.get('setting_baidu_wenxin_switch', 'bool')) {
 
 Log.log('config', config);
 while (true) {
+    System.setAccessibilityMode('!fast');//快速模式
     try {
         tCommon.openApp();
         task.log();

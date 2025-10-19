@@ -14,6 +14,7 @@ let task = {
 
     //type 0 评论，1私信
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -46,10 +47,10 @@ let config = {
     toker_run_hour: storage.getArray('toker_xhs_run_hour'),//运行时间
 };
 
+System.setAccessibilityMode('fast');
 while (true) {
     task.log();
     try {
-        Common.openApp();//兜底，防止跑到外面去了
         let code = task.run();
         if (code === 101) {
             // tCommon.closeApp();
@@ -65,8 +66,6 @@ while (true) {
                     break;
                 }
             }
-            Log.log("内存清理");
-            System.cleanUp();
             throw new Error('重新进入');
         }
         Common.sleep(3000);

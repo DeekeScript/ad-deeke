@@ -13,11 +13,12 @@ let task = {
     index: -1,
     nicknames: [],
     contents: [],
-    run(input, kw, sleepSecond) {
-        return this.testTask(input, kw, sleepSecond);
+    run(input, kw) {
+        return this.testTask(input, kw);
     },
 
     getMsg(type, title, age, gender) {
+        gender = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -40,7 +41,7 @@ let task = {
         return false;
     },
 
-    testTask(input, kw, sleepSecond) {
+    testTask(input, kw) {
         //首先进入页面
         let intoUserFansList = input.indexOf('+') === 0;
         let hasRemark = tCommon.getRemark(input);
@@ -79,11 +80,11 @@ let task = {
             if (intoUserFansList) {
                 res = DyUser.focusListSearch(douyin);
             } else {
-                res = DySearch.intoUserVideoPage(input[this.index], 2);
+                res = DySearch.intoUserVideoPage(input[this.index], 1);
             }
 
             if (!res) {
-                System.toast('找不到用户账号：' + input);
+                FloatDialogs.toast('找不到用户账号：' + input);
                 return 'exit';
             }
 
@@ -92,14 +93,12 @@ let task = {
             }
         }
 
-        //获取最新的前三视频
-        let i = 3;
-        while (i-- > 0) {
+        while (true) {
             let title = DyVideo.getContent();
             let commentCount = DyVideo.getCommentCount();
             if (commentCount === 0 || this.contents.includes(title)) {
-                Log.log('下一个视频', i);
-                DyVideo.next();
+                Log.log('下一个视频');
+                DyVideo.next(true);
                 tCommon.sleep(3000);
                 continue;
             }
@@ -109,37 +108,11 @@ let task = {
 
             DyVideo.openComment(commentCount);
             tCommon.sleep(2000 + 1000 * Math.random());
-            let rp = 0;
-            let lastComment = undefined;
-            let maxSwipe = 1200;
             while (true) {
                 let comments = DyComment.getList();
-                maxSwipe--;
-                if (maxSwipe <= 0) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('滑动了1200次了');
-                    break;
-                }
-
-                if (JSON.stringify(comments) === lastComment) {
-                    rp++;
-                } else {
-                    rp = 0;
-                }
-                // Log.log(JSON.stringify(comments), lastComment, rp);
-
-                if (rp >= 3) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('评论扫描完了');
-                    break;
-                }
-                lastComment = JSON.stringify(comments);
-
                 for (let k in comments) {
-                    if (comments[k]['content'] == "" || !this.includesKw(comments[k]['content'], kw) || this.nicknames.includes(comments[k].nickname)) {
-                        Log.log('数据：', comments[k]['content'], !this.includesKw(comments[k]['content'], kw), this.nicknames.includes(comments[k].nickname));
+                    if (!comments[k]['content'] || !this.includesKw(comments[k]['content'], kw) || this.nicknames.includes(comments[k].nickname)) {
+                        Log.log('数据：', comments[k]['content'], kw, this.nicknames.includes(comments[k].nickname));
                         continue;
                     }
 
@@ -150,7 +123,9 @@ let task = {
                     Log.log('找到了关键词', comments[k]['content']);
 
                     try {
-                        if (!DyComment.isZan()) {
+                        if (DyComment.isZan()) {
+                            continue;
+                        } else {
                             DyComment.clickZan(comments[k]);
                         }
                     } catch (e) {
@@ -160,7 +135,12 @@ let task = {
 
                     this.nicknames.push(comments[k].nickname);
                     machine.set('task_dy_toker_comment_' + douyin + '_' + comments[k].nickname, true);
-                    DyComment.intoUserPage(comments[k]);
+                    try {
+                        DyComment.intoUserPage(comments[k]);
+                    } catch (e) {
+                        Log.log('进入用户页异常处理：', e);
+                        break;
+                    }
                     //私密账号
                     if (DyUser.isPrivate()) {
                         tCommon.back();
@@ -170,54 +150,62 @@ let task = {
                     }
 
                     //开始操作评论
-                    if (DyVideo.intoUserVideo()) {
-                        Log.log('有视频，直接操作视频引流');
-                        DyVideo.clickZan();
-                        let msg = this.getMsg(0, DyVideo.getContent());
-                        if (msg) {
-                            DyVideo.openComment(!!DyVideo.getCommentCount());
-                            Log.log('开启评论窗口');
-                            DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                            Log.log('评论了');
-                            tCommon.back(2);//视频页面回到用户页面
+                    System.setAccessibilityMode('!fast');
+                    try {
+                        if (DyVideo.intoUserVideo()) {
+                            Log.log('有视频，直接操作视频引流');
+                            DyVideo.clickZan();
+                            let msg = this.getMsg(0, DyVideo.getContent());
+                            if (msg) {
+                                DyVideo.openComment(!!DyVideo.getCommentCount());
+                                Log.log('开启评论窗口');
+                                DyComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                                Log.log('评论了');
+                                tCommon.back(2);//视频页面回到用户页面
+                            } else {
+                                tCommon.back();//从视频页面到用户页面
+                            }
                         } else {
-                            tCommon.back();//从视频页面到用户页面
+                            Log.log('无视频，直接操作关注和私信引流');
+                            DyUser.focus();
+                            let msg = this.getMsg(1, comments[k].nickname, DyUser.getAge(), DyUser.getGender());
+                            if (msg) {
+                                DyUser.privateMsg(msg.msg);
+                            }
                         }
-                    } else {
-                        Log.log('无视频，直接操作关注和私信引流');
-                        DyUser.focus();
-                        let msg = this.getMsg(1, comments[k].nickname, DyUser.getAge(), DyUser.getGender());
-                        if (msg) {
-                            DyUser.privateMsg(msg.msg);
-                        }
+                    } catch (e) {
+                        Log.log('异常了', e);
+                        tCommon.sleep(2000);
+                        DyUser.backHome();
                     }
                     tCommon.back();
+                    System.setAccessibilityMode('fast');
                     tCommon.sleep(1000);
                 }
 
                 Log.log('下一页评论');
-                tCommon.swipeCommentListOp();
+                if (!tCommon.swipeCommentListOp()) {
+                    tCommon.back();
+                    tCommon.sleep(1000);
+                    Log.log('到底了');
+                    break;
+                }
                 tCommon.sleep(1500 + 500 * Math.random());
             }
-            Log.log('下一个视频', i);
+            Log.log('下一个视频');
             this.contents.push(title);
-            DyVideo.next();
+            if (!DyVideo.next(true)) {
+                break;
+            }
             tCommon.sleep(4000 + Math.random() * 2000);
         }
 
-        if (intoUserFansList) {
-            tCommon.back(5, 1500);
-        } else {
-            tCommon.back(5, 1500);
-        }
-
+        tCommon.back(5, 1500);
         tCommon.backApp();
         if (this.index === input.length - 1) {
-            System.toast('一轮完成，休息' + sleepSecond + '秒');
-            Log.log('一轮完成，休息' + sleepSecond + '秒');
-            tCommon.sleep(sleepSecond * 1000);//休眠十分钟
+            return "break";
         } else {
-            System.toast('一个账号完成，休息3分钟');
+            FloatDialogs.toast('一个账号完成，休息3分钟');
             Log.log('一个账号完成，休息3分钟');
             tCommon.sleep(180 * 1000);//休眠十分钟
         }
@@ -229,7 +217,7 @@ let task = {
 let input = machine.get('task_dy_toker_comment_account');
 Log.log("input内容：" + machine.get('task_dy_toker_comment_account', 'string'));
 if (!input) {
-    System.toast('请输入账号');
+    FloatDialogs.toast('请输入账号');
     System.exit();
 }
 
@@ -237,30 +225,26 @@ let kw = machine.get('task_dy_toker_comment_kw');
 
 Log.log("keyword：" + machine.get('task_dy_toker_comment_kw'));
 if (!kw) {
-    System.toast('请输入关键词');
-    System.exit();
-}
-
-let sleepSecond = machine.get('task_dy_toker_comment_sleep_second', "int");
-
-if (sleepSecond <= 0) {
-    System.toast('休眠时间不能为空');
+    FloatDialogs.toast('请输入关键词');
     System.exit();
 }
 
 tCommon.openApp();
+System.setAccessibilityMode('fast');
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();
     try {
-        let r = task.run(input, kw, sleepSecond);
+        let r = task.run(input, kw);
         if (r === 'exit') {
-            if (thr) {
-                tCommon.sleep(3000);
-                FloatDialogs.show('找不到用户，停止执行');
-            }
+            FloatDialogs.show('找不到用户，停止执行');
+            break;
+        }
+
+        if (r === "break") {
+            FloatDialogs.show('执行完成');
             break;
         }
 
