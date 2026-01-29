@@ -1,8 +1,8 @@
-# 🚀 Deeke抖音黑科技 · 颠覆你的引流方式！
+# 🚀 Deeke抖音黑科技 · 颠覆你的引流获客方式！
 <img src='https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke' width=0 height=0 />
 
 <span style="font-size:18px;">
-🎉 全国屈指可数的自研底层框架的黑科技软件研发公司！🎉
+🎉 全国屈指可数的自研底层框架的rpa软件研发公司！🎉
 </span>
 
 ### <a href="#bottom">👇 联系方式请见页面底部！ 👇</a>
@@ -13,9 +13,9 @@
 
 作为<a href="https://github.com/DeekeScript/ad-dke">“嘀客”</a>升级版，**Deeke黑科技**从性能到体验全面革新！  
 
-✅ 稳定性拉升（目前业顶级水平）
+✅ 稳定性拉升（目前业内顶级水平）
 ✅ 功能更纯粹，操作更简单
-✅ 用户体验更顺滑（领先绝大多数市场软件）
+✅ 用户体验更顺滑（绝对领先）
 ✅ 持续更新升级
 ✅ 源码购买通道已开启（自研框架）
 
