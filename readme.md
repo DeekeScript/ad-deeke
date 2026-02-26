@@ -57,7 +57,7 @@
 ## 📸 软件实景截图展示
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke主界面" src="photo/1.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/1-new.jpg" width="24%">
 <img alt="Deeke主界面" src="photo/2.jpg" width="24%">
 <img alt="Deeke主界面" src="photo/3.jpg" width="24%">
 <img alt="Deeke主界面" src="photo/4.jpg" width="24%">
