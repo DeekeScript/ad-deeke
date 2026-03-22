@@ -246,13 +246,12 @@ const Comment = {
         Common.click(backTag);
         Common.sleep(2500 + 500 * Math.random());
 
-        iptTag = UiSelector().className('android.widget.EditText').filter(v => {
+        let iptTag = UiSelector().className('android.widget.EditText').filter(v => {
             return v.isEditable();
         }).isVisibleToUser(true).findOne();
 
         if (!iptTag) {
-            Common.back();
-            Common.back(500);
+            Common.back(1, 1000);
             Log.log('没有找到输入框');
             return true;
         }
@@ -312,22 +311,6 @@ const Comment = {
     },
 
     /**
-     * 聊天发送表情
-     * @param {number} count 
-     */
-    iptEmoj(count) {
-        let emjs = UiSelector().className('android.widget.FrameLayout').descContains('按钮').isVisibleToUser(true).filter(v => {
-            return v.children().findOne(UiSelector().className('android.widget.ImageView')) && v.getChildCount() == 1 && v.desc().indexOf('[') == 0 && v.desc().indexOf(']') > 0;
-        }).find();
-
-        while (count-- > 0) {
-            let emj = emjs[Math.floor(Math.random() * emjs.length)];
-            emj.click();
-            Common.sleep(500 + 500 * Math.random());
-        }
-    },
-
-    /**
      * 表情评论
      * @returns boolean
      */
@@ -338,6 +321,10 @@ const Comment = {
         Common.sleep(1500 + 1000 * Math.random());
 
         let customTag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOne();
+        if (!customTag) {
+            Common.sleep(2000);
+            customTag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOne();
+        }
         customTag.click();
         Common.sleep(1000 + 500 * Math.random());
 
@@ -355,7 +342,7 @@ const Comment = {
         console.log(imgs[rand]);
         let res = imgs[rand].click();
         Common.sleep(1000);
-        return true;
+        return res;
     },
 
     zanComment(zanCount, meNickname) {

@@ -26,8 +26,6 @@ if (!Access.isMediaProjectionEnable()) {
     System.exit();
 }
 
-//开启线程  自动关闭弹窗
-// Engines.executeScript("unit/dialogClose.js");
 task.log();
 console.log('日志设置');
 
@@ -49,14 +47,11 @@ while (true) {
                     break;
                 }
             }
-            Log.log("内存清理");
-            System.cleanUp();
             throw new Error('重新进入');
         }
         tCommon.sleep(3000);
     } catch (e) {
         Log.log("全局异常：", e);
-        System.cleanUp();
         tCommon.closeAlert(1);
         tCommon.backHome();
     }

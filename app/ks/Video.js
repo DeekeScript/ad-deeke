@@ -8,7 +8,7 @@ let Video = {
      */
     next() {
         let tag = UiSelector().className('androidx.viewpager.widget.ViewPager').filter(v => {
-            return v.id();
+            return !!v.id();
         }).scrollable(true).isVisibleToUser(true).findOne();
 
         if (!tag) {
@@ -85,7 +85,7 @@ let Video = {
 
     /**
      * 评论  type 为true表示有评论数，否则为无评论数
-     * @param {number} type 
+     * @param {boolean} type 
      * @returns {boolean}
      */
     openComment(type) {
@@ -180,7 +180,7 @@ let Video = {
             return tag;
         }
 
-        return false;//极端情况是可以没有内容的
+        return null;//极端情况是可以没有内容的
     },
 
     /**
@@ -194,7 +194,7 @@ let Video = {
 
     /**
      * 获取昵称tag
-     * @returns {string}
+     * @returns {UiObject}
      */
     getTitleTag() {
         let tag = Common.id('user_name_text_view').isVisibleToUser(true).findOnce();
@@ -259,7 +259,7 @@ let Video = {
      */
     intoUserPage() {
         let head = this.getTitleTag();
-        let res = head.click();
+        let res = Common.click(head, 0.2);
         Common.sleep(3000 + Math.random() * 1000);
         statistics.viewUser();//目标视频数量加1
         return res;

@@ -70,14 +70,14 @@ let task = {
             try {
                 let rd = Math.round(Math.random() * 5) + 2;
                 while (rd-- > 0) {
-                    if (!DyVideo.next(true)) {
+                    if (!DyVideo.next()) {
                         return true;
                     }
                     tCommon.sleep(1000 * (Math.random() * 1 + 3));
                 }
 
                 while (DyVideo.isZan() || DyVideo.getAtNickname() == currentNickname) {
-                    if (!DyVideo.next(true)) {
+                    if (!DyVideo.next()) {
                         return true;
                     }
                     Log.log('滑动视频');

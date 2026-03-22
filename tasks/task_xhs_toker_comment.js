@@ -93,7 +93,7 @@ let task = {
             XhsWork.openComment();
             Log.log('打开或者滑动到评论区域');
 
-            tCommon.sleep(2000 + 1000 * Math.random());
+            tCommon.sleep(3000 + 1000 * Math.random());
             let maxSwipe = commentCount;//最多滑动次数
             while (maxSwipe-- > 0) {
                 let comments = XhsWork.getCommenList();//nicknameTag列表
@@ -165,7 +165,12 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                XhsWork.commentListSwipe();
+                if (!XhsWork.commentListSwipe()) {
+                    tCommon.sleep(1000);
+                    Log.log('评论扫描完了，已到底-');
+                    break;
+                }
+
                 tCommon.sleep(1500 + 500 * Math.random());
             }
 
@@ -211,6 +216,11 @@ let sleepSecond = machine.get('task_xhs_toker_comment_sleep_second', "int");
 
 if (sleepSecond <= 0) {
     System.toast('休眠时间不能为空');
+    System.exit();
+}
+
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
     System.exit();
 }
 

@@ -7,7 +7,6 @@ let storage = require('common/storage.js');
 let machine = require('common/machine.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 let statistics = require('common/statistics.js');
-let V = require('version/WxV.js');
 
 let iWx = {
     me: {},//当前账号的信息
@@ -105,7 +104,6 @@ let iWx = {
     refreshVideo(videoRules, isCity) {
         WxCommon.toast('现在是刷视频');
         let videoData;
-        let errorCount = 0;
         let noTitleCount = 5;
         let rpVideoCount = 0;//5重复就报错
 
@@ -140,17 +138,6 @@ let iWx = {
                 continue;
             }
 
-            //同类型的
-            let nicknames = storage.getExcNicknames();
-            if (nicknames) {
-                nicknames = nicknames.split(/[,|，]/);
-                if (nicknames.includes(vNickname)) {
-                    WxCommon.toast('排除的昵称');
-                    WxVideo.videoSlow();
-                    continue;
-                }
-            }
-
             let unique = vNickname + '_' + vContent;
             if (this.titles.includes(unique)) {
                 WxCommon.toast('重复视频');
@@ -175,10 +162,8 @@ let iWx = {
             }
 
             videoData = WxVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
-
-            errorCount = 0;
             //接下来是视频的参数和config比对， 不合适则刷下一个
-            let tmp = this.videoRulesCheck(videoRules, videoData, isCity);
+            let tmp = this.videoRulesCheck(videoRules, videoData);
             if (!tmp) {
                 Log.log('不符合条件');
                 this.videoCount++;//视频数量增加
@@ -317,7 +302,7 @@ let iWx = {
 
         Log.log('是同城：', this.isCity);
         if (this.isCity) {
-            WxIndex.intoLocal();
+            //WxIndex.intoLocal();
         } else {
             //WxIndex.intoHome();
             WxIndex.intoVideo();
@@ -368,8 +353,8 @@ let iWx = {
                     //看看是不是进入了广告
                     Log.log('用户数据异常', e);
                     WxCommon.sleep(2000);
-                    if (UiSelector().text(V.Video.ad[0]).isVisibleToUser(true).exists()) {
-                        Log.log('存在“反馈”字眼');
+                    if (UiSelector().text('广告详情页').isVisibleToUser(true).exists()) {
+                        Log.log('存在“广告详情页”字眼');
                         WxCommon.back();
                         WxCommon.sleep(500 + 500 * Math.random());
                         //有些用户页面，会弹出广告对话框，返回后还是在用户页面，这个时候需要返回
@@ -406,8 +391,8 @@ let iWx = {
 
                 let isPrivateAccount = userData.isPrivate;
                 if (!isPrivateAccount && this.configData.toker_focus_rate > focus_rate) {
-                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                    Log.log('用户规则：', userData.gender, this.configData.toker_run_sex);
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender)) {
                         Log.log('关注了哦');
                         WxUser.focus();///////////////////////////////////操作  关注视频作者
                         WxCommon.sleep(3000);
@@ -415,8 +400,8 @@ let iWx = {
                 }
 
                 if (!this.douyinExist(userData.douyin)) {
-                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                    Log.log('用户规则：', userData.gender, this.configData.toker_run_sex);
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender)) {
                         if (!isPrivateAccount && this.configData.toker_private_msg_rate > private_rate) {
                             let msg = this.getMsg(1, userData.nickname);
                             Log.log('要私信了哦');

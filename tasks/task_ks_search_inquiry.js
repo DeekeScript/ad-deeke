@@ -149,7 +149,7 @@ let task = {
                     }
 
                     let md5User = Encrypt.md5(nickname + userNickname);
-                    if (!machine.get('task_ks_toker_comment_user_' + md5User, 'bool')) {
+                    if (machine.get('task_ks_toker_comment_user_' + md5User, 'bool')) {
                         tCommon.back();
                         Log.log('重复用户');
                         continue;

@@ -18,6 +18,7 @@ let task = {
     testTask() {
         //首先进入点赞页面
         DyIndex.intoMyPage();
+        tCommon.sleep(2000);
         let res = DyIndex.intoLikeVideo();
         if (!res) {
             FloatDialogs.toast('未进入视频页面，请检查当前账号是否有“喜欢”视频');
@@ -31,8 +32,8 @@ let task = {
             if (isZan) {
                 DyVideo.clickZan();
             }
-            tCommon.sleep(1500);
-            if (!DyVideo.next(true)) {
+            tCommon.sleep(1500 + 500 * Math.random());
+            if (!DyVideo.next()) {
                 return true;
             }
         }

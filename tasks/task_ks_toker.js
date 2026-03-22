@@ -44,8 +44,6 @@ while (true) {
                     break;
                 }
             }
-            Log.log("内存清理");
-            System.cleanUp();
             throw new Error('重新进入');
         }
         tCommon.sleep(3000);
@@ -55,7 +53,6 @@ while (true) {
         if (tag) {
             tCommon.click(tag);
         }
-        System.cleanUp();
         tCommon.closeAlert(1);
         tCommon.backHome();
     }

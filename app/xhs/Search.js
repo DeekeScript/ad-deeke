@@ -53,7 +53,7 @@ let Search = {
 
     getList() {
         let tags = UiSelector().className('android.widget.FrameLayout').isVisibleToUser(true).filter(v => {
-            return v && v.parent() != null && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView' && v.getChildCount() == 1;
+            return v && v.parent() != null && v.parent().className() == 'androidx.recyclerview.widget.RecyclerView' && v.getChildCount() >= 1;
         }).find();
 
         let childs = [];
@@ -62,7 +62,7 @@ let Search = {
             let child = children.findOne(UiSelector().className('android.widget.TextView').filter(v => {
                 return v.text() != '赞助' && v.parent().className() == 'android.widget.FrameLayout';
             }));
-            if (!child || !child.isVisibleToUser()) {
+            if (!child) {
                 Log.log('child为null', child);
                 continue;
             }

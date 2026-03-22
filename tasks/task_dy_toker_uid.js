@@ -81,6 +81,7 @@ accounts = accounts.split("\n");
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 tCommon.openApp();//兜底，防止跑到外面去了
+System.setAccessibilityMode('fast');
 
 while (true) {
     task.log();

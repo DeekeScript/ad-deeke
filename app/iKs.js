@@ -110,6 +110,7 @@ let iKs = {
 
         while (true) {
             KsVideo.next();
+            KsCommon.sleep(1500 + 500 * Math.random());
             KsCommon.toast('---滑动视频---');
             Log.log('-标题获取');
             let vContent = KsVideo.getContent();
@@ -168,7 +169,7 @@ let iKs = {
             Log.log('视频获取结束');
             errorCount = 0;
             //接下来是视频的参数和config比对， 不合适则刷下一个
-            let tmp = this.videoRulesCheck(videoRules, videoData, isCity);
+            let tmp = this.videoRulesCheck(videoRules, videoData);
             if (!tmp) {
                 Log.log('不符合条件');
                 this.videoCount++;//视频数量增加
@@ -201,7 +202,7 @@ let iKs = {
             let msg = this.getMsg(0, videoData.title);
             Log.log('commentDeal', msg, videoData.commentCount);
             if (msg) {
-                KsVideo.openComment(!!videoData.commentCount);
+                KsVideo.openComment(videoData.commentCount);
                 Log.log('开启评论窗口-1');
                 windowOpen = true;
                 KsComment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
@@ -383,7 +384,7 @@ let iKs = {
                 if (userData) {
                     Log.log('看到了用户数据了哦');
                 } else {
-                    KsCommon.back();
+                    KsCommon.back(2);
                     Log.log('异常，返回回去');
                     KsCommon.sleep(1000);
                     continue;
@@ -420,9 +421,9 @@ let iKs = {
                     }
                 }
 
-                KsCommon.back();
+                KsCommon.userHomeBack();
                 Log.log('返回首页了哦');
-                KsCommon.sleep(2000 * Math.random());
+                KsCommon.sleep(1000 + 1000 * Math.random());
             }
 
             //看看是否可以操作评论区了

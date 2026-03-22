@@ -195,6 +195,14 @@ let Common = {
         //Log.log(this.swipeFansListOpTarge);
     },
 
+    swipeSearchWorkResultOp() {
+        let tag = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
+            return v.className() == 'androidx.recyclerview.widget.RecyclerView' && v.id() != null;
+        }).findOne();
+
+        return tag.scrollForward();
+    },
+
     //滑动用户作品列表
     swipeWorksOp() {
         let swipe = UiSelector().scrollable(true).isVisibleToUser(true).filter(v => {
@@ -202,11 +210,11 @@ let Common = {
         }).findOne();
 
         if (swipe) {
-            swipe.scrollForward();
+            return swipe.scrollForward();
         } else {
-            Log.log('滑动失败');
+            Common.log('滑动失败');
         }
-        //Log.log(this.swipeFansListOpTarge);
+        return false;
     },
 
     swipeFocusListOp() {
@@ -226,11 +234,11 @@ let Common = {
             return v.className() == 'androidx.recyclerview.widget.RecyclerView';
         }).findOne();
         if (tag) {
-            tag.scrollForward();
+            return tag.scrollForward();
         } else {
             Log.log('滑动失败');
         }
-        //Log.log(this.swipeCommentListOpTarget);
+        return false;
     },
 
 
@@ -241,7 +249,6 @@ let Common = {
         }
 
         this.log('开启线程监听弹窗');
-        let k = 0;
 
         while (true) {
             //检测是否只有当前的线程，是的话则关闭
@@ -254,12 +261,6 @@ let Common = {
                 }
 
                 this.sleep(200);
-                if (k % 50 == 0) {
-                    Log.log("对象清理");
-                    System.cleanUp();//清理线程垃圾
-                    k = 0;
-                }
-                k++;
             } catch (e) {
                 this.log("close dialog 异常了");
                 this.log(e);
@@ -302,6 +303,10 @@ let Common = {
         keyword = keyword.split(',');
         let ks = [];
         for (let i in keyword) {
+            if (keyword[i] === '') {
+                continue;
+            }
+
             let tmp = keyword[i];
             if (keyword[i].indexOf('&') !== -1) {
                 tmp = keyword[i].split('&');
@@ -334,6 +339,69 @@ let Common = {
         }
         return false;
     },
+
+    rgbToColorName(rgbaStr) {
+        // 解析 rgba
+        const match = rgbaStr.match(/rgba?\(([^)]+)\)/i);
+        if (!match) return "其他";
+
+        const parts = match[1].split(",").map(s => parseFloat(s.trim()));
+        const [r, g, b] = parts;
+
+        // 转 HSL
+        const { h, s, l } = this.rgbToHsl(r, g, b);
+
+        // ===== 先判断黑白灰 =====
+        if (l <= 0.08) return "黑";
+        if (l >= 0.92) return "白";
+        if (s <= 0.1) return "灰";
+
+        // ===== 再判断色相 =====
+        if ((h >= 0 && h < 30) || (h >= 330 && h <= 360)) return "红";
+        if (h >= 30 && h < 70) return "黄";
+        if (h >= 70 && h < 170) return "绿";
+        if (h >= 170 && h < 260) return "蓝";
+
+        return "其他";
+    },
+
+    // RGB 转 HSL
+    rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h, s;
+        const l = (max + min) / 2;
+
+        if (max === min) {
+            h = s = 0;
+        } else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h *= 60;
+        }
+
+        return {
+            h: h || 0,
+            s: s || 0,
+            l: l || 0
+        };
+    }
 }
 
 module.exports = Common;

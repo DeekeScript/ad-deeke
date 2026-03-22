@@ -49,7 +49,7 @@ let User = {
         while (true) {
             let videoTags = UiSelector().className('android.widget.FrameLayout').filter(v => {
                 return v.desc() && (v.desc().indexOf('视频') === 0 || v.desc().indexOf('笔记') === 0);
-            }).find();
+            }).isVisibleToUser(true).find();
 
             if (!videoTags || videoTags.length === 0) {
                 return false;

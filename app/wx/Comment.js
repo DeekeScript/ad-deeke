@@ -1,6 +1,5 @@
 let Common = require('app/wx/Common.js');
 let statistics = require('common/statistics.js');
-let V = require('version/WxV.js');
 let storage = require('common/storage.js');
 
 let Comment = {
@@ -8,9 +7,9 @@ let Comment = {
     containers: [],//本次遍历的内容  主要用于去重
     getAvatarTag(tag) {
         if (tag) {
-            return tag.children().findOne(Common.id(V.Comment.getAvatarTag[0]).desc(V.Comment.getAvatarTag[1]).isVisibleToUser(true));
+            return tag.children().findOne(Common.id('a_4').desc('头像').isVisibleToUser(true));
         }
-        return this.tag.children().findOne(Common.id(V.Comment.getAvatarTag[0]).desc(V.Comment.getAvatarTag[1]).isVisibleToUser(true));
+        return this.tag.children().findOne(Common.id('a_4').desc('头像').isVisibleToUser(true));
     },
 
     isChannel() {//判断是否是视频号，不是则不能进入主页
@@ -18,31 +17,33 @@ let Comment = {
     },
 
     getNicknameTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getNicknameTag[0]));
+        return this.tag.children().findOne(Common.id('kbf'));
     },
 
     getContentTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getContentTag[0]));
+        return Common.id('c1_').filter(v => {
+            return v.bounds().centerY() > this.tag.bounds().top && v.bounds().centerY() < this.tag.bounds().bottom;
+        }).findOne();
     },
 
     getTimeTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getTimeTag[0]));
+        return this.tag.children().findOne(Common.id('c85'));
     },
 
     getIpTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getIpTag[0]));
+        return this.tag.children().findOne(Common.id('hgh'));
     },
 
 
     getZanTag(tag) {
         if (tag) {
-            return tag.children().findOne(Common.id(V.Comment.getZanTag[0]).isVisibleToUser(true));
+            return tag.children().findOne(Common.id('iht').isVisibleToUser(true));
         }
-        return this.tag.children().findOne(Common.id(V.Comment.getZanTag[0]).isVisibleToUser(true));
+        return this.tag.children().findOne(Common.id('iht').isVisibleToUser(true));
     },
 
     isAuthor() {
-        return this.tag.children().findOne(Common.id(V.Comment.isAuthor[0]).textContains(V.Comment.isAuthor[1])) ? true : false;
+        return this.tag.children().findOne(Common.id('l23').textContains('作者')) ? true : false;
     },
 
     getNickname() {
@@ -63,7 +64,7 @@ let Comment = {
     },
 
     getZanCountTag() {
-        return this.tag.children().findOne(Common.id(V.Comment.getZanCountTag[0]));
+        return this.tag.children().findOne(Common.id('aa0'));
     },
 
     getZanCount() {
@@ -81,6 +82,10 @@ let Comment = {
     //data 是getList返回的参数
     clickZan(data) {
         let zanTag = this.getZanTag(data.tag);
+        if (zanTag && zanTag.isSelected()) {
+            return true;
+        }
+
         zanTag && Common.click(zanTag);
         statistics.zanComment();
         return true;
@@ -133,7 +138,7 @@ let Comment = {
     },
 
     swipeTop() {
-        Common.swipeCommentListOp();
+        return Common.swipeCommentListOp();
     },
 
     commentCount: 0,
@@ -142,7 +147,7 @@ let Comment = {
     },
 
     getList() {
-        let contains = Common.id(V.Comment.getList[0]).isVisibleToUser(true).filter(v => {
+        let contains = Common.id('dz_').isVisibleToUser(true).filter(v => {
             if (v && v.bounds()) {
                 Log.log('位置', v.bounds().top, v.bounds().height(), v.bounds().left, Device.height());
             }
@@ -167,8 +172,8 @@ let Comment = {
                     tag: contains[i],
                     nickname: this.getNickname(),
                     content: this.getContent(),
-                    zanCount: this.getZanCount(),
-                    isZan: this.isZan(),
+                    //zanCount: this.getZanCount(),
+                    //isZan: this.isZan(),
                     isAuthor: this.isAuthor(),
                     ip: this.getIp(),
                     headTag: this.getAvatarTag(),
@@ -199,11 +204,6 @@ let Comment = {
     },
     //这里其实使用back最方便
     closeCommentWindow() {
-        let closeTag = Common.id(V.Comment.closeCommentWindow[0]).desc(V.Comment.closeCommentWindow[1]).isVisibleToUser(true).findOnce();
-        if (!closeTag) {
-            return;
-            //throw new Error('找不到关闭按钮');
-        }
         Common.back();
         return true;
     },
@@ -220,15 +220,15 @@ let Comment = {
 
     //视频评论
     commentMsg(msg) {
-        let iptTag = Common.id(V.Comment.commentMsg[0]).isVisibleToUser(true).findOnce();
+        let iptTag = Common.id('c6v').isVisibleToUser(true).findOnce();
         try {
-            Common.click(iptTag);
+            Common.click(iptTag, 0.2);
             Common.sleep(1500 + 500 * Math.random());
         } catch (e) {
             Log.log(e);
         }
 
-        iptTag = Common.id(V.Comment.commentMsg[1]).isVisibleToUser(true).findOne();
+        iptTag = Common.id('c6v').isVisibleToUser(true).findOne();
         //获取是否评论图片
         Log.log("带图评论概率：" + storage.get("setting_comment_with_photo", "int"));
         if (storage.get("setting_comment_with_photo", "int") > Math.random() * 100) {
@@ -239,25 +239,21 @@ let Comment = {
 
         Log.log('msg', msg);
 
-        let iText = '';
-        for (let i = 0; i < msg.length; i++) {
-            iText = msg.substring(0, i + 1);
-            iptTag.setText(iText);
-            Common.sleep(100 + 300 * Math.random());
-        }
-
+        System.setClip(msg);
+        Common.sleep(500 + Math.random() * 1000);
+        iptTag.paste();
         Common.sleep(500 + Math.random() * 1000);
 
         let rp = 3;
         while (rp--) {
             try {
-                let submitTag = Common.id(V.Comment.commentMsg[2]).isVisibleToUser(true).findOne();
+                let submitTag = Common.id('uet').isVisibleToUser(true).findOne();
                 Log.log(submitTag);
                 if (!submitTag) {
                     continue;
                 }
-                Common.click(submitTag);
-                Common.sleep(1000);
+                Common.click(submitTag, 0.2);
+                Common.sleep(3000 + 1000 * Math.random());
                 break;
             } catch (e) {
                 Log.log(e);
@@ -265,21 +261,13 @@ let Comment = {
         }
 
         statistics.comment();
-
-        //查看dg0位置有没有下来
-        iptTag = Common.id(V.Comment.commentMsg[2]).isVisibleToUser(true).findOne();
-        Log.log(iptTag);
-        if (iptTag) {
-            Common.back();
-            Log.log("点击失败：返回");
-        }
-
-        Common.sleep(1500 + 1500 * Math.random());
+        Common.sleep(1000 + 1000 * Math.random());
+        return true;
     },
 
     //暂未变更
     commentImage() {
-        let imgTag = Common.id(V.Comment.commentImage[0]).isVisibleToUser(true).findOne();
+        let imgTag = Common.id('ueu').isVisibleToUser(true).findOne();
         Log.log(imgTag);
 
         if (!imgTag) {
@@ -288,20 +276,20 @@ let Comment = {
         }
 
         Log.log("表情呢", imgTag);
-        Common.click(imgTag);
+        Common.click(imgTag, 0.2);
         Common.sleep(2000 + 500 * Math.random());
-        let tag = Common.id(V.Comment.commentImage[1]).desc(V.Comment.commentImage[2]).isVisibleToUser(true).findOnce();
+        let tag = Common.id('n0v').desc('自定义表情').isVisibleToUser(true).findOnce();
         Log.log(tag);
         if (!tag) {
             Common.sleep(2000 + 500 * Math.random());
-            tag = Common.id(V.Comment.commentImage[1]).desc(V.Comment.commentImage[2]).isVisibleToUser(true).findOnce();
+            tag = Common.id('n0v').desc('自定义表情').isVisibleToUser(true).findOnce();
             Log.log("再次获取", tag);
         }
-        Common.click(tag);
+        Common.click(tag, 0.2);
         Common.sleep(1000 + 500 * Math.random());
 
         console.log("开始找表情");
-        let imgs = Common.id(V.Comment.commentImage[3]).isVisibleToUser(true).find();
+        let imgs = Common.id('a50').isVisibleToUser(true).find();
 
         console.log("表情数量：" + imgs.length);
         let rand = Math.round(Math.random() * (imgs.length - 1));
@@ -311,7 +299,7 @@ let Comment = {
         if (rand == 0) {
             rand = 1;
         }
-        Common.click(imgs[rand]);
+        Common.click(imgs[rand], 0.2);
         Common.sleep(1000);
     },
 }

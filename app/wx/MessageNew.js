@@ -1,6 +1,4 @@
 let Common = require("app/wx/Common.js");
-let User = require('app/wx/User.js');
-let V = require('version/WxV.js');
 let baiduWenxin = require('service/baiduWenxin.js');
 
 let MessageNew = {
@@ -13,45 +11,28 @@ let MessageNew = {
         return baiduWenxin.getChatByMsg(1 - type, msg, 3);
     },
 
-    hasMessage() {
-        let shipinhaoTag = Common.aId(V.Index.intoVideo[0]).text(V.Index.intoVideo[1]).isVisibleToUser(true).findOne();
-        console.log(shipinhaoTag);
-        let msgTag = shipinhaoTag.parent().children().findOne(Common.id(V.Index.intoVideo[2]).isVisibleToUser(true));
-        // let msgTag = Common.id(V.Index.intoVideo[2]).isVisibleToUser(true).filter(v => {
-        //     return v.bounds().top >= shipinhaoTag.parent().bounds().top && v.bounds().top + v.bounds().height() <= shipinhaoTag.parent().bounds().top + shipinhaoTag.parent().bounds().height();
-        // }).findOne();
-        console.log(msgTag);
-        if (!msgTag || msgTag.text() * 1 <= 0) {
-            return false;
-        }
-        return true;
-    },
-
     //第一步
     intoMessage() {
-        if (!this.hasMessage()) {
-            return false;
-        }
-
-        let shipinhaoTag = Common.aId(V.Index.intoVideo[0]).text(V.Index.intoVideo[1]).isVisibleToUser(true).findOne();
+        let shipinhaoTag = Common.aId('title').text('视频号').isVisibleToUser(true).findOne();
         if (!shipinhaoTag) {
             throw new Error('没有视频号');
         }
-        Common.click(shipinhaoTag);
+        Common.click(shipinhaoTag, 0.2);
         Log.log('进入视频号');
         Common.sleep(3000 + 3000 * Math.random());
-        let closeTag = Common.id(V.Index.intoVideo[3]).isVisibleToUser(true).findOne();
+        let closeTag = UiSelector().text('我知道了').clickable(true).isVisibleToUser(true).findOne();
         if (closeTag) {
-            Common.click(closeTag);
+            Common.click(closeTag, 0.2);
             Log.log('关闭”知道了“');
             Common.sleep(1000 + 1000 * Math.random());
         }
 
-        let accountTag = Common.id(V.Index.intoVideo[4]).isVisibleToUser(true).findOne();
+        //个人中心入口
+        let accountTag = Common.id('ktr').isVisibleToUser(true).findOne();
         if (!accountTag) {
             throw new Error('找不到消息入口');
         }
-        Common.click(accountTag);
+        Common.click(accountTag, 0.2);
         Log.log('进入账号中心');
         Common.sleep(2000 + 3000 * Math.random());
         return true;
@@ -64,13 +45,10 @@ let MessageNew = {
             throw new Error('找不到视频号消息入口');
         }
         let tipCountTag = tag.parent().children().findOne(Common.id(V.Account.interact[2]).isVisibleToUser(true));
-        // let tipCountTag = Common.id(V.Account.interact[2]).isVisibleToUser(true).filter(v => {
-        //     return v.bounds().top >= tag.parent().bounds().top && v.bounds().top + v.bounds().height() <= tag.parent().bounds().top + tag.parent().bounds().height();
-        // }).findOne();
-        if (!tipCountTag || tipCountTag.text() * 1 <= 0) {
+        if (!tipCountTag || parseInt(tipCountTag.text()) <= 0) {
             return true;
         }
-        let count = tipCountTag.text() * 1;
+        let count = parseInt(tipCountTag.text());
         Common.click(tipCountTag);
         Log.log('进入视频号消息');
         Common.sleep(3000 + 3000 * Math.random());
@@ -82,7 +60,7 @@ let MessageNew = {
         }).findOne();
         count = 0;//这里才是真正的消息数
         if (commentTag && commentTag.text()) {
-            count = commentTag.text().replace('+', '') * 1;
+            count = parseInt(commentTag.text().replace('+', ''));
         }
         Log.log('消息数量', count);
         if (count <= 0) {
@@ -181,7 +159,7 @@ let MessageNew = {
                         return v.bounds().left > tags[i].bounds().left && v.bounds().top > tags[i].bounds().top && v.bounds().left + v.bounds().width() < tags[i].bounds().left + tags[i].bounds().width();
                     }).findOne();
 
-                    if (!tipTag || tipTag.text() * 1 <= 0) {
+                    if (!tipTag || parseInt(tipTag.text()) <= 0) {
                         continue;
                     }
 
@@ -215,7 +193,7 @@ let MessageNew = {
 
                     Common.click(inputTag);
                     Common.sleep(1000 + 1000 * Math.random());
-                    inputTag = Common.id(V.Account.privateDeal[9]).textMatches("\.+").isVisibleToUser(true).findOne();
+                    inputTag = Common.id(V.Account.privateDeal[9]).textMatches(/\.+/).isVisibleToUser(true).findOne();
                     if (!inputTag) {
                         throw new Error('找不到输入框');
                     }
@@ -245,9 +223,6 @@ let MessageNew = {
             throw new Error('找不到视频号消息入口');
         }
         let dotCountTag = tag.parent().children().findOne(Common.id(V.Account.privateDeal[1]).isVisibleToUser(true)) || tag.parent().children().findOne(Common.id(V.Account.privateDealT[0]).isVisibleToUser(true));
-        // let dotCountTag = Common.id(V.Account.privateDeal[1]).isVisibleToUser(true).filter(v => {
-        //     return v.bounds().top >= tag.parent().bounds().top && v.bounds().top + v.bounds().height() <= tag.parent().bounds().top + tag.parent().bounds().height();
-        // }).findOne();
         if (!dotCountTag) {
             Log.log('没有进入私信消列表')
             return true;

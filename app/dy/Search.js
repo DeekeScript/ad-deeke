@@ -12,7 +12,7 @@ const Search = {
      * @param {number} type 
      * @returns 
      */
-    intoSearchList(keyword, type) {
+    intoSearchList(keyword, type, config) {
         if (!type) {
             type = 0;
         }
@@ -25,7 +25,7 @@ const Search = {
         Common.sleep(1000 + 500 * Math.random());
 
         //找到搜索按钮
-        let searchBtnTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).desc('搜索').findOne();
+        let searchBtnTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('搜索').findOne() || UiSelector().className('android.widget.TextView').isVisibleToUser(true).desc('搜索').findOne();
         Log.log('searchBtnTag', searchBtnTag);
         Common.click(searchBtnTag);
         Common.sleep(4000 + 2000 * Math.random());
@@ -55,8 +55,61 @@ const Search = {
         }
 
         console.log('进入用户或者视频：', videoTag);
-        Common.click(videoTag, 0.2);
-        Common.sleep(3000 + 2000 * Math.random());
+        videoTag.parent().click();
+        Common.sleep(3500 + 1500 * Math.random());
+
+        if (config) {
+            let num = 0;
+            for (let i in config) {
+                num += config[i];
+            }
+
+            if (num > 0) {
+                //开始搜索
+                let filterTag = UiSelector().descContains('筛选').clickable(true).isVisibleToUser(true).findOne();
+                if (filterTag) {
+                    filterTag = UiSelector().className('android.view.ViewGroup').clickable(true).filter(v => {
+                        return v.bounds().left > Device.width() * 0.8 && v.bounds().bottom < Device.height() / 5;
+                    }).findOne();
+                }
+
+                Common.log('filterTag', filterTag);
+                filterTag.click();
+                Common.sleep(1000);
+
+                let textConfig = {
+                    sort: ['综合排序', '最新发布', '最多点赞'],
+                    time: ['不限', '一天内', '一周内', '半年内'],
+                    minute: ['不限', '1分钟以下', '1-5分钟', '5分钟以上'],
+                    random: ['不限', '关注的人', '最近看过', '还未看过'],
+                }
+
+                let baseTop = {
+                    sort: '排序依据',
+                    time: '发布时间',
+                    minute: '视频时长',
+                    random: '搜索范围',
+                }
+
+                for (let i in config) {
+                    if (config[i] == 0) {
+                        continue;
+                    }
+
+                    let baseTopTag = UiSelector(false).text(baseTop[i]).isVisibleToUser(true).findOne();
+                    let tag = UiSelector(false).text(textConfig[i][config[i]]).filter(v => {
+                        return v.bounds().top > baseTopTag.bounds().top + baseTopTag.bounds().height();
+                    }).findOne();
+                    tag.parent().click();
+                    Common.sleep(1000 + 1000 * Math.random());
+                    continue;
+                }
+
+                Common.sleep(3000 + 1000 * Math.random());
+                filterTag.click();
+                Common.sleep(500);
+            }
+        }
     },
 
     /**
@@ -64,8 +117,8 @@ const Search = {
      * @returns {boolean}
      */
     intoSearchVideo() {
-        let descTag = UiSelector().id('com.ss.android.ugc.aweme:id/desc').className('android.widget.TextView').filter(v => {
-            return v.text();
+        let descTag = Common.id('desc').className('android.widget.TextView').filter(v => {
+            return !!v.text();
         }).isVisibleToUser(true).findOne();
 
         if (descTag) {
@@ -82,28 +135,20 @@ const Search = {
      */
     intoSeachUser(keyword) {
         Log.log("开始寻找抖音号了哈", keyword);
-        let userTag = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').descContains('抖音号：' + keyword).filter(v => {
-            return v.bounds().width() < Device.width() / 2; //取短的这个，防止下面的点击把“关注”或者“发私信”点了
-        }).isVisibleToUser(true).findOne();
+        let userTag = UiSelector().className('android.view.ViewGroup').descContains('关注').isVisibleToUser(true).findOne();
         if (!userTag) {
-            userTag = UiSelector().className('android.view.ViewGroup').descContains('关注').isVisibleToUser(true).findOne();
-            if (!userTag) {
-                loatDialogs.toast('找不到抖音号：' + keyword);
-                return false;
-            }
-            let parent = userTag.parent();
-            let centerX = parent.bounds().centerX() - 50;
-            let height = parent.bounds().height();
-            let top = parent.bounds().top;
-            console.log('点击位置', centerX, top, height);
-            let res = Gesture.click(centerX + 100 * Math.random(), top + height * Math.random());
-            Common.sleep(2000 + 1000 * Math.random());
-            return res;
+            FloatDialogs.toast('找不到抖音号：' + keyword);
+            return false;
         }
 
-        Common.click(userTag);
+        let parent = userTag.parent();
+        let centerX = parent.bounds().centerX() - 50;
+        let height = parent.bounds().height();
+        let top = parent.bounds().top;
+        console.log('点击位置', centerX, top, height);
+        let res = Gesture.click(centerX + 100 * Math.random(), top + height * (0.1 + 0.8 * Math.random()));
         Common.sleep(2000 + 1000 * Math.random());
-        return true;
+        return res;
     },
 
     /**
@@ -112,19 +157,9 @@ const Search = {
      * @returns {boolean}
      */
     intoLiveRoom(douyin) {
-        let tag = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').descContains(douyin).descContains('抖音号：').isVisibleToUser(true).findOnce();
-        console.log(douyin);
-        console.log('找进入用户内容', tag);
+        let tag = UiSelector().className('android.view.ViewGroup').descContains('直播').isVisibleToUser(true).findOne();
         if (!tag) {
-            tag = UiSelector().className('android.view.ViewGroup').descContains('直播').isVisibleToUser(true).findOne();
-            if (!tag) {
-                FloatDialogs.toast('找不到抖音号：' + douyin);
-                return false;
-            }
-        }
-
-        if (tag.desc().indexOf('直播') == -1) {
-            FloatDialogs.toast('找不到直播间');
+            FloatDialogs.toast('找不到抖音号：' + douyin);
             return false;
         }
 
@@ -183,6 +218,23 @@ const Search = {
         return Video.intoUserVideo();
     },
 
+
+    notInList() {
+        let i = 3;
+        while (i-- > 0) {
+            if (Common.aId('text1').text('用户').isVisibleToUser(true).findOne()) {
+                Log.log('在用户页面');
+                return;
+            }
+
+            Common.sleep(5000);
+        }
+
+        Common.back();//偶尔会出现没有返回回来的情况，这里加一个判断
+        Common.sleep(2000);
+        Log.log('不在用户页面， 返回');
+    },
+
     /**
      * 
      * @param {function} getAccounts 
@@ -197,14 +249,10 @@ const Search = {
         Log.log('开始执行用户列表');
         let errorCount = 0;
 
-        let topTag = UiSelector().className('android.widget.HorizontalScrollView').isVisibleToUser(true).findOne();
-        let minTop = topTag.bounds().top + topTag.bounds().height();
+        let rects = [];
         while (true) {
             let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').isVisibleToUser(true).findOne();
-            let tags = tag.children().find(UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').isVisibleToUser(true).filter(v => {
-                return v.desc() && v.desc().indexOf('粉丝') != -1 && v.bounds().top + v.bounds().height() > minTop + 5 && v.bounds().width() < Device.width() / 2;
-            }).clickable(false));
-
+            let tags = tag.children().find(UiSelector().className('android.widget.FrameLayout').isVisibleToUser(true));
             Log.log('tags', tags.length);
             if (tags.length === 0) {
                 errorCount++;
@@ -214,16 +262,12 @@ const Search = {
             }
 
             for (let i in tags) {
-                if (tags[i].bounds().top + tags[i].bounds().height() > Device.height()) {
-                    let top = tags[i].bounds().top + (Device.height() - tags[i].bounds().top) * Math.random();
-                    Gesture.click(tags[i].bounds().left + tags[i].bounds().width() * Math.random(), top);
-                } else if (tags[i].bounds().top > minTop) {
-                    Common.click(tags[i]);
-                } else {
-                    let top = minTop + (tags[i].bounds().top + tags[i].bounds().height() - minTop) * Math.random();
-                    Gesture.click(tags[i].bounds().left + tags[i].bounds().width() * Math.random(), top);
+                this.notInList();
+                if (rects.includes(tags[i].bounds().toString())) {
+                    continue;
                 }
-
+                Common.click(tags[i], 0.35);
+                rects.push(tags[i].bounds().toString());
                 Common.sleep(3000 + 1500 * Math.random());
                 //看看有没有视频，有的话，操作评论一下，按照20%的频率即可
                 statistics.viewUser();
@@ -237,6 +281,7 @@ const Search = {
 
                 if (this.contents.includes(account) || getAccounts(account)) {
                     Common.back();
+                    Log.log('重复');
                     Common.sleep(1000 + 500 * Math.random());
                     continue;
                 }
@@ -244,8 +289,10 @@ const Search = {
                 Log.log('是否是私密账号：' + isPrivateAccount);
                 if (isPrivateAccount) {
                     Common.back();
+                    Log.log('私密账号');
                     Common.sleep(1000 + 500 * Math.random());
                     if (decCount() <= 0) {
+                        Log.log('数量操作完了');
                         return true;
                     }
                     setAccount(account);
@@ -269,6 +316,9 @@ const Search = {
                     fansCount = User.getFansCount();
                 } catch (e) {
                     Log.log(e);
+                    Log.log('获取粉丝数量失败');
+                    Common.back();
+                    Common.sleep(1000 + 500 * Math.random());
                     continue;//大概率是没有点击进去
                 }
 
@@ -281,13 +331,16 @@ const Search = {
                 }
 
                 let nickname = User.getNickname();
+                Log.log('获取名称', nickname);
 
                 if (Math.random() * 100 <= settingData.focusRate * 1) {
                     User.focus();
+                    Log.log('关注');
                 }
 
                 if (Math.random() * 100 <= settingData.privateRate * 1) {
                     User.privateMsg(getMsg(1, nickname, User.getAge(), User.getGender()).msg);
+                    Log.log('私信');
                 }
 
                 let commentRate = Math.random() * 100;
@@ -299,6 +352,7 @@ const Search = {
                     Log.log('点赞频率检测', zanRate, settingData.zanRate * 1);
                     if (zanRate <= settingData.zanRate * 1) {
                         Video.clickZan();
+                        Log.log('点赞');
                     }
 
                     //随机评论视频
@@ -313,6 +367,7 @@ const Search = {
                         }
                     }
                     User.backHome();
+                    Log.log('返回home检测');
                 } else {
                     Log.log('未进入视频');
                 }
@@ -327,10 +382,9 @@ const Search = {
                 Log.log(account, getAccounts(account));
                 this.contents.push(account);
                 Common.back();
+                Log.log('返回到列表-可能不成功');
                 Common.sleep(1000 + 500 * Math.random());//用户页到列表页
-                if (!Common.aId('text1').text('用户').isVisibleToUser(true).findOne()) {
-                    Common.back();//偶尔会出现没有返回回来的情况，这里加一个判断
-                }
+                this.notInList();
                 Common.sleep(1000 + 500 * Math.random());
             }
 
@@ -340,6 +394,7 @@ const Search = {
 
             if (!Common.swipeSearchUserOp()) {
                 FloatDialogs.toast('操作完了');
+                Log.log('滑动失败了，认为是成功');
                 return true;
             }
             Common.sleep(2000 + 1000 * Math.random());

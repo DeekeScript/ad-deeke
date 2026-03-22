@@ -2,30 +2,66 @@ let Common = require("app/xhs/Common.js");
 let statistics = require("common/statistics.js");
 
 let Work = {
-    getZanTag() {
-        return UiSelector().className('android.widget.Button').descContains('点赞').isVisibleToUser(true).findOne();
-    },
-
     getCommentTag() {
         return UiSelector().className('android.widget.Button').descContains('评论').isVisibleToUser(true).findOne();
     },
 
     zan() {
         if (this.isZan()) {
-            Log.log('已经点过赞了');
-            return;
+            Common.log('已点赞');
+            return true;
         }
 
-        let zanTag = this.getZanTag();
+        let zanTag = UiSelector().className('android.widget.Button').descContains('点赞').isVisibleToUser(true).findOne();
         if (zanTag) {
-            Common.click(zanTag, 0.25);
+            Common.click(zanTag, 0.2);
             statistics.zan();
-            Log.log('点赞成功');
+            Common.log('点赞成功', zanTag);
+            Common.sleep(1000);
+            return true;
         }
+
+        let collectTag = UiSelector().descContains('收藏').className('android.widget.Button').isVisibleToUser(true).findOne();
+        if (!collectTag) {
+            Common.log('广告，没有点赞，收藏');
+            return false;
+        }
+
+        zanTag = UiSelector().className('android.widget.LinearLayout').filter(v => {
+            return Math.abs(v.bounds().top - collectTag.bounds().top) <= 5 && Math.abs(v.bounds().right - collectTag.bounds().left) <= 5;
+        }).clickable(true).isVisibleToUser(true).findOne();
+        statistics.zan();
+        Common.click(zanTag, 0.2);
+        Common.log('点赞成功', zanTag);
+        return true;
     },
 
     isZan() {
-        return UiSelector().className('android.widget.Button').descContains('已点赞').isVisibleToUser(true).findOne();
+        //图文
+        let zanTag = UiSelector().className('android.widget.Button').descContains('点赞').isVisibleToUser(true).findOne();
+        if (zanTag && zanTag.desc().indexOf('已点赞') !== -1) {
+            return true;
+        }
+
+        if (zanTag && zanTag.desc().indexOf('已点赞') == -1) {
+            return false;
+        }
+
+        //视频
+        let collectTag = UiSelector().descContains('收藏').className('android.widget.Button').isVisibleToUser(true).findOne();
+        if (!collectTag) {
+            Common.log('广告，没有点赞，收藏');
+            return false;
+        }
+
+        zanTag = UiSelector().className('android.widget.LinearLayout').filter(v => {
+            return Math.abs(v.bounds().top - collectTag.bounds().top) <= 5 && Math.abs(v.bounds().right - collectTag.bounds().left) <= 5;
+        }).clickable(true).isVisibleToUser(true).findOne();
+
+        let image = Images.capture();
+        let color = Images.getColor(image, zanTag.bounds().left + collectTag.bounds().width() / 4, zanTag.bounds().centerY());
+        console.log(Common.rgbToColorName(color));
+        return color == '红';
     },
 
     getCollectTag() {
@@ -68,14 +104,10 @@ let Work = {
     },
 
     msg(type, msg) {
-        System.setAccessibilityMode('!fast');
-        let inputTag = UiSelector().className('android.widget.EditText').filter(v => {
-            return v.isEditable();
-        }).findOne() || UiSelector().className('android.widget.TextView').desc('评论框').findOne();
+        let inputTag = UiSelector().textContains('说点什么').className('android.widget.TextView').findOne() || UiSelector().className('android.widget.TextView').desc('评论框').findOne();
 
         if (!inputTag) {
             Log.log('没有找到输入框');
-            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -87,7 +119,6 @@ let Work = {
         }).isVisibleToUser(true).findOne();
         if (!iptTag) {
             Log.log('输入框没有');
-            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -95,7 +126,6 @@ let Work = {
         Common.sleep(1500 + 500 * Math.random());
         let sendTag = UiSelector().className('android.widget.TextView').text('发送').isVisibleToUser(true).findOne();
         if (!sendTag) {
-            System.setAccessibilityMode('fast');
             return false;
         }
 
@@ -103,10 +133,9 @@ let Work = {
         statistics.comment();
         Log.log('发送了');
         Common.sleep(500 + 500 * Math.random());
-        System.setAccessibilityMode('fast');
     },
 
-    commentListSwipe(type) {
+    commentListSwipe() {
         let tag = UiSelector().scrollable(true).isVisibleToUser(true).findOne();
         if (!tag) {
             Log.log('赞评论列表滑动失败');
@@ -121,7 +150,7 @@ let Work = {
     },
 
     intoBottom() {
-        let tag = UiSelector().className('android.widget.FrameLayout').isVisibleToUser(true).desc('已到底').findOne();
+        let tag = UiSelector().isVisibleToUser(true).text('- 到底了 -').findOne();
         return tag ? true : false;
     },
 
@@ -166,7 +195,7 @@ let Work = {
             childs.push({
                 content: _childs[1].text(),
                 ip: arr[arr.length - 2] || '-',
-                zanTag: _childs[_childs.length - 1].parent(),
+                zanTag: _childs[3].parent(),
                 nicknameTag: _childs[0],
                 nickname: _childs[0].text(),
             });
@@ -184,60 +213,32 @@ let Work = {
             Common.sleep(2000 + 1000 * Math.random());
         }
 
-        let rp = 0;
-        let arr = [];
         while (true) {
-            let tags = UiSelector().className('android.widget.LinearLayout').filter(v => {
+            let tags = [];
+            let parentTags = UiSelector().className('android.widget.RelativeLayout').filter(v => {
                 let childs = v.children();
-                if (childs.length() != 2) {
+                if (childs.length() != 3) {
                     return false;
                 }
 
-                if (childs.getChildren(0).className() != "android.widget.ImageView") {
+                if (childs.getChildren(2).className() != "android.widget.ImageView") {
                     return false;
                 }
 
-                if (childs.getChildren(1).className() != "android.widget.TextView") {
+                if (childs.getChildren(1).className() != "android.widget.LinearLayout") {
                     return false;
                 }
+                tags.push(childs.getChildren(1));
                 return true;
             }).isVisibleToUser(true).find();
 
-            let top = 0;
-            if (type == 0) {
-                let tag = UiSelector().desc('评论框').isVisibleToUser(true).findOne();
-                if (tag) {
-                    top = tag.bounds().top;
-                }
-            } else {
-                let tag = Common.id('commentLayout').isVisibleToUser(true).findOne();
-                if (tag) {
-                    top = tag.bounds().top
-                }
-            }
-            Log.log('评论框上边距', top);
-
-            if (tags.length == 0) {
+            if (parentTags.length == 0) {
                 break;
             }
 
             for (let i in tags) {
-                if (arr.indexOf(tags[i]._addr) != -1) {
-                    if (rp++) {
-                        Common.back();
-                        break;//操作完了
-                    }
+                if (!tags[i].isClickable() || !tags[i].isVisibleToUser()) {
                     continue;
-                }
-
-                if (top > 0 && tags[i].bounds().top + tags[i].bounds().height >= top) {
-                    Log.log('超出范围');
-                    continue;
-                }
-                rp = 0;
-                arr.push(tags[i]._addr);
-                if (arr.length >= 20) {
-                    arr.shift()
                 }
 
                 Common.click(tags[i], 0.25);
@@ -248,12 +249,11 @@ let Work = {
                 }
             }
 
-            if (this.intoBottom() || count <= 0) {
+            if (!this.commentListSwipe() || count <= 0 || this.intoBottom()) {
                 Log.log('到底了', count);
                 break;
             }
 
-            this.commentListSwipe(type);
             Common.sleep(2000 + 1000 * Math.random());
         }
 

@@ -63,13 +63,14 @@ let task = {
             return 'exit';
         }
 
-        //获取最新的前三视频
-        let i = 3;
+        if (!WxUser.intoVideo()) {
+            return 'videoExit';
+        }
+
+        //获取最新的前10视频
+        let i = 10;
         while (i-- > 0) {
             Log.log('进入一个视频', 3 - i);
-            if (!WxUser.intoVideo()) {
-                return 'videoExit';
-            }
             //let title = WxVideo.getContent();
             let commentCount = WxVideo.getCommentCount();
             if (commentCount === 0) {
@@ -162,7 +163,7 @@ let task = {
                     } else {
                         Log.log('无视频，直接操作关注和私信引流');
                         WxUser.focus();
-                        let msg = this.getMsg(1, comments[k].nickname, WxUser.getAge(), WxUser.getGender());
+                        let msg = this.getMsg(1, comments[k].nickname, null, WxUser.getGender());
                         if (msg) {
                             WxUser.privateMsg(msg.msg);
                         }
@@ -172,7 +173,9 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                WxComment.swipeTop();
+                if (!WxComment.swipeTop()) {
+                    break;
+                }
                 tCommon.sleep(1500 + 500 * Math.random());
             }
 

@@ -56,7 +56,7 @@ let task = {
             if (DyVideo.isLiving()) {
                 Log.log('直播');
                 tCommon.sleep(1000 + Math.random() * 1000);
-                DyVideo.next(true);
+                DyVideo.next();
                 continue;
             }
 
@@ -75,7 +75,7 @@ let task = {
             let md5 = Encrypt.md5(nickname + "_" + title);
             if (machine.get('task_dy_search_inquiry_' + md5, 'bool') || commentCount <= 0) {
                 Log.log('重复视频');
-                DyVideo.next(true);
+                DyVideo.next();
                 continue;
             }
 
@@ -96,7 +96,8 @@ let task = {
 
             Log.log('看看是不是广告');
             if (DyVideo.viewDetail()) {
-                DyVideo.next(true);
+                DyVideo.next();
+                Log.log('是广告');
                 continue;
             } else {
                 Log.log('不是广告，准备进入主页');
@@ -140,6 +141,8 @@ let task = {
 
                     try {
                         DyComment.clickZan(comments[i]);
+                        Log.log('点击了赞');
+                        tCommon.sleep(1000 + 1000 * Math.random());
                     } catch (e) {
                         Log.log(e, '赞找不到了');
                     }
@@ -234,9 +237,9 @@ Log.log("count: " + task.count);
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
-System.setAccessibilityMode('!fast');//快速模式
 
 while (true) {
+    System.setAccessibilityMode('!fast');//快速模式
     task.log();
     try {
         let res = task.run(keyword, kws);

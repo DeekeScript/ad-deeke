@@ -2,6 +2,7 @@ let tCommon = require("app/dy/Common");
 let DyUser = require("app/dy/User");
 let DySearch = require("app/dy/Search");
 let DyVideo = require("app/dy/Video");
+let DyIndex = require("app/dy/Index");
 let DyComment = require("app/dy/Comment");
 let storage = require("common/storage");
 let machine = require("common/machine");
@@ -13,6 +14,15 @@ let task = {
     contents: [],
     run(input, sleepSecond) {
         return this.testTask(input, sleepSecond);
+    },
+
+    filterConfig() {
+        return {
+            sort: storage.get('task_dy_toker_live_video_sort'),
+            time: storage.get('task_dy_toker_live_video_time'),
+            minute: storage.get('task_dy_toker_live_video_minute'),
+            random: storage.get('task_dy_toker_live_video_random'),
+        }
     },
 
     getMsg(type, title, age, gender) {
@@ -43,14 +53,21 @@ let task = {
         //首先进入页面
         let commentKw = tCommon.splitKeyword(input);
         Log.log('评论关键词：', commentKw);
+        let videoConfig = this.filterConfig();
+        let title = storage.get('task_dy_toker_live_video_title');
+        DyIndex.intoSearchPage();
+        tCommon.sleep(1500);
+        DySearch.intoSearchList(title, 0, videoConfig);
         DySearch.intoSearchVideo();
 
-        let rateCount = storage.get('task_dy_toker_live_video_zan_head_rate', 'int') + storage.get('task_dy_toker_live_video_focus_rate', 'int') + storage.get('task_dy_toker_live_video_zan_comment_rate', 'int');
+        let rateCount = storage.get('task_dy_toker_live_video_private_rate', 'int') + storage.get('task_dy_toker_live_video_focus_rate', 'int') + storage.get('task_dy_toker_live_video_zan_comment_rate', 'int');
         let zanCommentRate = 0;
         let focuRate = 0;
+        let privateRate = 0;
         if (rateCount > 0) {
             zanCommentRate = storage.get('task_dy_toker_live_video_zan_comment_rate', 'int') / rateCount;
             focuRate = storage.get('task_dy_toker_live_video_focus_rate', 'int') / rateCount;
+            privateRate = storage.get('task_dy_toker_live_video_private_rate', 'int') / rateCount;
         }
 
         Log.log('总的点赞：', rateCount, zanCommentRate, focuRate);
@@ -59,7 +76,7 @@ let task = {
             //看看是不是直播
             if (DyVideo.isLiving()) {
                 Log.log('直播，下一个');
-                DyVideo.next(true);
+                DyVideo.next();
                 continue;
             }
 
@@ -68,7 +85,7 @@ let task = {
             statistics.viewVideo();
             if (commentCount === 0 || this.contents.includes(title)) {
                 Log.log('下一个视频');
-                DyVideo.next(true);
+                DyVideo.next();
                 continue;
             }
 
@@ -129,8 +146,13 @@ let task = {
                         if (DyUser.isPrivate()) {
                             tCommon.back();
                         } else {
-                            DyUser.focus();
-                            Log.log('关注');
+                            if (opRate <= zanCommentRate + privateRate) {
+                                DyUser.privateMsg(this.getMsg(1).msg);
+                            } else {
+                                DyUser.focus();
+                                Log.log('关注');
+                            }
+
                             tCommon.sleep(1000 + 1000 * Math.random());
                             tCommon.back();
                         }
@@ -163,16 +185,24 @@ let task = {
             }
             Log.log('下一个视频');
             this.contents.push(title);
-            DyVideo.next(true);
+            DyVideo.next();
         }
     },
 }
 
+if (!machine.get('task_dy_toker_live_video_title')) {
+    FloatDialogs.show('请输入视频搜索关键词');
+    System.exit();
+    tCommon.sleep(3000);
+}
+
+
 let input = machine.get('task_dy_toker_live_video_comment_keyword');
 Log.log("input内容：" + machine.get('task_dy_toker_live_video_comment_keyword', 'string'));
 if (!input) {
-    FloatDialogs.toast('请输入评论关键词');
+    FloatDialogs.show('请输入评论关键词');
     System.exit();
+    tCommon.sleep(3000);
 }
 
 //开启线程  自动关闭弹窗
@@ -182,6 +212,7 @@ System.setAccessibilityMode('fast');
 while (true) {
     task.log();
     try {
+        tCommon.openApp();
         let r = task.run(input, storage.get('task_dy_toker_live_video_second', 'int'));
         if (r === 'exit') {
             if (thr) {

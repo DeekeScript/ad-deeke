@@ -23,9 +23,9 @@ let iDy = {
      * @param {string} title 
      * @param {number} age 
      * @param {number} gender 
-     * @returns {boolean}
+     * @returns {object}
      */
-    getMsg(type, title, age, gender) {
+    getMsg(type, title, age = undefined, gender = undefined) {
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -40,6 +40,13 @@ let iDy = {
     douyinExist(douyin) {
         if (storage.getMachineType() === 1) {
             return machine.douyinExist(douyin);//永远不会结束
+        }
+        return false;
+    },
+
+    douyinExistUpdate(douyin) {
+        if (storage.getMachineType() === 1) {
+            return machine.douyinExistUpdate(douyin);//永远不会结束
         }
         return false;
     },
@@ -109,7 +116,7 @@ let iDy = {
     /**
      * 视频规则是否符合
      * @param {object} rule 
-     * @param {string} videoData 
+     * @param {object} videoData 
      * @returns 
      */
     videoRulesCheck(rule, videoData) {
@@ -141,13 +148,8 @@ let iDy = {
         let noTitleCount = 5;
 
         while (true) {
-            DyVideo.next(true);
-            // //判断是否在同城  不能使用，一段时间之后，无法识别到
-            // let inRecommend = DyIndex.inRecommend();
-            // if (isCity && inRecommend) {
-            //     throw new Error('在推荐页，异常');
-            // }
-
+            DyVideo.next();
+            DyCommon.sleep(2000 + 1000 * Math.random());
             DyCommon.log('标题获取');
             let vContent = undefined;
             try {
@@ -158,7 +160,7 @@ let iDy = {
             DyCommon.log("标题：" + vContent);
             if (!vContent) {
                 if (noTitleCount-- <= 0) {
-                    DyCommon.toast('5次没有标题');
+                    DyCommon.log('5次没有标题');
                     throw new Error('可能异常！');
                 }
                 DyVideo.videoSlow();
@@ -175,12 +177,12 @@ let iDy = {
             }
 
             //直播间的话，无法获取标题，直接过滤了
-            // DyCommon.log('判断是否是直播');
-            // if (DyVideo.isLiving()) {
-            //     DyCommon.log('直播中，切换下一个视频');
-            //     DyVideo.videoSlow();
-            //     continue;
-            // }
+            DyCommon.log('判断是否是直播');
+            if (DyVideo.isLiving()) {
+                DyCommon.log('直播中，切换下一个视频');
+                DyVideo.videoSlow();
+                continue;
+            }
 
             DyCommon.log('昵称获取');
             let vNickname = DyVideo.getNickname();
@@ -202,9 +204,8 @@ let iDy = {
             }
 
             videoData = DyVideo.getInfo(isCity, { nickname: vNickname, title: vContent, commentCount: true });
-            errorCount = 0;
             //接下来是视频的参数和config比对， 不合适则刷下一个
-            let tmp = this.videoRulesCheck(videoRules, videoData, isCity);
+            let tmp = this.videoRulesCheck(videoRules, videoData);
             if (!tmp) {
                 DyCommon.log('视频不符合条件');
                 continue;
@@ -337,7 +338,7 @@ let iDy = {
     /**
      * 运行推荐营销或者同城营销
      * @param {number} type 
-     * @returns {boolean}
+     * @returns {boolean|number}
      */
     run(type) {
         this.isCity = type == 1 ? true : false;
@@ -352,7 +353,7 @@ let iDy = {
 
     /**
      * 运行任务
-     * @returns {boolean}
+     * @returns {boolean|number}
      */
     runTask() {
         //进入主页，获取个人的账号信息 然后进入视频界面
@@ -402,7 +403,7 @@ let iDy = {
                 try {
                     Log.log("查看用户数据");
                     userData = DyUser.getUserInfo();///////////操作  进入用户主页
-                    Log.log("查看用户数据-2");
+                    Log.log("查看用户数据-2", userData);
                 } catch (e) {
                     //看看是不是进入了广告
                     Log.log('用户数据异常', e);
@@ -417,8 +418,8 @@ let iDy = {
                         }).exists()) {
                             let a = UiSelector().text('确定').filter((v) => {
                                 return v && v.bounds() && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 2 / 3;
-                            });
-                            a.click();
+                            }).findOne();
+                            a && a.click();
                             DyCommon.sleep(1000 + 1000 * Math.random());
                         }
                         continue;
@@ -429,13 +430,13 @@ let iDy = {
                 if (userData) {
                     Log.log('看到了用户数据了哦');
                 } else {
-                    DyCommon.back();
+                    DyCommon.back(2);//有时候返回一次没用
                     Log.log('异常，返回回去');
                     DyCommon.sleep(1000);
                     continue;
                 }
 
-                //判断IP
+                //判断IP  ip 四川，成都， 四川
                 Log.log('ip', this.configData.toker_view_video_ip, userData.ip);
                 if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
                     DyCommon.back();
@@ -462,6 +463,7 @@ let iDy = {
                             Log.log('要私信了哦');
                             if (msg) {
                                 DyUser.privateMsg(msg.msg);///////////////////////////////////操作  私信视频作者
+                                this.douyinExistUpdate(userData.douyin);
                             }
                         }
                     }

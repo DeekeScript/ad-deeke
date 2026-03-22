@@ -7,17 +7,14 @@ const Index = {
      */
     InXPageTag() {
         try {
-            System.setAccessibilityMode('fast');
             let tag = UiSelector().className('android.widget.FrameLayout').filter(v => {
-                return v.isSelected() && v.children().findOne(UiSelector().descContains('按钮').isVisibleToUser(true));
+                return !!(v.isSelected() && v.children().findOne(UiSelector().textMatches(/(首页|朋友|消息|我)/)));
             }).isVisibleToUser(true).findOne();
 
-            let child = tag.children().findOne(UiSelector().descContains('按钮').isVisibleToUser(true));
+            let child = tag.children().findOne(UiSelector().textMatches(/(首页|朋友|消息|我)/));
             console.log('在那个页面', child.desc());
-            System.setAccessibilityMode('!fast');
             return child;
         } catch (e) {
-            System.setAccessibilityMode('!fast');
             throw new Error(e.message);
         }
     },
@@ -26,14 +23,16 @@ const Index = {
      * @returns boolean
      */
     intoHome() {
+        Log.log('判断页面是否在主页');
         let tag = this.InXPageTag();
-        if (tag.desc().indexOf('首页') != -1) {
+        if (tag.text().indexOf('首页') != -1) {
             return true;
         }
 
-        tag = UiSelector().descContains('首页').isVisibleToUser(true).findOne();
+        Log.log('准备点击首页');
+        tag = UiSelector().text('首页').findOne();
         let res = Common.click(tag);//注意，首次打开抖音，这个clickable是false
-        Common.sleep(2000 + Math.random() * 1000);
+        Common.sleep(1000 + Math.random() * 500);
         Log.log('点击home');
         return res;
     },
@@ -44,15 +43,15 @@ const Index = {
      */
     intoMyMessage() {
         let tag = this.InXPageTag();
-        if (tag.desc().indexOf('消息') != -1) {
+        if (tag.text().indexOf('消息') != -1) {
             return true;
         }
 
-        tag = tag = UiSelector().descContains('消息').filter(v => {
-            return v.bounds().top > Device.height() * 0.7 && v.bounds().left >= Device.width() / 2;
-        }).isVisibleToUser(true).findOne();
+        tag = tag = UiSelector().text('消息').filter(v => {
+            return v.bounds().top > Device.height() * 0.7 && v.bounds().left >= Device.width() / 2 && v.parent().isVisibleToUser();
+        }).findOne();
         let res = Common.click(tag);//注意，首次打开抖音，这个clickable是false
-        Common.sleep(2000 + 1000 * Math.random());
+        Common.sleep(3000 + 1000 * Math.random());
         Log.log('点击message');
         return res;
     },
@@ -63,12 +62,12 @@ const Index = {
      */
     intoMyPage() {
         let tag = this.InXPageTag();
-        if (tag.desc().indexOf('我') != -1) {
+        if (tag.text().indexOf('我') != -1) {
             return true;
         }
 
-        tag = UiSelector().descContains('我').isVisibleToUser(true).filter(v => {
-            return v.bounds().top > Device.height() * 0.8 && v.bounds().left > Device.width() * 0.5 && v.desc().indexOf('我') == 0;
+        tag = UiSelector().text('我').filter(v => {
+            return v.bounds().top > Device.height() * 0.8 && v.bounds().left > Device.width() * 0.5 && v.parent().isVisibleToUser();
         }).findOne();
         let res = Common.click(tag);//注意，首次打开抖音，这个clickable是false
         Common.sleep(1000 + 1000 * Math.random());
@@ -82,22 +81,24 @@ const Index = {
      */
     intoLikeVideo() {
         //首先知道喜欢的菜单
-        let likeTag = UiSelector().className('androidx.appcompat.app.ActionBar$Tab').descContains('喜欢').clickable(true).isVisibleToUser(true).findOne();
+        let likeTag = Common.aId('text1').textContains('喜欢').filter(v => {
+            return v.text().indexOf('喜欢') == 0;
+        }).findOne();
         if (!likeTag) {
             return false;
         }
 
-        likeTag.click();
+        Common.click(likeTag);
         Common.sleep(3000 + 2000 * Math.random());
-        let containerTag = UiSelector().descMatches('(视频|图文)').isVisibleToUser(true).findOne() || UiSelector().id('com.ss.android.ugc.aweme:id/container').isVisibleToUser(true).findOne();
+        let containerTag = UiSelector().descMatches(/(视频|图文)/).isVisibleToUser(true).findOne() || UiSelector().id('com.ss.android.ugc.aweme:id/container').isVisibleToUser(true).findOne();
         if (!containerTag) {
             return false;
         }
 
         Log.log(containerTag);
-        containerTag.isClickable() ? Common.click(containerTag) : Common.click(containerTag);
+        let res = Common.click(containerTag);
         Common.sleep(3000 + 2000 * Math.random());
-        return true;
+        return res;
     },
 
     /**
@@ -210,7 +211,11 @@ const Index = {
      * @returns {number}
      */
     getMsgCount() {
-        let msgTag = UiSelector().descContains('消息').isVisibleToUser(true).findOne();
+        let msgTag = UiSelector().text('消息').findOne();
+        msgTag = msgTag.parent().children().findOne(UiSelector().filter(v => {
+            return v.text() && v.text() != '消息';
+        }));
+
         if (msgTag) {
             return Common.numDeal(msgTag.text());
         }
@@ -225,7 +230,7 @@ const Index = {
         let topTag = UiSelector().className('android.widget.HorizontalScrollView').scrollable(true).isVisibleToUser(true).findOne();
         if (!topTag) {
             Log.log('顶部滑动失败');
-            return 0;
+            return null;
         }
 
         if (topTag.scrollBackward()) {
@@ -241,11 +246,15 @@ const Index = {
      * @returns {boolean}
      */
     intoSearchPage() {
-        Common.sleep(3000);
         let searchTag = UiSelector().desc('搜索').isVisibleToUser(true).findOne();
         Log.log(searchTag);
         if (!searchTag) {
-            throw new Error('找不到搜索框，无法进入搜索页');
+            Log.log('找不到搜索框，无法进入搜索页');
+            let tag = UiSelector().text('推荐').findOne().parent();
+            console.log(tag);
+            let res = Gesture.click(tag.bounds().right + tag.bounds().width() / 2, tag.bounds().centerY());
+            Common.sleep(2000 + 1000 * Math.random());
+            return res;
         }
 
         let res = searchTag.click();

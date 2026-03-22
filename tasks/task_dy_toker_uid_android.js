@@ -300,6 +300,7 @@ let task = {
 
 
 while (true) {
+    System.setAccessibilityMode('fast');
     tCommon.openApp();
     try {
         task.run();

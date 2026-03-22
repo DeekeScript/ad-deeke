@@ -286,7 +286,6 @@ const Common = {
 
                 if (k % 50 == 0) {
                     Log.log("对象清理");
-                    System.cleanUp();//清理线程垃圾
                 }
             } catch (e) {
                 this.log("close dialog 异常了");
@@ -330,6 +329,10 @@ const Common = {
         keyword = keyword.split(',');
         let ks = [];
         for (let i in keyword) {
+            if (keyword[i] == '') {
+                continue;
+            }
+
             let tmp = keyword[i];
             if (keyword[i].indexOf('&') !== -1) {
                 tmp = keyword[i].split('&');
@@ -391,7 +394,18 @@ const Common = {
 
     getRemark(remark) {
         return remark.indexOf('#') == 0 || remark.indexOf('＃') == 0;
-    }
+    },
+
+    userHomeBack() {
+        let k = 2;
+        do {
+            this.back();
+            this.log('返回中...');
+            if (k-- <= 0) {
+                break;
+            }
+        } while (this.id('user_name_tv').isVisibleToUser(true).findOne());//昵称ID
+    },
 }
 
 module.exports = Common;

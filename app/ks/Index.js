@@ -6,7 +6,7 @@ let Index = {
      * @param {boolean} isTrue 
      * @returns {boolean}
      */
-    intoHome(isTrue) {
+    intoHome(isTrue = false) {
         let tag = UiSelector().className('androidx.appcompat.app.ActionBar$c').desc(isTrue ? '主页' : '精选').isVisibleToUser(true).findOne();
         if (!tag) {
             throw new Error('未进入Home');
@@ -46,9 +46,14 @@ let Index = {
         }
 
         //开始找视频，并且进入
-        let videoTag = Common.id('container').descContains('作品').filter(v => {
+        let videoTag = Common.id('recycler_view').isVisibleToUser(true).findOne();
+        if (!videoTag) {
+            throw new Error('未找到视频');
+        }
+
+        videoTag = videoTag.children().findOne(UiSelector().descContains('作品').filter(v => {
             return !v.children().findOne(UiSelector().text('直播中'));
-        }).isVisibleToUser(true).findOne();
+        }).isVisibleToUser(true));
         let res = videoTag.click();
         Common.sleep(4000 + 2000 * Math.random());
         return res;

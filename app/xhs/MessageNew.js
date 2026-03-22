@@ -321,7 +321,7 @@ let MessageNew = {
         while (a_count > 0 && k-- > 0) {
             let tags = UiSelector().className('android.view.ViewGroup').isVisibleToUser(true).filter(v => {
                 return v && v.bounds() && v.bounds().left <= 1 && v.bounds().width() >= Device.width() - 1;
-            }).descMatches('[\\s\\S]+').find();
+            }).descMatches(/[\s\S]+/).find();
 
             Log.log('tags', tags.length);
             Log.log('一轮开始进行');

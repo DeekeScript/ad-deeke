@@ -30,11 +30,6 @@ const User = {
      * @returns {boolean}
      */
     intoPrivatePage() {
-        //私密账号，目前可以私信（不确定是否可以禁用私信）
-        // if (UiSelector().text('私密账号').isVisibleToUser(true).findOnce()) {
-        //     Log.log('私密账号');
-        //     return false;
-        // }
         if (this.isBlackUser()) {
             return false;
         }
@@ -130,7 +125,7 @@ const User = {
      * @param {boolean} noBackHome 不返回主界面
      * @returns {boolean}
      */
-    privateMsg(msg, inMsgPage, noBackHome) {
+    privateMsg(msg, inMsgPage = false, noBackHome = false) {
         try {
             if (!inMsgPage && !this.intoPrivatePage()) {
                 return false;
@@ -143,7 +138,7 @@ const User = {
                 throw new Error('找不到发私信输入框');//可能是企业号，输入框被隐藏了
             }
             textTag.setText(msg);
-            Common.sleep(100 + 100 * Math.random());
+            Common.sleep(500 + 500 * Math.random());
 
             let sendTextTag = UiSelector().desc('发送').isVisibleToUser(true).clickable(true).findOne();
             if (!sendTextTag || !sendTextTag.click()) {
@@ -171,7 +166,7 @@ const User = {
      * @returns {string}
      */
     getNickname() {
-        let nicknameTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).descContains('复制名字').findOne() || UiSelector().className('android.widget.TextView').isVisibleToUser(true).findOne();
+        let nicknameTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).descContains('复制名字').findOne() || UiSelector().className('android.widget.TextView').clickable(true).isVisibleToUser(true).findOne();
         if (nicknameTag) {
             return nicknameTag.text();
         }
@@ -200,7 +195,7 @@ const User = {
         let settingTag = UiSelector().desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().text('更多').clickable(true).isVisibleToUser(true).findOne();
         if (!settingTag) {
             Log.log('找不到setting按钮');
-            return false;
+            return null;
         }
 
         settingTag.click();
@@ -261,8 +256,8 @@ const User = {
      */
     getIntroduce() {
         let introduceTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).filter(v => {
-            return v.bounds().top > textTag.bounds().bottom;
-        }).findOne()
+            return v.bounds().left < Device.width() / 4 && v.bounds().width() > Device.width() * 0.7;
+        }).findOne();
         return introduceTag.text();
     },
 
@@ -412,6 +407,7 @@ const User = {
 
         if (focusTag) {
             let res = focusTag.click();
+            statistics.focus();
             Common.sleep(500 + 500 * Math.random());
             return res;
         }
@@ -697,7 +693,7 @@ const User = {
      * @returns 
      */
     focusUserList(type, getMsg, machine, settingData, contents, meNickname) {
-        let account = settingData
+        let account = settingData.account;
         let tag = type == 0 ? this.getFocusTag() : this.getFansTag();
         Common.click(tag);
         Common.sleep(2000 + 1000 * Math.random());
@@ -841,7 +837,7 @@ const User = {
         Common.sleep(1000 + 1000 * Math.random());
 
         let nickTag = Common.id('root_layout').filter(v => {
-            return v.children().findOne(UiSelector().text('DeekeScript').isVisibleToUser(true));
+            return v.children().findOne(UiSelector().text(keyword).isVisibleToUser(true));
         }).isVisibleToUser(true).findOne();
 
         Log.log('nickTag', keyword, nickTag);
@@ -869,9 +865,8 @@ const User = {
         Common.sleep(2000 + 1000 * Math.random());
         let contents = [];
         while (true) {
-            let containers = containers = Common.id('root_layout').isVisibleToUser(true).find();
+            let containers = Common.id('root_layout').isVisibleToUser(true).find();
             if (containers.length === 0) {
-                errorCount++;
                 Log.log('containers为0');
             }
 

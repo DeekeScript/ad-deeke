@@ -51,7 +51,7 @@ let task = {
                 if (DyVideo.isLiving()) {
                     Log.log('直播');
                     tCommon.sleep(2000 + Math.random() * 2000);
-                    DyVideo.next(true);
+                    DyVideo.next();
                     tCommon.sleep(2000);
                     continue;
                 }
@@ -62,7 +62,7 @@ let task = {
                 if (machine.get('task_dy_search_vertical_' + nickname + "_" + title, 'bool')) {
                     Log.log('重复视频');
                     tCommon.sleep(2000 + Math.random() * 2000);
-                    DyVideo.next(true);
+                    DyVideo.next();
                     tCommon.sleep(2000);
                     continue;
                 }
@@ -90,7 +90,7 @@ let task = {
 
                 //看看是不是广告，是的话，不操作作者
                 if (DyVideo.viewDetail()) {
-                    DyVideo.next(true);
+                    DyVideo.next();
                 } else {
                     Log.log('不是广告，准备进入主页');
                 }
@@ -127,7 +127,7 @@ let task = {
 
                 machine.set('task_dy_search_vertical_' + nickname + "_" + title, true);
                 this.contents.push(nickname + "_" + title);
-                DyVideo.next(true);
+                DyVideo.next();
                 tCommon.sleep(2000);
                 noNicknameCount = 0;
             } catch (e) {
@@ -137,9 +137,14 @@ let task = {
                         Log.log('多次退出未解决问题');
                         break;
                     }
-                    tCommon.back();
-                    tCommon.sleep(500);
-                    DyVideo.next(true);
+
+                    if (!UiSelector().className('android.widget.TextView').text('搜索').findOne()) {
+                        Log.log('评论窗口');//否则可能就是广告窗口，直接滑动来调整异常
+                        tCommon.back();
+                        tCommon.sleep(500);
+                    }
+
+                    DyVideo.next();
                     tCommon.sleep(2000);
                 }
                 continue;

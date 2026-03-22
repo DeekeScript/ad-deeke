@@ -202,10 +202,6 @@ while (true) {
     try {
         let r = task.run(input, kw);
         if (r === 'exit') {
-            if (thr) {
-                tCommon.sleep(3000);
-                FloatDialogs.show('找不到用户，停止执行');
-            }
             break;
         }
 

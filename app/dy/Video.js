@@ -6,23 +6,18 @@ const Video = {
      * 滑动视频  （非fast模式下运行，否则视频划不动）
      * @returns {boolean}
      */
-    next(fast) {
+    next() {
         //推荐页面滑动视频
-        if (fast) {
-            System.setAccessibilityMode('!fast');
-        }
-        let tag = UiSelector().id('com.ss.android.ugc.aweme:id/viewpager').desc('视频').scrollable(true).isVisibleToUser(true).findOne();
-        if (!tag) {
-            tag = UiSelector().id('com.ss.android.ugc.aweme:id/viewpager').filter(v => {
-                //注意，这里的过滤，防止左滑进入用户页面
-                return v.bounds().height() < Device.height();
-            }).scrollable(true).className('androidx.viewpager.widget.ViewPager').isVisibleToUser(true).findOne();
-        }
-        let res = tag.scrollForward();
-        if (fast) {
-            System.setAccessibilityMode('fast');
-        }
-        return res;
+        let w = Device.width();
+        let h = Device.height();
+
+        let x = w * (0.45 + Math.random() * 0.1);
+        let startY = h * (0.80 + Math.random() * 0.05);
+        let endY = h * (0.20 + Math.random() * 0.05);
+
+        let duration = 250 + Math.random() * 150;
+
+        return Gesture.swipe(x, startY, x, endY, duration);
     },
 
     /**
@@ -219,8 +214,9 @@ const Video = {
     getAtNickname() {
         let tag = this.getTitleTag();
         if (!tag) {
-            return false;
+            return null;
         }
+
         return this.getTitleTag().text().replace('@', '');
     },
 
@@ -256,7 +252,7 @@ const Video = {
 
     /**
      * 是否直播中
-     * @returns {string}
+     * @returns {boolean}
      */
     isLiving() {
         //两种方式，一种是屏幕上展示，一种是头像
@@ -278,7 +274,8 @@ const Video = {
      * @returns {boolean}
      */
     viewDetail() {
-        let tags = UiSelector().descMatches('(查看|了解详情)').isVisibleToUser(true).findOne() || UiSelector().textMatches('(查看|了解详情)').isVisibleToUser(true).findOne();
+        let tags = UiSelector().descMatches(/(查看|了解详情)/).isVisibleToUser(true).findOne() || UiSelector().textMatches(/(查看|了解详情)/).isVisibleToUser(true).findOne();
+        Log.log('广告', tags);
         if (tags) {
             return true;
         }
@@ -304,10 +301,17 @@ const Video = {
      * @returns {boolean}
      */
     intoLocalUserPage() {
-        let nicknameTag = this.getAvatarTag();
+        let nicknameTag = this.getTitleTag();
         Log.log(nicknameTag);
         let res = nicknameTag.click();
         Common.sleep(3000 + Math.random() * 1000);
+        let closeTag = UiSelector().className('android.widget.Button').desc('关闭').isVisibleToUser(true).findOne();
+        if (closeTag) {
+            Common.log('关闭对话弹窗');
+            closeTag.click();
+            Common.sleep(1000 + Math.random() * 1000);
+        }
+
         statistics.viewUser();//目标视频数量加1
         return res;
     },
@@ -326,10 +330,7 @@ const Video = {
     * @returns {string}
     */
     getDistanceTag() {
-        let tag = UiSelector().descMatches('[m|公里]').filter(v => {
-            return !isNaN(v.desc().substring(0, 1));
-        }).isVisibleToUser(true).findOne();
-
+        let tag = UiSelector().descMatches(/\d+(m|公)/).isVisibleToUser(true).findOne();
         console.log("同城--", tag ? '1' : '0', typeof (tag));
         if (tag) {
             console.log("同城--", tag);
@@ -413,7 +414,7 @@ const Video = {
 
     /**
      * 获取视频的详细信息
-     * @param {number} isCity 
+     * @param {boolean} isCity 
      * @param {object} params 
      * @returns {object}
      */
@@ -483,7 +484,7 @@ const Video = {
             Common.sleep(2000);
         }
 
-        let containers = UiSelector().descMatches('(视频|图文)').className('android.view.View').filter(v => {
+        let containers = UiSelector().descMatches(/(视频|图文)/).className('android.view.View').filter(v => {
             return v.desc().indexOf('置顶') === -1;
         }).clickable(true).isVisibleToUser(true).find();
         let videoIndex = 0;
@@ -496,7 +497,7 @@ const Video = {
                 let zanCount = parseInt(containers[i].desc().split('点赞数')[1]);
                 if (zanCount < baseZanCount) {
                     baseZanCount = zanCount;
-                    videoIndex = i;
+                    videoIndex = parseInt(i);
                 }
             }
 
@@ -526,7 +527,7 @@ const Video = {
      * @returns {boolean}
      */
     videoSlow() {
-        //Common.sleep(1000 + Math.random() * 1000);
+        Common.sleep(1000 + Math.random() * 500);
         return true;
     },
 }

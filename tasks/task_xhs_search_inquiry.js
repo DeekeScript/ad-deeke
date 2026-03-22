@@ -140,7 +140,7 @@ let task = {
                 continue;
             }
             Log.log('滑动');
-            tCommon.swipe(0, 0.85);
+            tCommon.swipeSearchWorkResultOp();
             tCommon.sleep(3000 + 3000 * Math.random());
         }
     },
@@ -229,7 +229,16 @@ let task = {
             }
 
             Log.log('下一页评论');
-            XhsWork.commentListSwipe();
+            if (!XhsWork.commentListSwipe()) {
+                tCommon.sleep(1000);
+                Log.log('评论扫描完了，已到底');
+                if (isVideo) {
+                    tCommon.back();
+                    tCommon.sleep(500 + 500 * Math.random());
+                }
+
+                break;
+            }
             tCommon.sleep(1500 + 500 * Math.random());
         }
     },
@@ -251,6 +260,11 @@ if (!kws) {
     System.exit();
 }
 
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    System.exit();
+}
+
 task.count = machine.get('task_xhs_search_inquiry_count', 'int');
 
 Log.log("count: " + task.count);
@@ -263,6 +277,7 @@ if (!task.count) {
 tCommon.openApp();
 
 while (true) {
+    System.setAccessibilityMode('fast');
     task.log();
     try {
         let res = task.run(keyword, kws);

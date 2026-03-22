@@ -170,11 +170,11 @@ let task = {
                         count++;
                         Log.log('操作次数：' + count + "/" + config.runTimes);
                     }
-                    
+
                     DyCommon.sleep(config.homeWait * 1000);//主页停留
                     DyCommon.back();
                     DyCommon.sleep(500, 500);
-                    if (DyCommon.aId('text1').descContains('粉丝').isVisibleToUser(true).findOne()) {
+                    if (DyCommon.aId('text1').descContains('粉丝').isVisibleToUser(true).findOne() || DyCommon.aId('text1').textContains('粉丝').isVisibleToUser(true).findOne()) {
                         Log.log("在列表页面了");
                     } else {
                         DyCommon.back();
@@ -189,7 +189,7 @@ let task = {
                     return true;
                 }
             } catch (e) {
-                if (!DyCommon.aId('text1').descContains('粉丝').isVisibleToUser(true).findOne()) {
+                if (!DyCommon.aId('text1').descContains('粉丝').isVisibleToUser(true).findOne() && !DyCommon.aId('text1').textContains('粉丝').isVisibleToUser(true).findOne()) {
                     Log.log("找不到标签，返回了");
                     DyCommon.back();
                     DyCommon.sleep(2000);

@@ -27,34 +27,29 @@ let Live = {
      * @returns {UiObject[]}
      */
     getUserTags() {
-        let parent = UiSelector().className('com.lynx.tasm.behavior.ui.swiper.ViewPager').isVisibleToUser(true).findOnce();
+        let parent = UiSelector().className('androidx.recyclerview.widget.RecyclerView').isVisibleToUser(true).findOnce();
         if (!parent) {
             Log.log('找不到观众列表');
             FloatDialogs.toast('找不到观众列表');
             return [];
         }
 
-        let tags = parent.children().find(UiSelector().className('android.view.View').filter((v) => {
-            return v && v.bounds().left < 10 && v.bounds().width() >= Device.width() - 10 && v.getChildCount() == 0 && v.bounds().top < Device.height();
-        }));
+        let tags = parent.children().find(UiSelector().className('android.widget.FrameLayout').isVisibleToUser(true));
         return tags;
     },
 
     /**
      * 获取用户列表控件
-     * @returns {UiObject[]}
+     * @returns {Object[]}
      */
     getUsers() {
         let tags = this.getUserTags();
-        let users = [];
-        for (let i in tags) {
-            users.push({
-                tag: tags[i],
-            });
-            Log.log(tags[i]);
+        if (tags.length === 0) {
+            System.sleep(2000);
+            tags = this.getUserTags();
         }
         Log.log("粉丝列表：" + tags.length);
-        return users;
+        return tags;
     },
 
     /**
@@ -65,8 +60,10 @@ let Live = {
     getNickname() {
         let userTag = UiSelector().className('android.widget.Button').isVisibleToUser(true).filter(v => {
             return v.desc() && v.bounds().height() < Device.height() / 10;
+        }).findOne() || UiSelector().className('android.widget.Button').isVisibleToUser(true).filter(v => {
+            return v.text() && v.bounds().height() < Device.height() / 10;
         }).findOne();
-        return userTag ? userTag.desc() : '';
+        return userTag ? (userTag.desc() || userTag.text() || '') : '';
     },
 
     /**
@@ -89,13 +86,9 @@ let Live = {
      * @returns {boolean}
      */
     swipeFansList() {
-        let tag = UiSelector().className('com.lynx.tasm.behavior.ui.swiper.ViewPager').isVisibleToUser(true).findOne();
-        if (!tag) {
-            return false;
-        }
-        let container = tag.children().findOne(UiSelector().className('android.widget.LinearLayout').filter(v => {
+        let container = UiSelector().className('androidx.recyclerview.widget.RecyclerView').filter(v => {
             return v.bounds().top > Device.height() / 3;
-        }));
+        }).scrollable(true).findOne();
 
         if (!container) {
             return false;

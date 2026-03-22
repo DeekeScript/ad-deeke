@@ -1,81 +1,37 @@
 let Common = require('app/wx/Common.js');
-let V = require('version/WxV.js');
-
 
 let Index = {
     intoHome() {
-        let tag = Common.id(V.Index.home[4]).text(V.Index.home[0]).findOne();
+        let tag = Common.id('icon_tv').text('微信').findOne();
         if (!tag || !tag.parent() || !tag.parent().isVisibleToUser()) {
             throw new Error('未进入主页');
         }
 
-        Common.click(tag);
+        Common.click(tag, 0.2);
         Common.sleep(3000 + 2000 * Math.random());
         return true;
     },
 
     intoVideo() {
-        let tag = Common.id(V.Index.home[4]).text(V.Index.home[2]).findOne();
-        if (!tag || !tag.parent() || !tag.parent().isVisibleToUser()) {
-            throw new Error('未进入主页');
-        }
-
-        Common.click(tag);
-        Log.log('点击 朋友');
-        Common.sleep(2000 + 1000 * Math.random());
-
+        this.intoFund();
         //开始点击同城
-        let videoTag = Common.aId(V.Index.intoVideo[0]).isVisibleToUser(true).text(V.Index.intoVideo[1]).findOne();
+        let videoTag = Common.aId('title').isVisibleToUser(true).text('视频号').findOne();
         if (!videoTag) {
-            Log.log(Common.id(V.Index.intoVideo[0]).find());
             throw new Error('找不到视频号入口');
         }
 
-        Common.click(videoTag);
+        Common.click(videoTag, 0.2);
         Log.log('进入 视频号');
         Common.sleep(4000 + 2000 * Math.random());
-        let iKonw = Common.id(V.Video.close[0]).textContains(V.Video.close[1]).isVisibleToUser(true).findOne();
+        let iKonw = Common.id('b1k').textContains('我知道了').isVisibleToUser(true).findOne();
         if (iKonw) {
-            Common.click(iKonw);
+            Common.click(iKonw, 0.2);
             Common.sleep(2000 + 1000 * Math.random());
         }
 
-        iKonw = UiSelector().className('android.widget.Button').text(V.Video.close[1]).isVisibleToUser(true).findOne();
+        iKonw = UiSelector().className('android.widget.Button').text('我知道了').isVisibleToUser(true).findOne();
         if (iKonw) {
-            Common.click(iKonw);
-            Common.sleep(2000 + 1000 * Math.random());
-        }
-    },
-
-    intoLocal() {
-        let tag = Common.id(V.Index.home[4]).text(V.Index.home[2]).findOne();
-        if (!tag || !tag.parent() || !tag.parent().isVisibleToUser()) {
-            throw new Error('未进入主页');
-        }
-
-        Common.click(tag);
-        Common.sleep(2000 + 1000 * Math.random());
-
-        //开始点击同城
-        let localTag = Common.aId(V.Index.local[0]).isVisibleToUser(true).text(V.Index.local[1]).findOne();
-        if (!localTag) {
-            Log.log(Common.id(V.Index.local[0]).find());
-            throw new Error('找不到同城');
-        }
-
-        Common.click(localTag);
-        Common.sleep(4000 + 2000 * Math.random());
-
-        //开始找视频，并且进入
-        let container = Common.id(V.Index.local[2]).findOne();
-        if (!container) {
-            throw new Error('找不到同城视频');
-        }
-        Common.click(container);
-        Common.sleep(4000 + 2000 * Math.random());
-        let iKonw = Common.id(V.Video.close[0]).textContains(V.Video.close[1]).isVisibleToUser(true).findOne();
-        if (iKonw) {
-            Common.click(iKonw);
+            Common.click(iKonw, 0.2);
             Common.sleep(2000 + 1000 * Math.random());
         }
     },
@@ -93,12 +49,12 @@ let Index = {
     },
 
     intoFund() {
-        let tag = Common.id(V.Index.home[4]).text(V.Index.home[2]).findOne();
+        let tag = Common.id('icon_tv').text('发现').findOne();
         if (!tag || !tag.parent() || !tag.parent().isVisibleToUser()) {
             throw new Error('未进入主页');
         }
 
-        Common.click(tag);
+        Common.click(tag, 0.2);
         Common.sleep(2000 + 1000 * Math.random());
     }
 }

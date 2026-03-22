@@ -85,7 +85,7 @@ while (true) {
     task.log();
     try {
         //开启线程  自动关闭弹窗
-        if (task.run(accounts, storage.get('task_xhs_toker_uid_interval', 'int'), storage.getArray('task_xhs_toker_uid_op'))) {
+        if (task.run(accounts, storage.get('task_xhs_toker_uid_interval', 'int'), ["1"])) {
             FloatDialogs.show('提示', '执行完成');
             break;
         }

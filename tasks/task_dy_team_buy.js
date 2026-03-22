@@ -33,6 +33,48 @@ let task = {
         Log.setFile(allFile);
     },
 
+    intoShop(name) {
+        let tag = UiSelector().clickable(true).descContains('团购').findOne();
+        tag.click();
+        tCommon.sleep(5000);
+
+        tag = tCommon.id('et_search_kw').isVisibleToUser(true).findOne();
+        tag.parent().click();
+        tCommon.sleep(1500);
+
+        tag = UiSelector().className('android.widget.EditText').filter(v => {
+            return v.isEditable();
+        }).isVisibleToUser(true).findOne();
+        tag.setText(name);
+        tCommon.sleep(1000);
+
+        tag = UiSelector().desc('搜索').isVisibleToUser(true).findOne();
+        tCommon.click(tag);
+        tCommon.sleep(4000);
+
+        tag = UiSelector().descContains(name).isVisibleToUser(true).findOne();
+        if (!tag) {
+            tag = UiSelector().descContains(name.substring(0, 3)).isVisibleToUser(true).findOne();
+        }
+        if (!tag) {
+            tag = UiSelector().className('android.view.ViewGroup').filter(v => {
+                return !!v.desc();
+            }).isVisibleToUser(true).findOne();
+        }
+        tCommon.click(tag);
+        tCommon.sleep(4000);
+
+        let imageFile = Images.capture();
+        let arr = Images.findTextPosition(imageFile, "条评价");
+        console.log(arr);
+        if (arr.length == 0) {
+            arr = Images.findTextPosition(imageFile, "条评");
+        }
+        Gesture.click(arr[0].left + 10 + 10 * Math.random(), arr[0].centerY());
+        tCommon.sleep(4000);
+        return true;
+    },
+
     includesKw(str, kw) {
         for (let i in kw) {
             if (str.includes(kw[i])) {
@@ -43,6 +85,7 @@ let task = {
     },
 
     testTask() {
+        let shopName = machine.get('task_dy_team_buy_name');
         let zanRate = machine.get('task_dy_team_buy_zan_rate', 'int');
         let privateRate = machine.get('task_dy_team_buy_private_rate', 'int');
         let commentRate = machine.get('task_dy_team_buy_comment_rate', 'int');
@@ -56,19 +99,13 @@ let task = {
         let containers = [];
         let rpContainers = [];
 
+        this.intoShop(shopName);
+        //System.setAccessibilityMode('!fast');//非快速模式
         while (true) {
             try {
                 //底部分享评论部分，如果低于这个top，则不操作
-                let bottomCommentTag = UiSelector().className('com.lynx.tasm.behavior.ui.LynxFlattenUI').descContains('分享真实体验').findOne();
-                Log.log('bottomCommentTag', bottomCommentTag);
-                let bottom = Device.height();
-                if (bottomCommentTag) {
-                    bottom = bottomCommentTag.bounds().top;
-                }
-
-                let tags = UiSelector().className('com.lynx.tasm.behavior.ui.view.UIView').textMatches("[\\s\\S]+").clickable(true).filter(v => {
-                    return v && v.bounds() && v.bounds().width() == Device.width() && v.bounds().height() > 0 && v.bounds().left == 0 && v.bounds().top + 250 < Device.height();
-                }).find();
+                let parentTag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').isVisibleToUser(true).findOne();
+                let tags = parentTag.children().find(UiSelector().className('android.widget.FrameLayout').isVisibleToUser(true));
 
                 if (tags.length == 0) {
                     Log.log('无内容');
@@ -77,48 +114,33 @@ let task = {
                     return true;
                 }
 
-                if (containers.length >= 3) {
-                    if (tags[0].text() == containers[0] && tags[0].text() == containers[1]) {
-                        Log.log('完成');
-                        return true;
+                for (let i in tags) {
+                    let textTag = tags[i].children().findOne(UiSelector().descMatches(/[\s\S]+/));
+                    if (!textTag || !textTag.isVisibleToUser()) {
+                        console.log('没有内容');
+                        continue;
                     }
 
-                    containers.shift();
-                }
-
-                containers.push(tags[0].text());
-
-                for (let i in tags) {
-                    if (rpContainers.indexOf(tags[i].text()) != -1) {
+                    if (rpContainers.indexOf(textTag.desc()) != -1) {
                         Log.log('重复');
                         continue;
                     }
 
-                    rpContainers.push(tags[i].text());
+                    rpContainers.push(textTag.desc());
                     if (rpContainers.length > 20) {
                         rpContainers.shift();
                     }
 
-                    Log.log('内容：', tags[i].text());
-                    if (tags[i].text() && (tags[i].text().indexOf('**') !== -1 || tags[i].text().indexOf('帮助更多用户决策') !== -1) || !tags[i].desc()) {
-                        Log.log('隐私或者底部');
-                        continue;
-                    }
+                    Log.log('内容：', textTag.desc());
 
                     Log.log('进入用户中心', tags[i], tags[i].bounds().top, tags[i].bounds().height());
-                    // Gesture.click(tags[i].bounds().left + 20 * Math.random(), tags[i].bounds().top + 20 * Math.random());
-                    let intoHeader = UiSelector().className('com.lynx.tasm.ui.image.FlattenUIImage').filter(v => {
-                        return v && v.bounds().left > tags[i].bounds().left && v.bounds().top > tags[i].bounds().top && v.bounds().left < Device.width() / 2;
-                    }).findOne();
 
-                    if (intoHeader.bounds().top + intoHeader.bounds().height() >= bottom) {
-                        Log.log('头像位置不对，滑动一下');
-                        continue;
-                    }
+                    let x = tags[i].bounds().left + (textTag.bounds().left - tags[i].bounds().left) / 2;
+                    let y = tags[i].bounds().top + (textTag.bounds().top - tags[i].bounds().top) / 2 * 0.6;
+                    tCommon.click(x, y);
 
-                    tCommon.click(intoHeader);
                     tCommon.sleep(3000 + 1000 * Math.random());
-                    intoUser = UiSelector().textContains('评价数').descContains('评价数').isVisibleToUser(true).findOne() ? true : false;
+                    let intoUser = UiSelector().textContains('评价数').descContains('评价数').isVisibleToUser(true).findOne() ? true : false;
                     if (!intoUser) {
                         Log.log('没有进入到主页，可能是设置隐私了-1');
                         continue;
@@ -258,17 +280,34 @@ let task = {
     }
 }
 
+if (!machine.get('task_dy_team_buy_name')) {
+    FloatDialogs.show('温馨提示', '团购商家名称不能为空');
+    System.exit();
+    tCommon.sleep(3000);
+}
+
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    System.exit();
+    tCommon.sleep(3000);
+}
+
 //开启线程  自动关闭弹窗
-System.setAccessibilityMode('!fast');//非快速模式
+System.setAccessibilityMode('fast');//快速模式
 Engines.executeScript("unit/dialogClose.js");
 
 task.log();
-try {
-    task.run();
-    tCommon.sleep(3000);
-} catch (e) {
-    Log.log(e);
-    tCommon.closeAlert(1);
-    tCommon.backHome(10);
+while (true) {
+    try {
+        tCommon.openApp();
+        if (task.run()) {
+            break;
+        }
+        tCommon.sleep(3000);
+    } catch (e) {
+        Log.log(e);
+        tCommon.closeAlert(1);
+        tCommon.backHome(10);
+    }
 }
 FloatDialogs.show('提示', '已完成');

@@ -21,13 +21,13 @@ let task = {
 }
 
 //开启线程  自动关闭弹窗
+System.setAccessibilityMode('fast');//快速模式
 Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
     task.log();
     try {
         tCommon.openApp();//兜底，防止跑到外面去了
-        System.setAccessibilityMode('fast');//快速模式
         let code = task.run();
         if (code === 101) {
             FloatDialogs.toast('不在任务时间，休息一会儿');
@@ -47,6 +47,7 @@ while (true) {
     } catch (e) {
         Log.log(e);
         tCommon.closeAlert(1);
+        System.setAccessibilityMode('fast');//快速模式
         tCommon.backHome();
     }
 }

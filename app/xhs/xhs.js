@@ -113,7 +113,7 @@ let xhs = {
 
                         //笔记需要筛选IP
                         if (this.config.toker_view_video_ip) {
-                            let ipTag = UiSelector().className('android.view.View').descMatches('\\d+[\\u4e00-\\u9fa5]+$').findOne();
+                            let ipTag = UiSelector().className('android.view.View').descMatches(/\d+[\u4e00-\u9fa5]+$/).findOne();
                             if (!ipTag) {
                                 Log.log('IP不符合');
                                 continue;
@@ -144,12 +144,14 @@ let xhs = {
                         Log.log('评论内容：', msg);
                         if (msg) {
                             Work.msg(type, msg);
-                            Common.sleep(500 + 1000 * Math.random());
+                            Common.sleep(2000 + 2000 * Math.random());
                         }
                     }
 
                     //点赞数量
-                    if (Work.getCommentCount(type)) {
+                    let commentCount = Work.getCommentCount(type);
+                    Common.log('评论数', commentCount);
+                    if (commentCount > 0) {
                         Log.log('点赞评论');
                         Work.zanComment(type, 5);//随机赞5个
                     }
@@ -166,8 +168,8 @@ let xhs = {
                 }
 
                 Log.log('滑动');
-                Index.swipe(this.config.isCity);
-                Common.sleep(2000 + 2000 * Math.random());
+                Index.swipe();
+                Common.sleep(3000 + 2000 * Math.random());
             } catch (e) {
                 Log.log('异常了', e);
                 if (!UiSelector().className('android.widget.ImageView').desc('菜单').isVisibleToUser(true).findOne()) {

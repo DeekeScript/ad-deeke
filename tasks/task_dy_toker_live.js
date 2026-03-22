@@ -97,26 +97,22 @@ let task = {
                 }
 
                 for (let k in users) {
-                    if (k == 0) {
+                    Log.log('index', ignoreIndex, users[k]);
+                    if (parseInt(k) == 0) {
                         continue;
                     }
-                    Log.log('index', ignoreIndex, users[k].tag);
+
                     if (ignoreIndex++ <= preIndex) {
                         continue;
                     }
 
-                    if (!tCommon.clickRange(users[k].tag, onlineTag.bounds().top, users[0].tag.bounds().top)) {
+                    if (!tCommon.click(users[k], 0.25)) {
                         Log.log('边界超出');
                         continue;
                     }
 
                     tCommon.sleep(2000 + 1000 * Math.random());
                     let nickname = DyLive.getNickname();
-                    if(!nickname){
-                        tCommon.sleep(1000);
-                        nickname = DyLive.getNickname();
-                        Log.log('再次获取昵称');
-                    }
 
                     if (nickname == '') {
                         Log.log('没有点击成功');
@@ -199,7 +195,7 @@ let task = {
 
                 Log.log('下一页');
                 DyLive.swipeFansList();
-                tCommon.sleep(2000);
+                tCommon.sleep(3000 + 1000 * Math.random());
             }
             FloatDialogs.toast('休眠2分钟后继续执行');
             tCommon.sleep(120 * 1000);//休眠2分钟

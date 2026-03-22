@@ -54,7 +54,7 @@ let task = {
     },
 }
 
-
+task.log();
 let settingData = machine.getSearchUserSettingRate();//commentRate
 Log.log('settingData', settingData);
 settingData.keyword = settingData.keyword.replace(/\s+/g, '')

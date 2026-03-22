@@ -177,6 +177,8 @@ let Search = {
         tCommon.sleep(4000 + 2000 * Math.random());
 
         let imageFile = Images.capture();
+        console.log(imageFile);
+        tCommon.sleep(1000);
         let arr;
         if (type == 2) {
             arr = Images.findTextPosition(imageFile, "用户");

@@ -57,12 +57,12 @@ if (!index) {
     System.exit();
 }
 
-System.setAccessibilityMode('!fast');//非快速模式 （需要进入视频）
 tCommon.openApp();
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 
 while (true) {
+    System.setAccessibilityMode('!fast');//快速模式
     task.log();
     try {
         let res = task.run(keyword, index);

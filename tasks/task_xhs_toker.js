@@ -47,6 +47,12 @@ let config = {
     toker_run_hour: storage.getArray('toker_xhs_run_hour'),//运行时间
 };
 
+//点赞点赞识别需要
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    System.exit();
+}
+
 System.setAccessibilityMode('fast');
 while (true) {
     task.log();
@@ -71,7 +77,6 @@ while (true) {
         Common.sleep(3000);
     } catch (e) {
         Log.log(e);
-        Common.cleanUp();
         Common.backHome();
     }
 }

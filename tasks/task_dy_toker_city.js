@@ -49,6 +49,7 @@ while (true) {
     } catch (e) {
         Log.log(e);
         tCommon.closeAlert(1);
+        System.setAccessibilityMode('fast');//快速模式
         tCommon.backHome();
     }
 }

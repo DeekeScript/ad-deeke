@@ -77,6 +77,7 @@ let task = {
 
         let res;
         if (!hasRemark) {
+            tCommon.sleep(1500);
             if (intoUserFansList) {
                 res = DyUser.focusListSearch(douyin);
             } else {
@@ -98,7 +99,7 @@ let task = {
             let commentCount = DyVideo.getCommentCount();
             if (commentCount === 0 || this.contents.includes(title)) {
                 Log.log('下一个视频');
-                DyVideo.next(true);
+                DyVideo.next();
                 tCommon.sleep(3000);
                 continue;
             }
@@ -194,7 +195,7 @@ let task = {
             }
             Log.log('下一个视频');
             this.contents.push(title);
-            if (!DyVideo.next(true)) {
+            if (!DyVideo.next()) {
                 break;
             }
             tCommon.sleep(4000 + Math.random() * 2000);

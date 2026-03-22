@@ -13,7 +13,7 @@ let Message = {
     search(account) {
         //首次打开抖音进入消息，拿不到desc信息，目前这样尝试
         let searchTag = UiSelector().className('android.widget.Button').desc('搜索').isVisibleToUser(true).findOnce() || UiSelector().className('android.widget.Button').clickable(true).isVisibleToUser(true).filter(v => {
-            return v.bounds().left > Device.width() / 2 && v.bounds().top < Device.height() / 5;
+            return v.bounds().left > Device.width() / 2 && v.bounds().top < Device.height() / 10;
         }).findOne();
         searchTag.click();
         Common.sleep(1500 + 500 * Math.random());
@@ -46,29 +46,37 @@ let Message = {
             }
 
             let contains = Common.id('content_container').descContains(account).isVisibleToUser(true).find();
+            if (contains.length == 0) {
+                contains = UiSelector().className('android.widget.TextView').textContains(account).filter(v => {
+                    return v.id() !== 'com.ss.android.ugc.aweme:id/keyword_tv';
+                }).isVisibleToUser(true).find();
+            }
+
             if (contains.length === 0) {
                 throw new Error('找不到群聊-2');
             }
 
             for (let i in contains) {
-                if (isNaN(i)) {
-                    continue;
-                }
-
                 if (contains[i].bounds().top < groupTag.bounds().top) {
                     Log.log('非群聊');
                     continue;
                 }
 
                 allRp++;
-                if (contents.includes(contains[i].desc())) {
+                if (contents.includes(contains[i].desc() || contains[i].text())) {
                     rp++;
                     continue;
                 }
 
-                contents.push(contains[i].desc());
+                contents.push(contains[i].desc() || contains[i].text());
                 if (contents.length === index) {
-                    contains[i].click();
+                    if (contains[i].isClickable()) {
+                        contains[i].click();
+                    } else {
+                        Common.click(contains[i], 0.25);
+                    }
+
+                    Common.log('点击的入口', contains[i]);
                     Common.sleep(3000 + 2000 * Math.random());
                     return true;
                 }
@@ -120,7 +128,7 @@ let Message = {
         Log.log('config', config);
         //每进入这个界面，50%概率控件的“更多”没有出来，暂时这样补救
         let moreTag = UiSelector().className('android.widget.Button').desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.Button').clickable(true).filter(v => {
-            return v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() * 0.75 && v.children().findOne(UiSelector().className('android.widget.ImageView').isVisibleToUser(true));
+            return v.bounds().top < Device.height() / 10 && v.bounds().left > Device.width() * 0.75;
         }).isVisibleToUser(true).findOne();
 
         moreTag.click();
@@ -135,14 +143,15 @@ let Message = {
         let rpContains = [];
         let runIndex = 0;
         while (true) {
-            let contains = UiSelector().id('com.ss.android.ugc.aweme:id/content').clickable(true).isVisibleToUser(true).find();
+            let parentTag = Common.id('recycler_view').isVisibleToUser(true).findOne();
+            let contains = parentTag.children().find(Common.id('title'));
             if (0 == contains.length) {
                 return true;
             }
 
             for (let i in contains) {
                 Log.log('第几个：' + i);
-                rpContains.push(contains[i].desc());
+                rpContains.push(contains[i].text());
                 if (rpContains[0] == rpContains[1]) {
                     rpCount++;
                 } else {
@@ -155,7 +164,7 @@ let Message = {
                 Log.log('rpContains', rpContains, rpCount);
 
                 runIndex++;
-                if (contents.includes(contains[i].desc()) || machineInclude(contains[i].desc())) {
+                if (contents.includes(contains[i].text()) || machineInclude(contains[i].text())) {
                     FloatDialogs.toast('昵称重复，不操作');
                     continue;
                 }
@@ -166,15 +175,14 @@ let Message = {
                 }
 
                 Log.log('点击元素，准备进入个人中心');
-                contains = UiSelector().id('com.ss.android.ugc.aweme:id/content').clickable(true).isVisibleToUser(true).find();
-                contains[i].click();
+                Common.click(contains[i]);
                 Common.sleep(3000 + 2000 * Math.random());
                 statistics.viewUser();
                 let isPrivateAccount = User.isPrivate();
                 if (isPrivateAccount) {
                     Common.back();
-                    machineSet(contains[i].desc());
-                    contents.push(contains[i].desc());
+                    machineSet(contains[i].text());
+                    contents.push(contains[i].text());
                     continue;
                 }
                 Log.log('是否是私密账号：' + isPrivateAccount);
@@ -237,13 +245,13 @@ let Message = {
                         User.privateMsgCard();
                         Common.sleep(500);
                     } else {
-                        User.privateMsg(getMsg(1, contains[i].desc()).msg);
+                        User.privateMsg(getMsg(1, contains[i].text()).msg);
                     }
                     Common.sleep(iBase * config.privateWait);
                 }
-                Log.log('设置已经操作的账号：' + contains[i].desc());
-                machineSet(contains[i].desc());
-                contents.push(contains[i].desc());
+                Log.log('设置已经操作的账号：' + contains[i].text());
+                machineSet(contains[i].text());
+                contents.push(contains[i].text());
                 Common.sleep(300);
                 Common.back();
                 Common.sleep(config.accountWait);
