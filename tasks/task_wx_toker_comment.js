@@ -1,25 +1,42 @@
-let tCommon = require("app/wx/Common");
-let WxIndex = require("app/wx/Index");
-let WxSearch = require("app/wx/Search");
-let WxUser = require("app/wx/User");
-let WxVideo = require("app/wx/Video");
-let WxComment = require("app/wx/Comment");
-let storage = require("common/storage");
-let machine = require("common/machine");
-let baiduWenxin = require("service/baiduWenxin");
-let statistics = require("common/statistics");
+let tCommon = require("../app/wx/Common");
+let WxIndex = require("../app/wx/Index");
+let WxSearch = require("../app/wx/Search");
+let WxUser = require("../app/wx/User");
+let WxVideo = require("../app/wx/Video");
+let WxComment = require("../app/wx/Comment");
+let storage = require("../common/storage");
+let machine = require("../common/machine");
+let baiduWenxin = require("../service/baiduWenxin");
+let statistics = require("../common/statistics");
 
 let task = {
     index: -1,
+    /** @type {string[]} */
     nicknames: [],
+    /**
+     * 
+     * @param {string} input 
+     * @param {string} kw 
+     * @param {number} sleepSecond 
+     * @returns 
+     */
     run(input, kw, sleepSecond) {
         return this.testTask(input, kw, sleepSecond);
     },
 
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+    //type 0 评论，1私信
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
@@ -31,6 +48,12 @@ let task = {
         Log.setFile(allFile);
     },
 
+    /**
+     * 
+     * @param {string} str 
+     * @param {string[]} kw 
+     * @returns 
+     */
     includesKw(str, kw) {
         for (let i in kw) {
             if (str.includes(kw[i])) {
@@ -40,6 +63,13 @@ let task = {
         return false;
     },
 
+    /**
+     * 
+     * @param {any} input 
+     * @param {any} kw 
+     * @param {*} sleepSecond 
+     * @returns 
+     */
     testTask(input, kw, sleepSecond) {
         //首先进入页面
         this.index++;
@@ -163,7 +193,7 @@ let task = {
                     } else {
                         Log.log('无视频，直接操作关注和私信引流');
                         WxUser.focus();
-                        let msg = this.getMsg(1, comments[k].nickname, null, WxUser.getGender());
+                        let msg = this.getMsg(1, comments[k].nickname, undefined, WxUser.getGender());
                         if (msg) {
                             WxUser.privateMsg(msg.msg);
                         }

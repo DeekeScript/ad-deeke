@@ -92,7 +92,7 @@ let Comment = {
     },
 
     getTime() {
-        let timestamp = Math.ceil(Date.parse(new Date()) / 1000);
+        let timestamp = Math.ceil(Date.now() / 1000);
         let incSecond = 0;
 
         let time = this.getTimeTag();
@@ -146,6 +146,10 @@ let Comment = {
         return this.commentCount;
     },
 
+    /**
+     * 
+     * @returns {any}
+     */
     getList() {
         let contains = Common.id('dz_').isVisibleToUser(true).filter(v => {
             if (v && v.bounds()) {
@@ -204,6 +208,9 @@ let Comment = {
     },
     //这里其实使用back最方便
     closeCommentWindow() {
+        if (!Common.id('d4v').textContains('评论').isVisibleToUser(true).findOne()) {
+            return true;
+        }
         Common.back();
         return true;
     },

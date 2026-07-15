@@ -64,7 +64,7 @@ let Comment = {
     /**
      * 是否是作者
      * @param tag
-     * @returns {UiObject}
+     * @returns {boolean}
      */
     isAuthor() {
         return this.tag.children().findOne(UiSelector().text('作者')) ? true : false;
@@ -130,7 +130,7 @@ let Comment = {
      * @returns {string}
      */
     getTime() {
-        let timestamp = Math.ceil(Date.parse(new Date()) / 1000);
+        let timestamp = Math.ceil(Date.now() / 1000);
         let incSecond = 0;
 
         let time = this.getTimeTag();

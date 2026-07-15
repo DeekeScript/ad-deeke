@@ -1,15 +1,23 @@
-let tCommon = require('app/dy/Common.js');
-let DyIndex = require('app/dy/Index.js');
-let DySearch = require('app/dy/Search.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let baiduWenxin = require('service/baiduWenxin.js');
+let tCommon = require('../app/dy/Common.js');
+let DyIndex = require('../app/dy/Index.js');
+let DySearch = require('../app/dy/Search.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
 
 let task = {
     contents: [],
     count: 100,
     fans: 20000,
+    /**
+     * @type {any}
+     */
     params: { clickZan: false, comment: false, },
+    /**
+     * 
+     * @param {any} settingData 
+     * @returns 
+     */
     run(settingData) {
         return this.testTask(settingData);
     },
@@ -21,15 +29,22 @@ let task = {
         Log.setFile(allFile);
     },
 
+    
     //type 0 评论，1私信
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
-        if (storage.getMachineType() === 1) {
-            if (storage.get('setting_baidu_wenxin_switch',  'bool')) {
-                return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
-            }
-            return machine.getMsg(type) || false;//永远不会结束
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} title
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
+        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
+        return machine.getMsg(type) || false;//永远不会结束
     },
 
     decCount() {
@@ -37,6 +52,11 @@ let task = {
         return --this.count;
     },
 
+    /**
+     * 
+     * @param {any} settingData 
+     * @returns 
+     */
     testTask(settingData) {
         //首先进入点赞页面
         DyIndex.intoHome();
@@ -45,9 +65,12 @@ let task = {
         tCommon.sleep(3000);
         this.params.settingData = settingData;
         return DySearch.userList(
+            /** @ts-ignore */
             (v) => machine.get('task_dy_search_user_' + v, 'bool'),
             () => this.decCount(),
+            /** @ts-ignore */
             (v) => machine.set('task_dy_search_user_' + v, true),
+            /** @ts-ignore */
             (v, title, age, gender) => this.getMsg(v, title, age, gender),
             this.params
         );

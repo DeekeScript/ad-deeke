@@ -1,6 +1,6 @@
-let tCommon = require("app/dy/Common");
-let DyIndex = require('app/dy/Index.js');
-let DyVideo = require('app/dy/Video.js');
+let tCommon = require("../app/dy/Common");
+let DyIndex = require('../app/dy/Index.js');
+let DyVideo = require('../app/dy/Video.js');
 
 let task = {
     rp: 0,
@@ -32,10 +32,11 @@ let task = {
             if (isZan) {
                 DyVideo.clickZan();
             }
-            tCommon.sleep(1500 + 500 * Math.random());
+            tCommon.sleep(2000 + 100 * Math.random());
             if (!DyVideo.next()) {
                 return true;
             }
+            tCommon.sleep(1500 + 1000 * Math.random());
         }
     },
 }

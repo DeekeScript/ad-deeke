@@ -1,4 +1,4 @@
-let statistics = require('common/statistics.js');
+let statistics = require('../common/statistics.js');
 
 var deekeStatistics = {
     dataList() {

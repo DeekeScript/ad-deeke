@@ -12,6 +12,7 @@ let storage = {
     },
 
     getSpeech() {
+        /** @type {any} */
         let data = Storage.get('deekeScript:speech:default');
         console.log("speech内容");
         console.log(data);
@@ -20,62 +21,25 @@ let storage = {
         }
 
         data = JSON.parse(data);
-        return data && data.speechLists;
-    },
-
-    getTask() {
-        let data = Storage.get('task');
-        if (!data) {
-            return [];
-        }
-
-        data = JSON.parse(data);
-        return data;
-    },
-
-
-    removeTaskDetail(i) {
-        let data = this.getTaskDetail();
-        if (data.length === 0) {
-            return true;
-        }
-
-        data.splice(i, 1);
-        Storage.put('taskDetail', JSON.stringify(data));
-    },
-
-    addTaskDetail(item) {
-        let data = this.getTaskDetail();
-        data.push(item);
-        Storage.put('taskDetail', JSON.stringify(data));
-        return data;
-    },
-
-    getTaskDetail(taskIndex) {
-        let data = Storage.get('taskDetail');
-        if (!data || data.length === 0) {
-            return [];
-        }
-
-        data = JSON.parse(data);
-        //Log.log(taskIndex, data);
-        if (taskIndex) {
-            for (let i in data) {
-                if (data[i].taskIndex === taskIndex) {
-                    //Log.log(data[i]);
-                    return data[i];
-                }
+        let list = data && data.speechLists;
+        if (!list) return [];
+        // 保证每条话术带启用状态（老数据无 enabled 时视为启用）
+        let res = [];
+        for (let i in list) {
+            if (list[i].enabled !== false) {
+                res.push(list[i]);
             }
-            return {};
         }
-        return data;
-    },
-
-    getMobileStopType() {
-        return Storage.get('mobileStopType');
+        return res;
     },
 
     //尽量 文件名 + key的模式
+    /**
+     * 
+     * @param {string} key 
+     * @param {string} [type] 
+     * @returns {any}
+     */
     get(key, type) {
         if (type == undefined) {
             type = "string"
@@ -88,7 +52,7 @@ let storage = {
         } else if (type == 'float') {
             return Storage.getDouble(key);
         } else if (type == 'object') {
-            return Storage.getObject(key);
+            return Storage.getObj(key);
         } else if (type == 'bool') {
             return Storage.getBoolean(key);
         }
@@ -96,23 +60,43 @@ let storage = {
         return undefined;
     },
 
+    /**
+     * 
+     * @param {string} key 
+     * @returns 
+     */
     getArray(key) {
         return Storage.getArray(key);
     },
 
+    /**
+     * 
+     * @param {number} num 
+     * @returns 
+     */
+    isFloat(num) {
+        return num % 1 !== 0;
+    },
+
     //尽量 文件名 + key的模式
+    /**
+     * 
+     * @param {string} key 
+     * @param {any} value 
+     * @returns 
+     */
     set(key, value) {
         if (typeof value == 'string') {
             Storage.put(key, value);
         } else if (typeof value == 'boolean') {
-            Storage.putBool(key, value);
+            Storage.putBoolean(key, value);
         } else if (typeof value == 'object') {
             Storage.putDouble(key, value);
-        } else if (typeof value == 'undefined' || typeof value == 'null') {
+        } else if (typeof value == 'undefined' || value == null) {
             Storage.putObj(key, value);
         } else if (Number.isInteger(value)) {
             Storage.putInteger(key, value);
-        } else if (Number.isFloat(value)) {
+        } else if (this.isFloat(value)) {
             Storage.putDouble(key, value);
         } else {
             Storage.putObj(key, value);

@@ -1,19 +1,22 @@
-let Common = require('app/dy/Common.js');
-let storage = require('common/storage.js');
-let statistics = require('common/statistics.js');
+let Common = require('./Common.js');
+let storage = require('../../common/storage.js');
+let statistics = require('../../common/statistics.js');
 
 const Comment = {
+    /** @type {UiObject|undefined}  */
     tag: undefined,//当前的tag标签
+    /** @type {string[]}  */
     containers: [],//本次遍历的内容  主要用于去重
     /**
      * 返回头像控件
-     * @param {Object} tag 
+     * @param {UiObject} tag 
      * @returns Object
      */
     getAvatarTag(tag) {
         if (tag) {
             return tag.children().findOne(Common.id('avatar'));
         }
+        // @ts-ignore
         return this.tag.children().findOne(Common.id('avatar'));
     },
 
@@ -22,6 +25,7 @@ const Comment = {
      * @returns Object
      */
     getNicknameTag() {
+        // @ts-ignore
         return this.tag.children().findOne(Common.id('title'));
     },
 
@@ -30,6 +34,7 @@ const Comment = {
      * @returns Object
      */
     getContentTag() {
+        // @ts-ignore
         return this.tag.children().findOne(Common.id('content'));
     },
 
@@ -38,12 +43,13 @@ const Comment = {
      * @returns object
      */
     getIpTag() {
+        // @ts-ignore
         return this.tag.children().findOne(UiSelector().textContains(' · ').isVisibleToUser(true));
     },
 
     /**
      * 返回回复控件
-     * @param {Object} tag 
+     * @param {UiObject} tag 
      * @returns 
      */
     getBackTag(tag) {
@@ -53,6 +59,7 @@ const Comment = {
             }));
         }
 
+        // @ts-ignore
         return this.tag.children().findOne(UiSelector().text('回复').filter(v => {
             return v.bounds().left > Device.width() / 4;
         }));
@@ -60,13 +67,15 @@ const Comment = {
 
     /**
      * 获取点赞控件  注意它的父控件可以直接使用click方法点击
-     * @param {Object} tag 
-     * @returns 
+     * @param {undefined|UiObject} tag 
+     * @returns {UiObject}
      */
     getZanTag(tag) {
         if (tag) {
             return tag.children().findOne(UiSelector().className('android.widget.LinearLayout').descContains('赞'));
         }
+
+        // @ts-ignore
         return this.tag.children().findOne(UiSelector().className('android.widget.LinearLayout').descContains('赞'));
     },
 
@@ -75,6 +84,7 @@ const Comment = {
      * @returns boolean
      */
     isAuthor() {
+        // @ts-ignore
         return this.tag.children().findOne(UiSelector().text('作者')) ? true : false;
     },
 
@@ -107,7 +117,7 @@ const Comment = {
      * @returns number
      */
     getZanCount() {
-        let tag = this.getZanTag();
+        let tag = this.getZanTag(undefined);
         return tag ? Common.numDeal(tag.desc()) : 0;
     },
 
@@ -116,7 +126,7 @@ const Comment = {
      * @returns boolean
      */
     isZan() {
-        let tag = this.getZanTag();
+        let tag = this.getZanTag(undefined);
         if (!tag) {
             return false;
         }
@@ -125,7 +135,7 @@ const Comment = {
 
     /**
      * 点赞
-     * @param {Object} data 
+     * @param {{tag:UiObject}} data 
      * @returns 
      */
     clickZan(data) {
@@ -161,7 +171,7 @@ const Comment = {
 
     /**
      * 返回评论内容（外层控件、昵称、评论内容、Ip、是否点赞、点赞数、作者）
-     * @returns array
+     * @returns {{tag:UiObject,nickname:string,content:string,isAuthor:boolean,isZan:boolean}[]}
      */
     getList() {
         let moreTag = UiSelector().text('已折叠部分评论').isVisibleToUser(true).findOne();
@@ -172,11 +182,12 @@ const Comment = {
         }
 
         let contains = UiSelector().className('android.widget.FrameLayout').filter(v => {
-            return v.desc() && v.bounds().width() >= Device.width() - 10;
+            return !!(v.desc() && v.bounds().width() >= Device.width() - 10);
         }).isVisibleToUser(true).find();
 
         Log.log("数量：", contains.length);
         let contents = [];
+        /** @type {any} */
         let data = {};
 
         for (let i in contains) {
@@ -216,7 +227,8 @@ const Comment = {
      * @returns boolean
      */
     closeCommentWindow() {
-        let closeTag = UiSelector().desc('关闭').isVisibleToUser(true).clickable(true).findOne();
+        // let closeTag = UiSelector().desc('关闭').isVisibleToUser(true).clickable(true).findOne();
+        let closeTag = Common.id('back_btn').clickable(true).isVisibleToUser(true).findOne();
         if (!closeTag) {
             return false;
         }
@@ -225,7 +237,7 @@ const Comment = {
 
     /**
      * 进入用户主页
-     * @param {Object} data 
+     * @param {{tag:UiObject}} data 
      * @returns boolean
      */
     intoUserPage(data) {
@@ -237,7 +249,7 @@ const Comment = {
 
     /**
      * 回复
-     * @param {object} data 
+     * @param {{tag:UiObject}} data 
      * @param {string} msg 
      */
     backMsg(data, msg) {
@@ -251,7 +263,7 @@ const Comment = {
         }).isVisibleToUser(true).findOne();
 
         if (!iptTag) {
-            Common.back(1, 1000);
+            Common.back(1, 1000, 0);
             Log.log('没有找到输入框');
             return true;
         }
@@ -293,7 +305,7 @@ const Comment = {
         Common.sleep(500 + Math.random() * 1000);
 
         let btnTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('发送').findOne();
-        btnTag.parent().click();
+        Common.click(btnTag, 0.2);
         Common.sleep(500 + 500 * Math.random());
         statistics.comment();
 
@@ -345,8 +357,14 @@ const Comment = {
         return res;
     },
 
+    /**
+     * 
+     * @param {number} zanCount 
+     * @param {string|undefined} meNickname 
+     */
     zanComment(zanCount, meNickname) {
         //随机点赞 评论回复
+        /** @type {string[]} */  
         let contains = [];//防止重复的
         let rps = 0;//大于2 则退出
         let opCount = 5;

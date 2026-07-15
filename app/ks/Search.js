@@ -172,7 +172,7 @@ let Search = {
         tag.setText(keyword);
         tCommon.sleep(2000 + 2000 * Math.random());
         let searchTag = UiSelector().className('android.widget.TextView').text('搜索').isVisibleToUser(true).findOne();
-        tCommon.click(searchTag);
+        tCommon.click(searchTag, 0.2);
         System.setTimeWindowShow(false);
         tCommon.sleep(4000 + 2000 * Math.random());
 
@@ -207,7 +207,7 @@ let Search = {
         //如果type为2，还需要进入用户视频
         if (type == 2) {
             let workTag = UiSelector().className('android.widget.ImageView').desc('作品').isVisibleToUser(true).findOne();
-            tCommon.click(workTag);
+            tCommon.click(workTag, 0.2);
             tCommon.sleep(3000 + 3000 * Math.random());
         }
     }

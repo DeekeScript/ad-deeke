@@ -12,7 +12,7 @@ let Video = {
 
         Log.log("滑动参数：" + left + ":" + bottom + ":" + left2 + ":" + top + ":" + duration);
         Gesture.swipe(left, bottom, left2, top, duration);
-        Common.sleep(1000 + 1000 * Math.random());
+        Common.sleep(2000 + 1000 * Math.random());
     },
 
     getZanTag(index) {
@@ -211,6 +211,10 @@ let Video = {
         statistics.viewUser();//目标视频数量加1
     },
 
+    /**
+     * 
+     * @returns {string|null}
+     */
     getNickname() {
         let tag = this.getNicknameTag();
         let focusTag = Common.id('gac').isVisibleToUser(true).findOne();
@@ -265,10 +269,10 @@ let Video = {
         } else if (/[\d]{2}\-[\d]{2}/.test(time) || /[\d]{2}\月[\d]{2}日/.test(time)) {
             time = time.replace('日', '').replace('月', '-');
             time = (new Date()).getFullYear() + '-' + time;
-            incSecond = Date.parse(new Date()) / 1000 - (new Date(time)).getTime() / 1000;//日期
+            incSecond = Date.now() / 1000 - (new Date(time)).getTime() / 1000;//日期
         } else {
             time = time.replace('日', '').replace('月', '-').replace('年', '-');
-            incSecond = Date.parse(new Date()) / 1000 - (new Date(time)).getTime() / 1000;//直接是日期
+            incSecond = Date.now() / 1000 - (new Date(time)).getTime() / 1000;//直接是日期
         }
         return incSecond;
     },

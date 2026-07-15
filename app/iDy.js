@@ -1,31 +1,35 @@
-let DyCommon = require('app/dy/Common.js');
-let DyVideo = require('app/dy/Video.js');
-let DyUser = require('app/dy/User.js');
-let DyIndex = require('app/dy/Index.js');
-let DyComment = require('app/dy/Comment.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let baiduWenxin = require('service/baiduWenxin.js');
-let statistics = require('common/statistics.js');
+let DyCommon = require('./dy/Common.js');
+let DyVideo = require('./dy/Video.js');
+let DyUser = require('./dy/User.js');
+let DyIndex = require('./dy/Index.js');
+let DyComment = require('./dy/Comment.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
+let statistics = require('../common/statistics.js');
 
 let iDy = {
+    /** @type {any} */
     me: {},//当前账号的信息
     taskConfig: {},
     titles: [],//今日刷视频的所有标题  标题+'@@@'+昵称   保证唯一，从而减少请求后台接口
     provices: [],
     isCity: false,//是否是同城
+    /** @type {string|undefined} */
     cityName: '',
     nicknames: [],//所有的昵称，重复的忽略
+    /** @type {any} */
+    configData: {},
 
     /**
      * type 0 评论，1私信
      * @param {number} type 
      * @param {string} title 
-     * @param {number} age 
-     * @param {number} gender 
-     * @returns {object}
+     * @param {number} [age]
+     * @param {number} [gender]
+     * @returns {any}
      */
-    getMsg(type, title, age = undefined, gender = undefined) {
+    getMsg(type, title, age, gender) {
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
@@ -44,6 +48,11 @@ let iDy = {
         return false;
     },
 
+    /**
+     * 抖音是否存在，更新
+     * @param {string} douyin 
+     * @returns {boolean}
+     */
     douyinExistUpdate(douyin) {
         if (storage.getMachineType() === 1) {
             return machine.douyinExistUpdate(douyin);//永远不会结束
@@ -97,7 +106,7 @@ let iDy = {
 
     /**
      * 检查标题是否包含关键词
-     * @param {object} rule 
+     * @param {any} rule 
      * @param {string} title 
      * @returns {boolean}
      */
@@ -115,8 +124,8 @@ let iDy = {
 
     /**
      * 视频规则是否符合
-     * @param {object} rule 
-     * @param {object} videoData 
+     * @param {any} rule 
+     * @param {any} videoData 
      * @returns 
      */
     videoRulesCheck(rule, videoData) {
@@ -138,7 +147,7 @@ let iDy = {
 
     /**
      * 刷视频
-     * @param {object} videoRules 
+     * @param {any} videoRules 
      * @param {boolean} isCity 
      * @returns {object}
      */
@@ -231,8 +240,8 @@ let iDy = {
 
     /**
      * 评论操作
-     * @param {object} videoData 
-     * @returns {boolean}
+     * @param {any} videoData 
+     * @returns {boolean|undefined}
      */
     commentDeal(videoData) {
         let windowOpen = false;
@@ -270,6 +279,7 @@ let iDy = {
         }
 
         //随机点赞 评论回复
+        /** @type {Array<string>} */
         let contains = [];//防止重复的
         let rps = 5;//大于2 则退出
         let opCount = 5;
@@ -399,6 +409,7 @@ let iDy = {
             if (this.configData.toker_private_msg_rate > private_rate || this.configData.toker_focus_rate > focus_rate) {
                 DyCommon.sleep(1000);
                 DyVideo.intoLocalUserPage();
+                /** @type {any} */
                 let userData;
                 try {
                     Log.log("查看用户数据");

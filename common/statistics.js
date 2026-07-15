@@ -1,4 +1,4 @@
-let storage = require('common/storage.js');
+let storage = require('../common/storage.js');
 
 let statistics = {
     getDate() {
@@ -78,6 +78,11 @@ let statistics = {
         return dates;
     },
 
+    /**
+     * 
+     * @param {string} [time] 
+     * @returns {any}
+     */
     getData(time) {
         time = time || this.getDate();
         if (storage.getPackage() === 'org.autojs.autoxjs.v6') {
@@ -107,12 +112,14 @@ let statistics = {
 
     getWeekData() {
         let dates = this.getWeekDate();
+        /** @type {any} */
         let data = [];
         for (let i in dates) {
             data.push([dates[i], this.getData(dates[i])]);
         }
 
         //数据整理
+        /** @type {any} */
         let res = {};
         let ids = ['s_viewVideo', 's_viewTargetVideo', 's_zan', 's_comment', 's_zanComment', 's_privateMsg', 's_focus', 's_viewUser'];
         for (let i in ids) {

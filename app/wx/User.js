@@ -90,19 +90,23 @@ let User = {
         return tag.text();
     },
 
+    /**
+     * 
+     * @returns {number}
+     */
     getGender() {
         //1男，0女，2未知
         let tag = Common.id('ov9').textContains('女').findOnce();
         if (tag) {
-            return '0';
+            return 0;
         }
 
         tag = Common.id('ov9').textContains('男').findOnce();
         if (tag) {
-            return '1';
+            return 1;
         }
 
-        return '2';
+        return 2;
     },
 
     //是否是私密账号
@@ -151,6 +155,7 @@ let User = {
     },
 
     getUserInfo() {
+        /** @type {any} */
         let res = {};
         res = {
             nickname: this.getNickname(),

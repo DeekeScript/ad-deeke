@@ -163,6 +163,11 @@ let Work = {
         Common.click(commentTag, 0.25);
         Common.sleep(2000 + 1000 * Math.random());
     },
+
+    /**
+     * 
+     * @returns {any}
+     */
     getCommenList() {
         //通过评论内容，反向找到昵称（通过昵称进入用户主页）
         let tags = UiSelector().className('android.widget.LinearLayout').filter(v => {
@@ -190,6 +195,12 @@ let Work = {
                 Log.log('作者过滤了', _childs[2].text());
                 continue;
             }
+
+            if (!_childs[3] || !_childs[3].parent()) {
+                Common.log('没有评论赞');
+                continue;
+            }
+
             let arr = _childs[2].text().split(' ');
             Log.log('评论内容', _childs[2].text(), index, arr);
             childs.push({
@@ -322,7 +333,7 @@ let Work = {
             let textTag = UiSelector().className('android.widget.TextView').filter(v => {
                 return v.parent() != null && !v.parent().parent() && v.parent().className() == 'android.widget.FrameLayout';
             }).isVisibleToUser(true).findOne();
-            return textTag.text();
+            return textTag ? textTag.text() : null;
         }
         return false;
     },

@@ -590,54 +590,59 @@
           "activity": {
             "notice": "暂无功能~",
             "title": "工具箱",
-            "minVersion": 290700,
-            "methods": [
+            "groups": [
               {
-                "title": "一键取赞",
-                "hidden": false,
-                "icon": "img/cancel_zan.png",
-                "jsFile": "tasks/task_dy_cancel_zan.js",
-                "settingPage": {
-                  "params": [
-                    {
-                      "type": "notice",
-                      "title": "帮助你快速取消视频点赞~"
+                "title": "工具箱",
+                "titleHidden": true,
+                "methods": [
+                  {
+                    "title": "一键取赞",
+                    "hidden": false,
+                    "icon": "img/cancel_zan.png",
+                    "jsFile": "tasks/task_dy_cancel_zan.js",
+                    "settingPage": {
+                      "params": [
+                        {
+                          "type": "notice",
+                          "title": "帮助你快速取消视频点赞~"
+                        }
+                      ]
                     }
-                  ]
-                }
-              },
-              {
-                "title": "一键取关",
-                "hidden": false,
-                "icon": "img/cancel_focus.png",
-                "jsFile": "tasks/task_dy_cancel_focus.js",
-                "settingPage": {
-                  "params": [
-                    {
-                      "type": "notice",
-                      "title": "帮助你快速取消单向关注（你关注他，他没有关注你）的用户~"
-                    },
-                    {
-                      "type": "switch",
-                      "label": "互相关注取关",
-                      "name": "task_dy_cancel_focus_mutual_switch"
+                  },
+                  {
+                    "title": "一键取关",
+                    "hidden": false,
+                    "icon": "img/cancel_focus.png",
+                    "jsFile": "tasks/task_dy_cancel_focus.js",
+                    "settingPage": {
+                      "params": [
+                        {
+                          "type": "notice",
+                          "title": "帮助你快速取消单向关注（你关注他，他没有关注你）的用户~"
+                        },
+                        {
+                          "type": "switch",
+                          "label": "互相关注取关",
+                          "name": "task_dy_cancel_focus_mutual_switch"
+                        }
+                      ]
                     }
-                  ]
-                }
-              },
-              {
-                "title": "粉丝回访",
-                "hidden": false,
-                "icon": "img/view_back.png",
-                "jsFile": "tasks/task_dy_fans_back_view.js",
-                "settingPage": {
-                  "params": [
-                    {
-                      "type": "notice",
-                      "title": "粉丝回访，能增加粉丝粘性~"
+                  },
+                  {
+                    "title": "粉丝回访",
+                    "hidden": false,
+                    "icon": "img/view_back.png",
+                    "jsFile": "tasks/task_dy_fans_back_view.js",
+                    "settingPage": {
+                      "params": [
+                        {
+                          "type": "notice",
+                          "title": "粉丝回访，能增加粉丝粘性~"
+                        }
+                      ]
                     }
-                  ]
-                }
+                  }
+                ]
               }
             ]
           }
@@ -1483,7 +1488,7 @@
       "methods": [
         {
           "title": "UID私信",
-          "columns": 2,
+          "columns": 16,
           "icon": "img/private-2.png",
           "jsFile": "tasks/task_dy_toker_uid.js",
           "settingPage": {
@@ -1565,7 +1570,7 @@
           "hidden": false,
           "icon": "img/rocket.png",
           "jsFile": "tasks/task_dy_search_user.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -1648,7 +1653,7 @@
           "hidden": false,
           "icon": "img/ai-back.png",
           "jsFile": "tasks/task_dy_ai_back.js",
-          "columns": 2,
+          "columns": 16,
           "settingPage": {
             "params": [
               {
@@ -1710,7 +1715,7 @@
         {
           "title": "团购营销",
           "hidden": true,
-          "columns": 1,
+          "columns": 8,
           "icon": "img/team-buy.png",
           "jsFile": "tasks/task_dy_team_buy.js",
           "settingPage": {
@@ -1785,7 +1790,7 @@
           "hidden": false,
           "icon": "img/barrage.png",
           "jsFile": "tasks/task_dy_live_barrage.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -1863,7 +1868,7 @@
         {
           "title": "评论截流II",
           "hidden": false,
-          "columns": 1,
+          "columns": 8,
           "icon": "img/comment-2.png",
           "jsFile": "tasks/task_dy_toker_video.js",
           "settingPage": {
@@ -1983,6 +1988,15 @@
               },
               {
                 "type": "numberRange",
+                "label": "回复评论（%）",
+                "name": "task_dy_toker_live_video_comment_comment_rate",
+                "value": 0,
+                "max": 100,
+                "min": 0,
+                "step": 1
+              },
+              {
+                "type": "numberRange",
                 "label": "私信频率",
                 "name": "task_dy_toker_live_video_private_rate",
                 "value": 0,
@@ -2019,7 +2033,7 @@
               },
               {
                 "type": "notice",
-                "title": "* 私信、关注、评论赞，三者会按照概率执行，并且只执行其中一个"
+                "title": "* 私信、关注、评论赞、回复评论，四者会按照概率执行，并且只执行其中一个"
               }
             ]
           }
@@ -2033,7 +2047,7 @@
           "title": "万能营销",
           "icon": "img/xhs-wanneng.png",
           "jsFile": "tasks/task_xhs_toker.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -2210,7 +2224,7 @@
           "jsFile": "tasks/task_xhs_fans.js",
           "runType": "floatSwitch",
           "autoOpen": true,
-          "columns": 1,
+          "columns": 8,
           "packageName": "com.xingin.xhs",
           "settingPage": {
             "params": [
@@ -2295,7 +2309,7 @@
           "jsFile": "tasks/task_xhs_zan_back.js",
           "runType": "floatSwitch",
           "autoOpen": true,
-          "columns": 1,
+          "columns": 8,
           "packageName": "com.xingin.xhs",
           "settingPage": {
             "params": [
@@ -2318,7 +2332,7 @@
         {
           "title": "评论区截流",
           "hidden": false,
-          "columns": 2,
+          "columns": 16,
           "icon": "img/speech-say-xhs.png",
           "jsFile": "tasks/task_xhs_toker_comment.js",
           "settingPage": {
@@ -2391,7 +2405,7 @@
       "methods": [
         {
           "title": "用户ID私信",
-          "columns": 2,
+          "columns": 16,
           "icon": "img/private-2.png",
           "jsFile": "tasks/task_xhs_toker_uid.js",
           "settingPage": {
@@ -2435,7 +2449,7 @@
         },
         {
           "title": "AI回复",
-          "columns": 1,
+          "columns": 8,
           "hidden": true,
           "icon": "img/ai-back.png",
           "jsFile": "tasks/task_xhs_ai_back.js",
@@ -2495,7 +2509,7 @@
         },
         {
           "title": "垂直养号",
-          "columns": 1,
+          "columns": 8,
           "icon": "img/vertical.png",
           "jsFile": "tasks/task_xhs_yanghao.js",
           "packageName": "com.ss.android.ugc.aweme",
@@ -2565,7 +2579,7 @@
           "title": "推荐营销",
           "icon": "img/finger_ks.png",
           "jsFile": "tasks/task_ks_toker.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -2734,7 +2748,7 @@
         {
           "title": "同城营销",
           "icon": "img/city_ks.png",
-          "columns": 1,
+          "columns": 8,
           "jsFile": "tasks/task_ks_toker_city.js",
           "settingPage": {
             "params": [
@@ -2918,7 +2932,7 @@
           "autoOpen": true,
           "icon": "img/rocket_ks.png",
           "jsFile": "tasks/task_ks_search_user.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -3004,7 +3018,7 @@
           "hidden": false,
           "icon": "img/speech-say-ks.png",
           "jsFile": "tasks/task_ks_toker_comment.js",
-          "columns": 2,
+          "columns": 16,
           "settingPage": {
             "params": [
               {
@@ -3062,7 +3076,7 @@
           "title": "推荐营销",
           "icon": "img/finger_wx.png",
           "jsFile": "tasks/task_wx_toker.js",
-          "columns": 1,
+          "columns": 8,
           "settingPage": {
             "params": [
               {
@@ -3213,7 +3227,7 @@
         {
           "title": "评论区截流",
           "hidden": false,
-          "columns": 1,
+          "columns": 8,
           "icon": "img/speech-say-wx.png",
           "jsFile": "tasks/task_wx_toker_comment.js",
           "settingPage": {

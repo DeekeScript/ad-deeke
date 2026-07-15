@@ -1,6 +1,6 @@
-let tCommon = require("app/dy/Common");
-let dy = require('app/iDy');
-let machine = require("common/machine");
+let tCommon = require("../app/dy/Common");
+let dy = require('../app/iDy');
+let machine = require("../common/machine");
 
 let task = {
     me: {},//我的抖音号和昵称

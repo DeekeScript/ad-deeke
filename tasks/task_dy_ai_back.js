@@ -1,6 +1,6 @@
-let tCommon = require("app/dy/Common");
-let tMessageNew = require("app/dy/MessageNew");
-let storage = require("common/storage");
+let tCommon = require("../app/dy/Common");
+let tMessageNew = require("../app/dy/MessageNew");
+let storage = require("../common/storage");
 
 let task = {
     log() {
@@ -16,6 +16,10 @@ let task = {
         tCommon.backApp();
     },
 
+    /**
+     * 
+     * @param {any} config 
+     */
     run(config) {
         Log.log('run---');
         if (tMessageNew.intoMessage()) {
@@ -35,6 +39,12 @@ let config = {
 if (!storage.get('setting_baidu_wenxin_switch', 'bool')) {
     Dialogs.show('提示', '请开启智能AI话术');
     System.exit();
+}
+
+if (!Access.isMediaProjectionEnable()) {
+    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    System.exit();
+    tCommon.sleep(2000);
 }
 
 Log.log('config', config);
@@ -59,14 +69,14 @@ while (true) {
         continue;
     }
 
-    let endTime = Date.parse(new Date()) / 1000 + config.ai_back_minitue * 60;
+    let endTime = Date.now() / 1000 + config.ai_back_minitue * 60;
     let file = ['tasks/task_dy_toker.js', 'tasks/task_dy_toker_city.js', 'tasks/task_dy_search_vertical.js'][config.ai_back_comment_run_other_fun - 1];
     Log.log('开始执行');
     Engines.executeScript(file);
     Log.log('执行过了');
     do {
-        Log.log('时间判断', Date.parse(new Date()) / 1000, endTime)
-        if (Date.parse(new Date()) / 1000 >= endTime) {
+        Log.log('时间判断', Date.now() / 1000, endTime)
+        if (Date.now() / 1000 >= endTime) {
             Engines.closeOther();//关闭其他线程
             Log.log('中断其他线程');
             tCommon.backHome();

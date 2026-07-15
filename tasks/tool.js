@@ -1,4 +1,4 @@
-//import { Common } from "app/dy/Common.js"
+//import { Common } from "../app/dy/Common.js"
 
 
 console.log('哈哈哈');

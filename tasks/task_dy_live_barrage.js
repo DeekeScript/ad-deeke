@@ -1,19 +1,35 @@
-let tCommon = require("app/dy/Common");
-let DyIndex = require('app/dy/Index.js');
-let DySearch = require('app/dy/Search.js');
-let DyUser = require('app/dy/User.js');
-let DyLive = require('app/dy/Live.js');
-let storage = require("common/storage");
-let machine = require("common/machine");
+let tCommon = require("../app/dy/Common");
+let DyIndex = require('../app/dy/Index.js');
+let DySearch = require('../app/dy/Search.js');
+let DyUser = require('../app/dy/User.js');
+let DyLive = require('../app/dy/Live.js');
+let storage = require("../common/storage");
+let machine = require("../common/machine");
+let baiduWenxin = require('../service/baiduWenxin');
 
 let task = {
     rp: 0,
     msg: [],
+
+    /**
+     * 
+     * @param {string} account 
+     * @param {number} second 
+     * @returns 
+     */
     run(account, second) {
         return this.testTask(account, second);
     },
 
-    getMsg(type, title, age, gender) {
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title]
+     * @param {number} [age] 
+     * @param {any} [gender]
+     * @returns 
+     */
+    getMsg(type, title, age, gender = 2) {
         gender = ['女', '男', '未知'][gender];
         let comments = storage.get('task_dy_live_barrage_comments');
         if (comments) {
@@ -35,6 +51,12 @@ let task = {
         Log.setFile(allFile);
     },
 
+    /**
+     * 
+     * @param {string} account 
+     * @param {number} second 
+     * @returns 
+     */
     testTask(account, second) {
         //首先进入点赞页面
         if (!tCommon.getRemark(account)) {

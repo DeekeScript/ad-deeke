@@ -1,6 +1,6 @@
-let tCommon = require("app/dy/Common");
-let DyIndex = require('app/dy/Index.js');
-let DyUser = require('app/dy/User.js');
+let tCommon = require("../app/dy/Common");
+let DyIndex = require('../app/dy/Index.js');
+let DyUser = require('../app/dy/User.js');
 
 let task = {
     nicknames: [],

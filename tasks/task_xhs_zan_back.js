@@ -1,8 +1,8 @@
-let storage = require("common/storage.js");
-let Common = require("app/xhs/Common.js");
-let User = require("app/xhs/User.js");
+let storage = require("../common/storage.js");
+let Common = require("../app/xhs/Common.js");
+let User = require("../app/xhs/User.js");
 
-let Work = require("app/xhs/Work.js");
+let Work = require("../app/xhs/Work.js");
 
 let task = {
     log() {
@@ -23,6 +23,11 @@ let task = {
         return this.zanBack(config);
     },
 
+    /**
+     * 
+     * @param {any} config 
+     * @returns 
+     */
     zanBack(config) {
         Log.log('开始');
         UiSelector().className('android.view.ViewGroup').descContains('已选定赞和收藏').isVisibleToUser(true).waitFindOne();
@@ -88,7 +93,7 @@ let task = {
                         arr.shift();
                     }
 
-                    Common.click(nicknameTag);
+                    Common.click(nicknameTag, 0.2);
                     Common.sleep(2000 + 2000 * Math.random());
 
                     Log.log('即将进入视频');

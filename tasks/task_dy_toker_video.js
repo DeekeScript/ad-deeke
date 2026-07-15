@@ -1,17 +1,23 @@
-let tCommon = require("app/dy/Common");
-let DyUser = require("app/dy/User");
-let DySearch = require("app/dy/Search");
-let DyVideo = require("app/dy/Video");
-let DyIndex = require("app/dy/Index");
-let DyComment = require("app/dy/Comment");
-let storage = require("common/storage");
-let machine = require("common/machine");
-let baiduWenxin = require("service/baiduWenxin");
-let statistics = require("common/statistics");
+let tCommon = require("../app/dy/Common");
+let DyUser = require("../app/dy/User");
+let DySearch = require("../app/dy/Search");
+let DyVideo = require("../app/dy/Video");
+let DyIndex = require("../app/dy/Index");
+let DyComment = require("../app/dy/Comment");
+let storage = require("../common/storage");
+let machine = require("../common/machine");
+let baiduWenxin = require("../service/baiduWenxin");
+let statistics = require("../common/statistics");
 
 let task = {
     nicknames: [],
     contents: [],
+    /**
+     * 
+     * @param {string} input 
+     * @param {number} sleepSecond 
+     * @returns 
+     */
     run(input, sleepSecond) {
         return this.testTask(input, sleepSecond);
     },
@@ -25,10 +31,20 @@ let task = {
         }
     },
 
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+
+    //type 0 评论，1私信
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
@@ -40,6 +56,12 @@ let task = {
         Log.setFile(allFile);
     },
 
+    /**
+     * 
+     * @param {string} str 
+     * @param {string[]} kw 
+     * @returns {boolean}
+     */
     includesKw(str, kw) {
         for (let i in kw) {
             if (str.includes(kw[i])) {
@@ -49,6 +71,11 @@ let task = {
         return false;
     },
 
+    /**
+     * 
+     * @param {string} input 
+     * @param {number} sleepSecond 
+     */
     testTask(input, sleepSecond) {
         //首先进入页面
         let commentKw = tCommon.splitKeyword(input);
@@ -60,17 +87,19 @@ let task = {
         DySearch.intoSearchList(title, 0, videoConfig);
         DySearch.intoSearchVideo();
 
-        let rateCount = storage.get('task_dy_toker_live_video_private_rate', 'int') + storage.get('task_dy_toker_live_video_focus_rate', 'int') + storage.get('task_dy_toker_live_video_zan_comment_rate', 'int');
+        let rateCount = storage.get('task_dy_toker_live_video_private_rate', 'int') + storage.get('task_dy_toker_live_video_focus_rate', 'int') + storage.get('task_dy_toker_live_video_zan_comment_rate', 'int') + storage.get('task_dy_toker_live_video_comment_comment_rate', 'int');
         let zanCommentRate = 0;
         let focuRate = 0;
         let privateRate = 0;
+        let backCommentRate = 0;
         if (rateCount > 0) {
             zanCommentRate = storage.get('task_dy_toker_live_video_zan_comment_rate', 'int') / rateCount;
             focuRate = storage.get('task_dy_toker_live_video_focus_rate', 'int') / rateCount;
             privateRate = storage.get('task_dy_toker_live_video_private_rate', 'int') / rateCount;
+            backCommentRate = storage.get('task_dy_toker_live_video_comment_comment_rate', 'int') / rateCount;
         }
 
-        Log.log('总的点赞：', rateCount, zanCommentRate, focuRate);
+        Log.log('总的点赞：', rateCount, zanCommentRate, focuRate, backCommentRate);
         while (true) {
             tCommon.sleep(4000 + Math.random() * 2000);
             //看看是不是直播
@@ -83,6 +112,7 @@ let task = {
             let title = DyVideo.getContent();
             let commentCount = DyVideo.getCommentCount();
             statistics.viewVideo();
+            /** @ts-ignore */
             if (commentCount === 0 || this.contents.includes(title)) {
                 Log.log('下一个视频');
                 DyVideo.next();
@@ -90,7 +120,7 @@ let task = {
             }
 
             statistics.viewTargetVideo();
-            DyVideo.openComment(commentCount);
+            DyVideo.openComment(!!commentCount);
             tCommon.sleep(2000 + 1000 * Math.random());
 
             let firstComment = true;
@@ -118,7 +148,9 @@ let task = {
                         continue;
                     }
 
+                    /** @ts-ignore */
                     if (!comments[k]['content'] || !this.includesKw(comments[k]['content'], commentKw) || this.nicknames.includes(comments[k].nickname)) {
+                        /** @ts-ignore */
                         Log.log('数据：', comments[k]['content'], commentKw, this.nicknames.includes(comments[k].nickname));
                         continue;
                     }
@@ -130,6 +162,7 @@ let task = {
 
                     Log.log('找到了关键词', comments[k]['content']);
                     let opRate = Math.random();
+                    let refresh = false;
                     if (opRate <= zanCommentRate) {
                         try {
                             Log.log('点赞');
@@ -141,12 +174,16 @@ let task = {
                             Log.log('异常处理：', e);
                             continue;
                         }
+                    } else if (opRate <= zanCommentRate + backCommentRate) {
+                        DyComment.backMsg(comments[k], this.getMsg(0, comments[k].content).msg);
+                        Log.log('回复评论');
+                        refresh = true;
                     } else {
                         DyComment.intoUserPage(comments[k]);
                         if (DyUser.isPrivate()) {
                             tCommon.back();
                         } else {
-                            if (opRate <= zanCommentRate + privateRate) {
+                            if (opRate <= zanCommentRate + backCommentRate + privateRate) {
                                 DyUser.privateMsg(this.getMsg(1).msg);
                             } else {
                                 DyUser.focus();
@@ -158,9 +195,14 @@ let task = {
                         }
                     }
 
+                    /** @ts-ignore */
                     this.nicknames.push(comments[k].nickname);
                     machine.set('task_dy_toker_video_' + comments[k].nickname, true);
                     tCommon.sleep(sleepSecond * 1000);
+                    if (refresh) {
+                        comments = DyComment.getList();
+                        refresh = false;
+                    }
                 }
 
                 Log.log('下一页评论');
@@ -184,6 +226,7 @@ let task = {
                 break;
             }
             Log.log('下一个视频');
+            /** @ts-ignore */
             this.contents.push(title);
             DyVideo.next();
         }
@@ -215,10 +258,6 @@ while (true) {
         tCommon.openApp();
         let r = task.run(input, storage.get('task_dy_toker_live_video_second', 'int'));
         if (r === 'exit') {
-            if (thr) {
-                tCommon.sleep(3000);
-                FloatDialogs.show('找不到用户，停止执行');
-            }
             break;
         }
 

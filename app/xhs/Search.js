@@ -27,6 +27,7 @@ let Search = {
 
     intoUserVideoPage(keyword) {
         this.intoSearchList(keyword);
+
         let userTag = UiSelector().className('android.widget.TextView').text('用户').isVisibleToUser(true).filter(v => {
             return v.parent().className() == 'androidx.appcompat.app.ActionBar$Tab';
         }).findOne() || UiSelector().className('android.widget.TextView').text('账号').isVisibleToUser(true).filter(v => {
@@ -36,6 +37,16 @@ let Search = {
         if (!userTag) {
             throw new Error('没有找到用户tab');
         }
+
+        let intoTag = UiSelector().className('android.widget.TextView').textContains(keyword).filter(v => {
+            return v.bounds().top > userTag.bounds().bottom;
+        }).isVisibleToUser(true).findOne();
+        if (intoTag && intoTag.parent().isClickable()) {
+            Common.click(intoTag, 0.2);
+            Common.sleep(4000 + 2000 * Math.random());
+            return true;
+        }
+
         Common.click(userTag, 0.15);
         Common.sleep(4000 + 2000 * Math.random());
 

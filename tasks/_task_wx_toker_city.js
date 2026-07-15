@@ -1,7 +1,7 @@
-let tCommon = require("app/wx/Common");
-let wx = require('app/iWx');
-let machine = require("common/machine");
-// let baiduWenxin = require("service/baiduWenxin");
+let tCommon = require("../app/wx/Common");
+let wx = require('../app/iWx');
+let machine = require("../common/machine");
+// let baiduWenxin = require("../service/baiduWenxin");
 
 let task = {
     me: {},//我的抖音号和昵称

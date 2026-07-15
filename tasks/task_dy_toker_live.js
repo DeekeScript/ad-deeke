@@ -1,26 +1,42 @@
-let tCommon = require("app/dy/Common");
-let DyIndex = require("app/dy/Index");
-let DySearch = require("app/dy/Search");
-let DyComment = require("app/dy/Comment");
-let DyUser = require("app/dy/User");
-let DyVideo = require("app/dy/Video");
-let storage = require("common/storage");
-let machine = require("common/machine");
-let DyLive = require("app/dy/Live");
-let baiduWenxin = require("service/baiduWenxin");
+let tCommon = require("../app/dy/Common");
+let DyIndex = require("../app/dy/Index");
+let DySearch = require("../app/dy/Search");
+let DyComment = require("../app/dy/Comment");
+let DyUser = require("../app/dy/User");
+let DyVideo = require("../app/dy/Video");
+let storage = require("../common/storage");
+let machine = require("../common/machine");
+let DyLive = require("../app/dy/Live");
+let baiduWenxin = require("../service/baiduWenxin");
 
 let task = {
     index: -1,
     nicknames: [],
     intoErrorCount: 0,//根据错误次数判断直播是否结束
+    /**
+     * 
+     * @param {string} input 
+     * @param {number} preIndex 
+     * @returns 
+     */
     run(input, preIndex) {
         return this.testTask(input, preIndex);
     },
 
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+    
+    //type 0 评论，1私信
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
@@ -32,6 +48,12 @@ let task = {
         Log.setFile(allFile);
     },
 
+    /**
+     * 
+     * @param {string} str 
+     * @param {string[]} kw 
+     * @returns 
+     */
     includesKw(str, kw) {
         for (let i in kw) {
             if (str.includes(kw[i])) {
@@ -41,6 +63,12 @@ let task = {
         return false;
     },
 
+    /**
+     * 
+     * @param {string} douyin 
+     * @param {number} preIndex 
+     * @returns 
+     */
     testTask(douyin, preIndex) {
         Log.log('账号：', douyin);
         Log.log('preIndex:', preIndex);
@@ -72,7 +100,7 @@ let task = {
             let rp = 0;//为1则表示完成
             DyLive.openUserList();
             let onlineTag = UiSelector().descContains('在线观众').filter((v) => {
-                return v && v.bounds() && v.bounds().top && v.bounds().width() && v.bounds().height() && v.bounds().top + v.bounds().height() < Device.height();
+                return !!(v && v.bounds() && v.bounds().top && v.bounds().width() && v.bounds().height() && v.bounds().top + v.bounds().height() < Device.height());
             }).findOneBy(2000);
 
             if (!onlineTag) {
@@ -120,6 +148,7 @@ let task = {
                         break;
                     }
 
+                    /** @ts-ignore */
                     if (this.nicknames.includes(nickname)) {
                         tCommon.back();
                         tCommon.sleep(800);
@@ -135,6 +164,7 @@ let task = {
                     }
 
                     Log.log('开始操作用户：', nickname, machine.get('task_dy_toker_live_' + douyin + '_' + nickname, 'bool'));
+                    /** @ts-ignore */
                     this.nicknames.push(nickname);
                     machine.set('task_dy_toker_live_' + douyin + '_' + nickname, true);
                     Log.log('设置后：' + machine.get('task_dy_toker_live_' + douyin + '_' + nickname, 'bool'));
@@ -224,6 +254,7 @@ Engines.executeScript("unit/dialogClose.js");
 while (true) {
     task.log();
     try {
+        /** @type {any} */
         let res = task.run(input, preIndex);
         if (res == true) {
             tCommon.sleep(5000);

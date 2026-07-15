@@ -1,4 +1,4 @@
-let storage = require('common/storage.js');
+let storage = require('./storage.js');
 let machine = {
     db() {
         return Storage;
@@ -14,156 +14,21 @@ let machine = {
         return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     },
 
-    getTask(params) {
-        let task = storage.getTask();
-        if (!task || !task.length) {
-            return [];
-        }
-
-        let t = [];
-        for (let i in task) {
-            //Log.log(task[i]);
-            if (task[i].state !== true) {
-                continue;
-            }
-
-            let detail = storage.getTaskDetail(task[i].index);
-            //Log.log(detail);
-            if (params.isCity !== undefined && !!detail.taskRule.is_city * 1 !== params.isCity) {
-                continue;
-            }
-
-            t.push({
-                id: task[i].index,
-                name: task[i].title,
-            });
-        }
-        return t;
-    },
-
-    getTaskConfig(province, index) {
-        let detail = storage.getTaskDetail(index);
-        let res = detail['taskRule'] || {};
-        res.hour = [];
-        for (let i in res.time) {
-            if (res.time[i]) {
-                res.hour.push(i * 1);
-            }
-        }
-        res.hour = JSON.stringify(res.hour);
-        res.end_type = 0;//结束类型，不限制
-        res.comment_zan_fre = res.zan_comment_fre || 0;
-        res.video_zan_fre = res.zan_video_fre || 0;
-        res.comment_fre = res.comment_video_fre || 0;
-        res.comment_back_fre = res.comment_back_fre || 0;
-        res.private_fre = res.private_msg_fre || 0;
-        res.private_author_fre = res.private_msg_author_fre || 0;
-        res.focus_fre = res.focus_fre || 0;
-        res.focus_author_fre = res.focus_author_fre || 0;
-        res.refresh_video_fre = res.video_fre || 1;//刷视频频率默认1起步
-
-        //规则都是多维的，这里进行处理
-        res.userRules = [detail['talentRule']];
-        if (res.userRules[0].ip) {
-            res.userRules[0].ip = res.userRules[0].ip.replace(/，/g, ',');
-            res.userRules[0].ip = res.userRules[0].ip.split(',');
-            res.userRules[0].province_id = [];
-            for (let i in res.userRules[0].ip) {
-                for (let j in province) {
-                    if (province[j].name.indexOf(res.userRules[0].ip[i]) !== -1) {
-                        res.userRules[0].province_id.push(province[j].id);
-                    }
-                }
-            }
-        } else {
-            res.userRules[0].province_id = [0];
-        }
-
-        res.videoRules = [detail['videoRule']];
-        res.videoRules[0].distance = detail['taskRule'].distance;
-        res.videoRules[0].in_time = 6;//15天内
-
-        res.commentRules = [detail['commentRule']];
-        res.commentRules[0].in_time = 5;//7天内
-        res.commentRules[0].nickname_type = [0];
-        if (res.commentRules[0].ip) {
-            res.commentRules[0].province_id = [];
-            res.commentRules[0].ip = res.commentRules[0].ip.replace(/，/g, ',');
-            res.commentRules[0].ip = res.commentRules[0].ip.split(',');
-            for (let i in res.commentRules[0].ip) {
-                for (let j in province) {
-                    if (province[j].name.indexOf(res.commentRules[0].ip[i]) !== -1) {
-                        res.commentRules[0].province_id.push(province[j].id);
-                    }
-                }
-            }
-        } else {
-            res.commentRules[0].province_id = [0];
-        }
-
-        res.commentUserRules = [detail['userRule']];
-        if (res.commentUserRules[0].ip) {
-            res.commentUserRules[0].ip = res.commentUserRules[0].ip.replace(/，/g, ',');
-            res.commentUserRules[0].ip = res.commentUserRules[0].ip.split(',');
-            res.commentUserRules[0].province_id = [];
-            for (let i in res.commentUserRules[0].ip) {
-                for (let j in province) {
-                    if (province[j].name.indexOf(res.commentUserRules[0].ip[i]) !== -1) {
-                        res.commentUserRules[0].province_id.push(province[j].id);
-                    }
-                }
-            }
-        } else {
-            res.commentUserRules[0].province_id = [0];
-        }
-
-        return res;
-    },
-
-    getConfig(index) {
-        let db = this.db();
-        return {
-            videoTimestamp: JSON.parse(db.get('config_' + index + '_videoTimestamp_' + this.getDate()) || '[]'),
-            zanVideoTimestamp: JSON.parse(db.get('config_' + index + '_zanVideoTimestamp_' + this.getDate()) || '[]'),
-            zanCommentTimestamp: JSON.parse(db.get('config_' + index + '_zanCommentTimestamp_' + this.getDate()) || '[]'),
-            commentTimestamp: JSON.parse(db.get('config_' + index + '_commentTimestamp_' + this.getDate()) || '[]'),
-            focusTimestamp: JSON.parse(db.get('config_' + index + '_focusTimestamp_' + this.getDate()) || '[]'),
-            privateMsgTimestamp: JSON.parse(db.get('config_' + index + '_privateMsgTimestamp_' + this.getDate()) || '[]'),
-            viewUserPageTimestamp: JSON.parse(db.get('config_' + index + '_viewUserPageTimestamp_' + this.getDate()) || '[]'),
-            privateClose: false,
-        }
-    },
-
-    getDouyinConfig(account) {
-        let db = this.db();
-        let key = 'privateClose_' + account;
-        let res = db.get(key);
-        if (!res) {
-            return { privateClose: false };
-        }
-
-        if (typeof (res) !== 'object') {
-            res = JSON.parse(res);
-        }
-
-        if (Date.parse(new Date()) / 1000 - res.timestamp > 86400) {
-            return { privateClose: false };
-        }
-        db.remove(key);
-        return { privateClose: true };
-    },
-
+    /**
+     * 
+     * @param {number} type 0 评论，1私信
+     * @returns 
+     */
     getMsg(type) {
         let speechs = storage.getSpeech();
-        if (speechs.length === 0) {
+        if (!speechs || speechs.length === 0) {
             return undefined;
         }
 
         let tmp = [];
-        //let types = ["评\n论", "私\n信"];
-        //type 为0 则是评论，为1是私信
+        // type 为0 则是评论，为1是私信；只取启用的话术（enabled 不为 false，兼容老数据无 enabled）
         for (let i in speechs) {
-            if (speechs[i]['type'] === type) {
+            if (speechs[i]['type'] === type && speechs[i]['enabled'] !== false) {
                 tmp.push(speechs[i].content);
             }
         }
@@ -176,35 +41,59 @@ let machine = {
         return { msg: tmp[rd] };
     },
 
+    /**
+     * 
+     * @param {string} account 
+     * @returns 
+     */
     douyinExist(account) {
         let res = this.db().getBoolean('douyinExist_' + account);
         if (res) {
             return true;
         }
-        this.db().putBool('douyinExist_' + account, true);
         return false;
     },
 
+    /**
+     * 
+     * @param {string} account 
+     * @returns 
+     */
+    douyinExistUpdate(account) {
+        return this.db().putBoolean('douyinExist_' + account, true);
+    },
+
+    /**
+     * 
+     * @param {string} nickname 
+     * @param {string} title 
+     * @returns 
+     */
     videoExist(nickname, title) {
         let res = this.db().get('videoExist_' + nickname + '_' + title);
         if (res) {
             return true;
         }
-        this.db().putBool('videoExist_' + nickname, true);
+        this.db().putBoolean('videoExist_' + nickname, true);
         return false;
     },
 
     //存一个月的内容
+    /**
+     * 
+     * @param {string} nickname 
+     * @returns 
+     */
     accountFreGt(nickname) {
         let key = 'accountFreGt_' + nickname;
-        let res = this.db().get(key);
-        let current = Date.parse(new Date()) / 1000;
-        if (!res) {
+        let result = this.db().get(key);
+        let current = Math.floor(Date.now()) / 1000;
+        if (!result) {
             this.db().put(key, JSON.stringify([current]));
             return { code: 1 };
         }
 
-        res = JSON.parse(res);//存的时间戳
+        let res = JSON.parse(result);//存的时间戳
         if (res.length === 0) {
             this.db().put(key, JSON.stringify([current]));
             return { code: 1 };
@@ -345,19 +234,6 @@ let machine = {
         }
     },
 
-    setSearchUserSettingRate(item) {
-        return this.set('searchUserSetting_privateRate', item.privateRate)
-            && this.set('searchUserSetting_focusRate', item.focusRate)
-            && this.set('searchUserSetting_zanRate', item.zanRate)
-            && this.set('searchUserSetting_commentRate', item.commentRate)
-            && this.set('searchUserSetting_fansMinCount', item.fansMinCount)
-            && this.set('searchUserSetting_fansMaxCount', item.fansMaxCount)
-            && this.set('searchUserSetting_worksMinCount', item.worksMinCount)
-            && this.set('searchUserSetting_worksMaxCount', item.worksMaxCount)
-            && this.set('searchUserSetting_opCount', item.opCount)
-            && this.set('searchUserSetting_keyword', item.keyword)
-    },
-
     //这里返回的字段要一直，只是值不一致
     getTokerData(type) {
         //type 2 轻松拓客， 默认设置参数
@@ -416,6 +292,11 @@ let machine = {
         }
     },
 
+    /**
+     * 
+     * @param {boolean} [type]
+     * @returns 
+     */
     getKsTokerData(type) {
         if (!type) {
             return {
@@ -451,6 +332,11 @@ let machine = {
         }
     },
 
+    /**
+     * 
+     * @param {boolean} [type] 
+     * @returns 
+     */
     getWxTokerData(type) {
         if (!type) {
             return {
@@ -486,27 +372,13 @@ let machine = {
         }
     },
 
-    getFansIncPageRate() {
-        return {
-            //keyword: this.get('fansIncPage_keyword') || '',
-            videoOpRate: this.get('fansIncPage_videoOpRate') || 100,
-            commentRate: this.get('fansIncPage_commentRate') || 100,
-            zanRate: this.get('fansIncPage_zanRate') || 100,
-            zanCommentRate: this.get('fansIncPage_zanCommentRate') || 100,
-            zanCount: this.get('fansIncPage_zanCount') || 5,
-        }
-    },
-
-    setFansIncPageRate(item) {
-        //this.set('fansIncPage_keyword', item.keyword)
-        return this.set('fansIncPage_videoOpRate', item.videoOpRate)
-            && this.set('fansIncPage_commentRate', item.commentRate)
-            && this.set('fansIncPage_zanRate', item.zanRate)
-            && this.set('fansIncPage_zanCommentRate', item.zanCommentRate)
-            && this.set('fansIncPage_zanCount', item.zanCount)
-    },
-
     //尽量 文件名 + key的模式
+    /**
+     * 
+     * @param {string} key 
+     * @param {string|undefined} [type]
+     * @returns {any}
+     */
     get(key, type) {
         if (type == undefined) {
             type = "string";
@@ -520,7 +392,7 @@ let machine = {
         } else if (type == 'float') {
             return db.getDouble(key);
         } else if (type == 'object') {
-            return db.getObject(key);
+            return db.getObj(key);
         } else if (type == 'bool') {
             return db.getBoolean(key);
         }
@@ -528,25 +400,45 @@ let machine = {
         return undefined;
     },
 
+    /**
+     * 
+     * @param {string} key 
+     * @returns 
+     */
     getArray(key) {
         let db = this.db();
         return db.getArray(key);
     },
 
+    /**
+     * 
+     * @param {number} num 
+     * @returns 
+     */
+    isFloat(num) {
+        return num % 1 !== 0;
+    },
+
     //尽量 文件名 + key的模式
+    /**
+     * 
+     * @param {string} key 
+     * @param {any} value 
+     * @returns {boolean}
+     */
     set(key, value) {
         let db = this.db();
         if (typeof value == 'string') {
             db.put(key, value);
         } else if (typeof value == 'boolean') {
-            db.putBool(key, value);
+            db.putBoolean(key, value);
         } else if (typeof value == 'object') {
             db.putDouble(key, value);
-        } else if (typeof value == 'undefined' || typeof value == 'null') {
+        } else if (typeof value == 'undefined' || value == null) {
             db.putObj(key, value);
         } else if (Number.isInteger(value)) {
             db.putInteger(key, value);
-        } else if (Number.isFloat(value)) {
+        } else if (this.isFloat(value)) {
             db.putDouble(key, value);
         } else {
             db.putObj(key, value);

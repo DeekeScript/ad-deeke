@@ -171,10 +171,10 @@ const Common = {
     },
 
     /**
-     * 模拟返回
-     * @param i
-     * @param time
-     * @param randTime
+     * 模拟返回操作
+     * @param {number} [i] - 返回次数，默认 1 次
+     * @param {number} [time] - 每次返回的间隔时间（毫秒），默认 700ms
+     * @param {number} [randTime] - 随机波动时间范围（毫秒），传入后会生成 time + randTime * random() 的随机间隔
      */
     back(i, time, randTime) {
         if (i === undefined) {
@@ -260,7 +260,8 @@ const Common = {
 
     /**
      * 滑动搜索用户列表
-     * @returns boolean  默认用户页面
+     * @param {boolean} [filterRootLayout] - 是否过滤掉根布局，默认为 false
+     * @returns {boolean|null}  默认用户页面
      */
     swipeSearchUserOp(filterRootLayout = false) {
         let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').scrollable(true).filter(v => {
@@ -284,7 +285,7 @@ const Common = {
 
     /**
      * 滑动粉丝列表
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeFansListOp() {
         return this.swipeSearchUserOp(true);
@@ -292,7 +293,7 @@ const Common = {
 
     /**
      * 滑动关注列表
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeFocusListOp() {
         return this.swipeSearchUserOp(true);
@@ -300,7 +301,7 @@ const Common = {
 
     /**
      * 滑动评论列表
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeCommentListOp() {
         return this.swipeSearchUserOp();
@@ -308,7 +309,7 @@ const Common = {
 
     /**
      * 搜索列表滑动到左侧
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeSearchTabToLeft() {
         let tag = UiSelector().scrollable(true).className('android.widget.HorizontalScrollView').isVisibleToUser(true).findOne();
@@ -326,7 +327,7 @@ const Common = {
 
     /**
      * 粉丝群列表滑动
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeFansGroupListOp() {
         return this.swipeSearchUserOp();
@@ -349,7 +350,7 @@ const Common = {
 
     /**
      * 互动消息列表滑动
-     * @returns {boolean}
+     * @returns {boolean|null}
      */
     swipeMessageDetailsList() {
         return this.swipeSearchUserOp();
@@ -357,7 +358,7 @@ const Common = {
 
     /**
     * 作品赞列表滑动
-    * @returns {boolean}
+    * @returns {boolean|null}
     */
     swipeWorkZanList() {
         return this.swipeSearchUserOp();
@@ -365,7 +366,7 @@ const Common = {
 
     /**
      * 关闭弹窗
-     * @param type
+     * @param [type] {number}
      */
     closeAlert(type) {
         if (!type) {
@@ -395,9 +396,9 @@ const Common = {
 
     /**
      * 执行方法后修复
-     * @param func
-     * @param time
-     * @param randomTime
+     * @param {function} func
+     * @param {number} time
+     * @param {number} [randomTime]
      */
     sleepFunc(func, time, randomTime) {
         if (!randomTime) {
@@ -409,7 +410,7 @@ const Common = {
 
     /**
      * 显示提示
-     * @param msg
+     * @param {string} msg
      */
     showToast(msg) {
         FloatDialogs.toast(msg);
@@ -418,87 +419,41 @@ const Common = {
 
     /**
      * 切分关键词
-     * @param msg
+     * @param {string} keyword
      */
     splitKeyword(keyword) {
         keyword = keyword.replace(/，/g, ',');
-        keyword = keyword.split(',');
+        let keywords = keyword.split(',');
         let ks = [];
-        for (let i in keyword) {
-            if (keyword[i] === '') {
+        for (let i in keywords) {
+            if (keywords[i] === '') {
                 continue;
             }
 
-            let tmp = keyword[i];
-            if (keyword[i].indexOf('&') !== -1) {
-                tmp = keyword[i].split('&');
-            } else if (keyword[i].indexOf('+') !== -1) {
-                tmp = keyword[i].split('+');
-            }
-            ks.push(tmp);
+            ks.push(keywords[i]);
         }
         return ks;
     },
 
     /**
      * 检测标题是否包含关键词
-     * @param contain
-     * @param title
-     * @returns {Array|null}
+     * @param {string} contain
+     * @param {string} title
+     * @returns {Array<string>|null}
      */
     containsWord(contain, title) {
-        contain = this.splitKeyword(contain);
-        for (let con of contain) {
+        let contains = this.splitKeyword(contain);
+        for (let con of contains) {
             if (typeof (con) === 'string' && title.indexOf(con) !== -1) {
                 return [con];
-            }
-
-            if (typeof (con) === 'object') {
-                let _true = true;
-                for (let i in con) {
-                    if (title.indexOf(con[i]) === -1) {
-                        _true = false;
-                    }
-                }
-                if (_true) {
-                    return con;
-                }
             }
         }
         return null;
     },
 
     /**
-     * 获取标题中是否不包含的关键字
-     * @param contain
-     * @param title
-     * @returns {boolean}
-     */
-    noContainsWord(noContain, title) {
-        noContain = this.splitKeyword(noContain);
-        for (let con of noContain) {
-            if (typeof (con) === 'string' && title.indexOf(con) !== -1) {
-                return false;
-            }
-
-            if (typeof (con) === 'object') {
-                let len = 0;
-                for (let i in con) {
-                    if (title.indexOf(con[i]) !== -1) {
-                        len++;
-                    }
-                }
-                if (len === con.length) {
-                    return false;
-                }
-            }
-        }
-        return noContain;
-    },
-
-    /**
      * 判断是否有备注
-     * @param remark
+     * @param {string} remark
      * @returns {boolean}
      */
     getRemark(remark) {

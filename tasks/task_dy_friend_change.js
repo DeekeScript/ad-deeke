@@ -1,10 +1,10 @@
-let DyCommon = require('app/dy/Common.js');
-let DyUser = require('app/dy/User.js');
-let DyVideo = require('app/dy/Video.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let baiduWenxin = require('service/baiduWenxin.js');
-let statistics = require('common/statistics');
+let DyCommon = require('../app/dy/Common.js');
+let DyUser = require('../app/dy/User.js');
+let DyVideo = require('../app/dy/Video.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
+let statistics = require('../common/statistics');
 
 let task = {
     contents: [],
@@ -19,11 +19,20 @@ let task = {
         Log.setFile(allFile);
     },
 
+    
     //type 0 评论，1私信
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
@@ -57,7 +66,6 @@ let task = {
                 Log.log("找到的内容数量：", contains.length);
                 if (contains.length == 0) {
                     if (errorContainsCount++ >= 3) {
-                        errorCount = 0;
                         throw new Error("3次找不到container内容");
                     }
                     continue;
@@ -173,7 +181,7 @@ let task = {
 
                     DyCommon.sleep(config.homeWait * 1000);//主页停留
                     DyCommon.back();
-                    DyCommon.sleep(500, 500);
+                    DyCommon.sleep(500);
                     if (DyCommon.aId('text1').descContains('粉丝').isVisibleToUser(true).findOne() || DyCommon.aId('text1').textContains('粉丝').isVisibleToUser(true).findOne()) {
                         Log.log("在列表页面了");
                     } else {

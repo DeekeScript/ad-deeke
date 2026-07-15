@@ -1,15 +1,17 @@
-let Common = require('app/dy/Common.js');
-let User = require('app/dy/User.js');
-let statistics = require('common/statistics');
-let Video = require('app/dy/Video.js');
-let Comment = require('app/dy/Comment.js');
+let Common = require('./Common.js');
+let User = require('./User.js');
+let statistics = require('../../common/statistics');
+let Video = require('./Video.js');
+let Comment = require('./Comment.js');
 
 const Search = {
+    /** @type {Array<string>} */
     contents: [],
     /**
      * type = 0 视频  type = 1 用户  需要先进入搜索页  2 综合
      * @param {string} keyword 
-     * @param {number} type 
+     * @param {number} [type]
+     * @param {any} [config]
      * @returns 
      */
     intoSearchList(keyword, type, config) {
@@ -96,7 +98,9 @@ const Search = {
                         continue;
                     }
 
+                    /** @ts-ignore */
                     let baseTopTag = UiSelector(false).text(baseTop[i]).isVisibleToUser(true).findOne();
+                    /** @ts-ignore */
                     let tag = UiSelector(false).text(textConfig[i][config[i]]).filter(v => {
                         return v.bounds().top > baseTopTag.bounds().top + baseTopTag.bounds().height();
                     }).findOne();
@@ -106,7 +110,9 @@ const Search = {
                 }
 
                 Common.sleep(3000 + 1000 * Math.random());
-                filterTag.click();
+                Gesture.click(filterTag.parent().bounds().left + 10 * Math.random(), filterTag.parent().bounds().top + 10 * Math.random());
+                Common.sleep(500);
+
                 Common.sleep(500);
             }
         }
@@ -117,6 +123,11 @@ const Search = {
      * @returns {boolean}
      */
     intoSearchVideo() {
+        //需要进入视频栏
+        let videoTag = Common.aId('text1').text('视频').isVisibleToUser(true).findOne();
+        Common.click(videoTag, 0.2);
+        Common.sleep(3000 + 1000 * Math.random());
+
         let descTag = Common.id('desc').className('android.widget.TextView').filter(v => {
             return !!v.text();
         }).isVisibleToUser(true).findOne();
@@ -136,6 +147,12 @@ const Search = {
     intoSeachUser(keyword) {
         Log.log("开始寻找抖音号了哈", keyword);
         let userTag = UiSelector().className('android.view.ViewGroup').descContains('关注').isVisibleToUser(true).findOne();
+        let userTag2 = UiSelector().className('android.view.ViewGroup').descContains('发私信').isVisibleToUser(true).findOne();
+        if (userTag2 && userTag2.bounds().top < userTag.bounds().top) {
+            userTag = userTag2;
+            Common.log('userTag2', '发私信位置更近，采用发私信对应的用户');
+        }
+
         if (!userTag) {
             FloatDialogs.toast('找不到抖音号：' + keyword);
             return false;
@@ -183,15 +200,17 @@ const Search = {
      * @param {string} keyword 
      */
     homeIntoSearchUser(keyword) {
+        let res;
         if (keyword.indexOf('+') !== 0) {
             Search.intoSearchList(keyword, 1);
-            Search.intoSeachUser(keyword);
+            res = Search.intoSeachUser(keyword);
         } else {
             keyword = keyword.substring(1);
             User.intoFocusList();
             Common.sleep(3000);
-            User.focusListSearch(keyword);
+            res = User.focusListSearch(keyword);
         }
+        return res;
     },
 
     /**
@@ -241,7 +260,7 @@ const Search = {
      * @param {function} decCount 
      * @param {function} setAccount 
      * @param {function} getMsg 
-     * @param {object} params 
+     * @param {any} params 
      * @returns {boolean}
      */
     userList(getAccounts, decCount, setAccount, getMsg, params) {
@@ -249,6 +268,7 @@ const Search = {
         Log.log('开始执行用户列表');
         let errorCount = 0;
 
+        /** @type Array<string> */
         let rects = [];
         while (true) {
             let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').isVisibleToUser(true).findOne();
@@ -261,131 +281,137 @@ const Search = {
                 errorCount = 0;
             }
 
-            for (let i in tags) {
-                this.notInList();
-                if (rects.includes(tags[i].bounds().toString())) {
-                    continue;
-                }
-                Common.click(tags[i], 0.35);
-                rects.push(tags[i].bounds().toString());
-                Common.sleep(3000 + 1500 * Math.random());
-                //看看有没有视频，有的话，操作评论一下，按照20%的频率即可
-                statistics.viewUser();
-                let isPrivateAccount = User.isPrivate();
-                let account = User.getDouyin();
-                Log.log(account, 'account');
-                if (!account) {
-                    Log.log('点击没有进入');
-                    continue;
-                }
+            try {
+                for (let i in tags) {
+                    this.notInList();
+                    if (rects.includes(tags[i].bounds().toString())) {
+                        continue;
+                    }
+                    Common.click(tags[i], 0.35);
+                    rects.push(tags[i].bounds().toString());
+                    Common.sleep(3000 + 1500 * Math.random());
+                    //看看有没有视频，有的话，操作评论一下，按照20%的频率即可
+                    statistics.viewUser();
+                    let isPrivateAccount = User.isPrivate();
+                    let account = User.getDouyin();
+                    Log.log(account, 'account');
+                    if (!account) {
+                        Log.log('点击没有进入');
+                        continue;
+                    }
 
-                if (this.contents.includes(account) || getAccounts(account)) {
-                    Common.back();
-                    Log.log('重复');
-                    Common.sleep(1000 + 500 * Math.random());
-                    continue;
-                }
+                    if (this.contents.includes(account) || getAccounts(account)) {
+                        Common.back();
+                        Log.log('重复');
+                        Common.sleep(1000 + 500 * Math.random());
+                        continue;
+                    }
 
-                Log.log('是否是私密账号：' + isPrivateAccount);
-                if (isPrivateAccount) {
-                    Common.back();
-                    Log.log('私密账号');
-                    Common.sleep(1000 + 500 * Math.random());
-                    if (decCount() <= 0) {
-                        Log.log('数量操作完了');
+                    Log.log('是否是私密账号：' + isPrivateAccount);
+                    if (isPrivateAccount) {
+                        Common.back();
+                        Log.log('私密账号');
+                        Common.sleep(1000 + 500 * Math.random());
+                        if (decCount() <= 0) {
+                            Log.log('数量操作完了');
+                            return true;
+                        }
+                        setAccount(account);
+                        this.contents.push(account);
+                        continue;
+                    }
+
+                    //查看粉丝和作品数是否合格
+                    let worksCount = User.getWorksCount();
+                    if (worksCount < settingData.worksMinCount || worksCount > settingData.worksMaxCount) {
+                        Log.log('作品数不符合', worksCount, settingData.worksMinCount, settingData.worksMaxCount);
+                        setAccount(account);
+                        Common.back();
+                        Common.sleep(1000 + 500 * Math.random());
+                        continue;
+                    }
+
+                    //查看粉丝和作品数是否合格
+                    let fansCount = 0;
+                    try {
+                        fansCount = User.getFansCount();
+                    } catch (e) {
+                        Log.log(e);
+                        Log.log('获取粉丝数量失败');
+                        Common.back();
+                        Common.sleep(1000 + 500 * Math.random());
+                        continue;//大概率是没有点击进去
+                    }
+
+                    if (fansCount < settingData.fansMinCount * 1 || fansCount > settingData.fansMaxCount * 1) {
+                        Log.log('粉丝数不符合', fansCount, settingData.fansMinCount, settingData.fansMaxCount);
+                        setAccount(account);
+                        Common.back();
+                        Common.sleep(1000 + 500 * Math.random());
+                        continue;
+                    }
+
+                    let nickname = User.getNickname();
+                    Log.log('获取名称', nickname);
+
+                    if (Math.random() * 100 <= settingData.focusRate * 1) {
+                        User.focus();
+                        Log.log('关注');
+                    }
+
+                    if (Math.random() * 100 <= settingData.privateRate * 1) {
+                        User.privateMsg(getMsg(1, nickname, User.getAge(), User.getGender()).msg);
+                        Log.log('私信');
+                    }
+
+                    let commentRate = Math.random() * 100;
+                    let zanRate = Math.random() * 100;
+
+                    Log.log('即将进入视频', commentRate, zanRate);
+                    if ((commentRate < settingData.commentRate * 1 || zanRate < settingData.zanRate * 1) && Video.intoUserVideo()) {
+                        //点赞
+                        Log.log('点赞频率检测', zanRate, settingData.zanRate * 1);
+                        if (zanRate <= settingData.zanRate * 1) {
+                            Video.clickZan();
+                            Log.log('点赞');
+                        }
+
+                        //随机评论视频
+                        Log.log('评论频率检测', commentRate, settingData.commentRate * 1);
+                        if ((commentRate <= settingData.commentRate * 1) && !UiSelector().text('作者仅允许互关朋友评论').isVisibleToUser(true).findOne()) {
+                            let msg = getMsg(0, Video.getContent());
+                            if (msg) {
+                                Log.log('开启评论窗口');
+                                Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
+                                Log.log('评论了');
+                                Common.sleep(1000 + 500 * Math.random());//回到视频页面
+                            }
+                        }
+                        User.backHome();
+                        Log.log('返回home检测');
+                    } else {
+                        Log.log('未进入视频');
+                    }
+
+                    let r = decCount();
+                    Log.log('r', r);
+                    if (r <= 0) {
                         return true;
                     }
+
                     setAccount(account);
+                    Log.log(account, getAccounts(account));
                     this.contents.push(account);
-                    continue;
-                }
-
-                //查看粉丝和作品数是否合格
-                let worksCount = User.getWorksCount();
-                if (worksCount < settingData.worksMinCount || worksCount > settingData.worksMaxCount) {
-                    Log.log('作品数不符合', worksCount, settingData.worksMinCount, settingData.worksMaxCount);
-                    setAccount(account);
                     Common.back();
+                    Log.log('返回到列表-可能不成功');
+                    Common.sleep(1000 + 500 * Math.random());//用户页到列表页
+                    this.notInList();
                     Common.sleep(1000 + 500 * Math.random());
-                    continue;
                 }
-
-                //查看粉丝和作品数是否合格
-                let fansCount = 0;
-                try {
-                    fansCount = User.getFansCount();
-                } catch (e) {
-                    Log.log(e);
-                    Log.log('获取粉丝数量失败');
-                    Common.back();
-                    Common.sleep(1000 + 500 * Math.random());
-                    continue;//大概率是没有点击进去
-                }
-
-                if (fansCount < settingData.fansMinCount * 1 || fansCount > settingData.fansMaxCount * 1) {
-                    Log.log('粉丝数不符合', fansCount, settingData.fansMinCount, settingData.fansMaxCount);
-                    setAccount(account);
-                    Common.back();
-                    Common.sleep(1000 + 500 * Math.random());
-                    continue;
-                }
-
-                let nickname = User.getNickname();
-                Log.log('获取名称', nickname);
-
-                if (Math.random() * 100 <= settingData.focusRate * 1) {
-                    User.focus();
-                    Log.log('关注');
-                }
-
-                if (Math.random() * 100 <= settingData.privateRate * 1) {
-                    User.privateMsg(getMsg(1, nickname, User.getAge(), User.getGender()).msg);
-                    Log.log('私信');
-                }
-
-                let commentRate = Math.random() * 100;
-                let zanRate = Math.random() * 100;
-
-                Log.log('即将进入视频', commentRate, zanRate);
-                if ((commentRate < settingData.commentRate * 1 || zanRate < settingData.zanRate * 1) && Video.intoUserVideo()) {
-                    //点赞
-                    Log.log('点赞频率检测', zanRate, settingData.zanRate * 1);
-                    if (zanRate <= settingData.zanRate * 1) {
-                        Video.clickZan();
-                        Log.log('点赞');
-                    }
-
-                    //随机评论视频
-                    Log.log('评论频率检测', commentRate, settingData.commentRate * 1);
-                    if ((commentRate <= settingData.commentRate * 1) && !UiSelector().text('作者仅允许互关朋友评论').isVisibleToUser(true).findOne()) {
-                        let msg = getMsg(0, Video.getContent());
-                        if (msg) {
-                            Log.log('开启评论窗口');
-                            Comment.commentMsg(msg.msg);///////////////////////////////////操作  评论视频
-                            Log.log('评论了');
-                            Common.sleep(1000 + 500 * Math.random());//回到视频页面
-                        }
-                    }
-                    User.backHome();
-                    Log.log('返回home检测');
-                } else {
-                    Log.log('未进入视频');
-                }
-
-                let r = decCount();
-                Log.log('r', r);
-                if (r <= 0) {
-                    return true;
-                }
-
-                setAccount(account);
-                Log.log(account, getAccounts(account));
-                this.contents.push(account);
-                Common.back();
-                Log.log('返回到列表-可能不成功');
-                Common.sleep(1000 + 500 * Math.random());//用户页到列表页
-                this.notInList();
-                Common.sleep(1000 + 500 * Math.random());
+            } catch (e) {
+                errorCount++;
+                //查看是不是不在视频页面，不是则返回
+                this.gotoVedioPage();
             }
 
             if (errorCount >= 3) {
@@ -398,6 +424,19 @@ const Search = {
                 return true;
             }
             Common.sleep(2000 + 1000 * Math.random());
+        }
+    },
+
+    gotoVedioPage() {
+        let k = 3;
+        while (k-- > 0) {
+            if (Common.id('back_btn').filter(v => {
+                return v.bounds().left > Device.width() / 2 && v.bounds().top > Device.height() / 4;
+            }).isVisibleToUser(true).findOne()) {
+                Common.back();
+                Common.sleep(1000 + 500 * Math.random());
+                Common.log('在评论窗口，关闭');
+            }
         }
     }
 }

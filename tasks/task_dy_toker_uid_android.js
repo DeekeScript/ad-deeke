@@ -1,9 +1,9 @@
-let tCommon = require('app/dy/Common');
-let machine = require('common/machine');
-let storage = require('common/storage');
-let baiduWenxin = require('service/baiduWenxin');
-let DyVideo = require('app/dy/Video');
-let DyUser = require('app/dy/User');
+let tCommon = require('../app/dy/Common');
+let machine = require('../common/machine');
+let storage = require('../common/storage');
+let baiduWenxin = require('../service/baiduWenxin');
+let DyVideo = require('../app/dy/Video');
+let DyUser = require('../app/dy/User');
 
 let dy = {
     getAvatar() {
@@ -11,14 +11,6 @@ let dy = {
     },
 
     getGender() {
-        // if (UiSelector().className('android.widget.TextView').descContains('女').isVisibleToUser(true).findOne()) {
-        //     return '0';
-        // }
-
-        // if (UiSelector().className('android.widget.TextView').descContains('男').isVisibleToUser(true).findOne()) {
-        //     return '1';
-        // }
-
         return '2';
     },
 
@@ -71,6 +63,11 @@ let dy = {
         return true;
     },
 
+    /**
+     * 
+     * @param {function} msgFunc 
+     * @returns 
+     */
     commentVideo(msgFunc) {
         let CommentCountTag = UiSelector().descContains('评论').className('android.widget.ImageView').isVisibleToUser(true).findOne();
         if (!CommentCountTag) {
@@ -106,7 +103,9 @@ let dy = {
             Log.log('没有找到输入框');
             return false;
         }
-        iptTag.setText(msgFunc(title));
+
+        let msg = msgFunc(title);
+        iptTag.setText(msg);
         tCommon.sleep(1000 + 1000 * Math.random());
 
         // @ts-ignore
@@ -146,6 +145,11 @@ let dy = {
         return true;
     },
 
+    /**
+     * 
+     * @param {string} msg 
+     * @returns 
+     */
     privateMsg(msg) {
         let moreTag = UiSelector().descContains('更多').filter(v => {
             // @ts-ignore
@@ -205,14 +209,21 @@ let dy = {
 }
 
 let task = {
+    
     //type 0 评论，1私信
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} title 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
-
-        //return { msg: ['厉害', '六六六', '666', '拍得很好', '不错哦', '关注你很久了', '学习了', '景色不错', '真的很不错', '太厉害了', '深表认同', '来过了', '茫茫人海遇见你', '太不容易了', '很好', '懂了', '我看到了', '可以的', '一起加油', '真好', '我的个乖乖'][Math.round(Math.random() * 20)] };
         return machine.getMsg(type) || false;//永远不会结束
     },
 
@@ -288,7 +299,7 @@ let task = {
             if (config.type.includes(3)) {
                 dy.privateMsg(task.getMsg(1, DyUser.getNickname()).msg);
             }
-            Storage.putBool('dy_uid_' + uid, true);
+            Storage.putBoolean('dy_uid_' + uid, true);
 
             tCommon.backHomeOnly();
             tCommon.sleep(config.second / 2 * 1000 + config.second / 2 * 1000 * Math.random());

@@ -1,7 +1,7 @@
-let tCommon = require("app/dy/Common");
-let DyIndex = require('app/dy/Index.js');
-let DyUser = require('app/dy/User.js');
-let machine = require('common/machine.js');
+let tCommon = require("../app/dy/Common");
+let DyIndex = require('../app/dy/Index.js');
+let DyUser = require('../app/dy/User.js');
+let machine = require('../common/machine.js');
 
 let task = {
     run() {

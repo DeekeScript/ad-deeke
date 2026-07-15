@@ -1,13 +1,18 @@
-let tCommon = require('app/dy/Common.js');
-let DyIndex = require('app/dy/Index.js');
-let DySearch = require('app/dy/Search.js');
-let DyUser = require('app/dy/User.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let baiduWenxin = require('service/baiduWenxin.js');
+let tCommon = require('../app/dy/Common.js');
+let DyIndex = require('../app/dy/Index.js');
+let DySearch = require('../app/dy/Search.js');
+let DyUser = require('../app/dy/User.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
 
 let task = {
     contents: [],
+    /**
+     * 
+     * @param {any} settingData 
+     * @returns 
+     */
     run(settingData) {
         return this.testTask(settingData);
     },
@@ -19,15 +24,29 @@ let task = {
         Log.setFile(allFile);
     },
 
+    
     //type 0 评论，1私信
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
         if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-            return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
 
+    /**
+     * 
+     * @param {any} settingData 
+     * @returns 
+     */
     testTask(settingData) {
         //首先进入点赞页面
         DyIndex.intoHome();

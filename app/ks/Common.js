@@ -264,6 +264,10 @@ const Common = {
                     a = UiSelector().text("拒绝").clickable(true).isVisibleToUser(true).findOne() || UiSelector().text("拒绝").desc('拒绝').clickable(true).filter(f).isVisibleToUser(true).findOne();
                 }
 
+                if (!a) {
+                    a = UiSelector().text("立即领取").filter(f).isVisibleToUser(true).findOne();
+                }
+
                 let ff = function (v) {
                     return v && v.bounds() && v.bounds().top > Device.height() / 5 && v.bounds().top + v.bounds().height() < Device.height() * 0.8 && v.bounds().left > Device.width() / 2 && v.bounds().left + v.bounds().width() < Device.width() * 0.9;//只有在中间的位置才是弹窗
                 }
@@ -278,10 +282,12 @@ const Common = {
                     a = UiSelector().text('暂不公开').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().text('忽略本次').clickable(true).filter(f).isVisibleToUser(true).findOnce() || UiSelector().descContains('不再提醒').clickable(true).filter(f).isVisibleToUser(true).findOne();
                 }
 
-                if (a) {
+                if (a && a.isClickable()) {
                     a.click();
-                    Log.log(a);
-                    Log.log("可能的弹窗点击了");
+                    console.log(a);
+                    console.log("可能的弹窗点击了");
+                } else if (a) {
+                    this.click(a, 0.2);
                 }
 
                 if (k % 50 == 0) {

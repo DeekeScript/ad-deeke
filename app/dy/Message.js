@@ -1,9 +1,9 @@
-let Common = require('app/dy/Common.js');
-let Comment = require('app/dy/Comment.js');
-let User = require('app/dy/User.js');
-let Video = require('app/dy/Video.js');
-let statistics = require('common/statistics');
-let storage = require('common/storage.js');
+let Common = require('./Common.js');
+let Comment = require('./Comment.js');
+let User = require('./User.js');
+let Video = require('./Video.js');
+let statistics = require('../../common/statistics');
+let storage = require('../../common/storage.js');
 
 let Message = {
     /**
@@ -34,6 +34,7 @@ let Message = {
      */
     intoFansGroup(account, index) {
         this.search(account);
+        /** @type {string[]} */
         let contents = [];
 
         let rpCount = 0;
@@ -91,13 +92,13 @@ let Message = {
             if (rpCount >= 3) {
                 return false;
             }
-            Common.swipe(0, 0.5);
+            Common.swipe(0, 1, 3);
         }
     },
 
     /**
      * 进入粉丝群列表
-     * @param {array} contents 
+     * @param {Array<string>} contents 
      * @param {function} getMsg 
      * @param {function} machineInclude 
      * @param {function} machineSet 
@@ -131,12 +132,12 @@ let Message = {
             return v.bounds().top < Device.height() / 10 && v.bounds().left > Device.width() * 0.75;
         }).isVisibleToUser(true).findOne();
 
-        moreTag.click();
-        Common.sleep(2000 + 1000 * Math.random());
+        Common.click(moreTag, 0.2);
+        Common.sleep(3000 + 1000 * Math.random());
 
         let intoGroupListTag = UiSelector().className('android.widget.TextView').text('群聊成员').isVisibleToUser(true).findOne();
-        Common.click(intoGroupListTag);
-        Common.sleep(2000 + 1000 * Math.random());
+        Common.click(intoGroupListTag, 0.2);
+        Common.sleep(5000 + 3000 * Math.random());
         Log.log(tag);
 
         let rpCount = 0;
@@ -180,7 +181,7 @@ let Message = {
                 statistics.viewUser();
                 let isPrivateAccount = User.isPrivate();
                 if (isPrivateAccount) {
-                    Common.back();
+                    Common.back(1, 1000);
                     machineSet(contains[i].text());
                     contents.push(contains[i].text());
                     continue;
@@ -230,7 +231,7 @@ let Message = {
                 }
 
                 Common.sleep(500);
-                Common.swipe(1, 1, 0.3);
+                Common.swipe(1, 1, 5);
                 Common.sleep(1000);
                 if (Math.random() * 100 <= config.focusRate) {
                     Common.sleep(base * config.focusWait);
@@ -242,7 +243,7 @@ let Message = {
                     Common.sleep(base * config.privateWait);
                     if (config.privateLanv) {
                         Log.log('私信卡片');
-                        User.privateMsgCard();
+                        User.privateMsgCard(1);
                         Common.sleep(500);
                     } else {
                         User.privateMsg(getMsg(1, contains[i].text()).msg);
@@ -253,8 +254,14 @@ let Message = {
                 machineSet(contains[i].text());
                 contents.push(contains[i].text());
                 Common.sleep(300);
-                Common.back();
+                if (User.inUserHome()) {
+                    Common.back(1, 2000);
+                }
                 Common.sleep(config.accountWait);
+            }
+
+            if (User.inUserHome()) {
+                Common.back(1, 2000);
             }
 
             if (rpCount >= 3) {

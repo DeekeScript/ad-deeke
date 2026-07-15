@@ -1,18 +1,25 @@
-let tCommon = require('app/ks/Common.js');
-let KsIndex = require('app/ks/Index.js');
-let KsSearch = require('app/ks/Search.js');
-let KsUser = require('app/ks/User.js');
-let KsVideo = require('app/ks/Video.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let KsComment = require('app/ks/Comment.js');
-let baiduWenxin = require('service/baiduWenxin.js');
+let tCommon = require('../app/ks/Common.js');
+let KsIndex = require('../app/ks/Index.js');
+let KsSearch = require('../app/ks/Search.js');
+let KsUser = require('../app/ks/User.js');
+let KsVideo = require('../app/ks/Video.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let KsComment = require('../app/ks/Comment.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
 
 let task = {
     contents: [],
     lib_id: undefined,
+    /** @type {string[]} */
     kws: [],
     count: 10,
+    /**
+     * 
+     * @param {string} keyword 
+     * @param {string[]} kws 
+     * @returns 
+     */
     run(keyword, kws) {
         this.kws = tCommon.splitKeyword(kws);
         Log.log('keyword', keyword, this.count, this.kws);
@@ -27,16 +34,27 @@ let task = {
     },
 
     //type 0 评论，1私信
-    getMsg(type, title, age, gender) {
-        gender = ['女', '男', '未知'][gender];
-        if (storage.getMachineType() === 1) {
-            if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
-                return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
-            }
-            return machine.getMsg(type) || false;//永远不会结束
+    /**
+     * 
+     * @param {number} type 
+     * @param {string} [title] 
+     * @param {number} [age] 
+     * @param {number} [gender] 
+     * @returns {any}
+     */
+    getMsg(type, title, age, gender = 2) {
+        let genderStr = ['女', '男', '未知'][gender];
+        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+            return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
+        return machine.getMsg(type) || false;//永远不会结束
     },
 
+    /**
+     * 
+     * @param {string} content 
+     * @returns 
+     */
     contains(content) {
         for (let str of this.kws) {
             if (content.indexOf(str) !== -1) {
@@ -46,6 +64,11 @@ let task = {
         return false;
     },
 
+    /**
+     * 
+     * @param {string} keyword 
+     * @returns 
+     */
     testTask(keyword) {
         //首先进入点赞页面
         KsIndex.intoHome();
