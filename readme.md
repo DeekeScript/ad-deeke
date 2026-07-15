@@ -60,24 +60,24 @@
 ## 📸 软件实景截图展示
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke主界面" src="photo/1-new.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/2.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/3.jpg" width="24%">
-<img alt="Deeke主界面" src="photo/4.jpg" width="24%">
+<img alt="Deeke主界面" src="photo/webp/1-new.webp" width="24%">
+<img alt="Deeke主界面" src="photo/webp/2.webp" width="24%">
+<img alt="Deeke主界面" src="photo/webp/3.webp" width="24%">
+<img alt="Deeke主界面" src="photo/webp/4.webp" width="24%">
 
-<img alt="Deeke设置" src="photo/setting.jpg" width="24%">
-<img alt="Deeke智能评论" src="photo/speech.jpg" width="24%">
-<img alt="Deeke评论应用" src="photo/speech-app.jpg" width="24%">
-<img alt="Deeke设置页面" src="photo/1-setting.jpg" width="24%">
+<img alt="Deeke设置" src="photo/webp/setting.webp" width="24%">
+<img alt="Deeke智能评论" src="photo/webp/speech.webp" width="24%">
+<img alt="Deeke评论应用" src="photo/webp/speech-app.webp" width="24%">
+<img alt="Deeke设置页面" src="photo/webp/1-setting.webp" width="24%">
 
-<img alt="Deeke功能文档说明" src="photo/document.jpg" width="24%">
-<img alt="Deeke支付界面" src="photo/pay.jpg" width="24%">
-<img alt="Deeke扫码设置" src="photo/scan.jpg" width="24%">
-<img alt="Deeke推荐营销设置页" src="photo/function.jpg" width="24%">
+<img alt="Deeke功能文档说明" src="photo/webp/document.webp" width="24%">
+<img alt="Deeke支付界面" src="photo/webp/pay.webp" width="24%">
+<img alt="Deeke扫码设置" src="photo/webp/scan.webp" width="24%">
+<img alt="Deeke推荐营销设置页" src="photo/webp/function.webp" width="24%">
 
-<img alt="Deeke推荐营销设置页" src="photo/function2.jpg" width="24%">
-<img alt="Deeke图标" src="photo/icon.jpg" width="24%">
-<img alt="Deeke演示" src="photo/demo.gif" width="24%"/>
+<img alt="Deeke推荐营销设置页" src="photo/webp/function2.webp" width="24%">
+<img alt="Deeke图标" src="photo/webp/icon.webp" width="24%">
+<img alt="Deeke演示" src="photo/webp/demo.webp" width="24%"/>
 </div>
 
 ---
@@ -85,10 +85,10 @@
 ## 💻 后台系统展示（功能强大，一应俱全）
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke后台" src="photo/backend-main.png" width="100%">
-<img alt="Deeke代理后台" src="photo/backend-agent.png" width="100%">
-<img alt="Deeke后台登录界面" src="photo/backend-login.png" width="100%">
-<img alt="Deeke后台数据" src="photo/backend-data.png" width="100%">
+<img alt="Deeke后台" src="photo/webp/backend-main.webp" width="100%">
+<img alt="Deeke代理后台" src="photo/webp/backend-agent.webp" width="100%">
+<img alt="Deeke后台登录界面" src="photo/webp/backend-login.webp" width="100%">
+<img alt="Deeke后台数据" src="photo/webp/backend-data.webp" width="100%">
 </div>
 
 ---
@@ -105,7 +105,7 @@
 立即联系我们！
 <a id="bottom"></a>
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke技术支持" src="photo/weixin.jpg" width="30%">
+<img alt="Deeke技术支持" src="photo/webp/weixin.webp" width="30%">
 </div>
 
 ---
