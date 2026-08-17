@@ -741,12 +741,12 @@ interface UiSelector {
     UiSelector(): void;
     text(text: string): UiSelector;
     textContains(text: string): UiSelector;
-    textMatches(text: RegExp): UiSelector;
+    textMatches(text: string): UiSelector;
     textStartsWith(text: string): UiSelector;
     textEndsWith(text: string): UiSelector;
     desc(desc: string): UiSelector;
     descContains(desc: string): UiSelector;
-    descMatches(desc: RegExp): UiSelector;
+    descMatches(desc: string): UiSelector;
     descStartsWith(desc: string): UiSelector;
     descEndsWith(desc: string): UiSelector;
     className(className: string): UiSelector;

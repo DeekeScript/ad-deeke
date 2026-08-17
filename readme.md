@@ -60,24 +60,40 @@
 ## 📸 软件实景截图展示
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke主界面" src="photo/webp/1-new.webp" width="24%">
-<img alt="Deeke主界面" src="photo/webp/2.webp" width="24%">
-<img alt="Deeke主界面" src="photo/webp/3.webp" width="24%">
-<img alt="Deeke主界面" src="photo/webp/4.webp" width="24%">
+<img alt="Deeke主界面第一屏" src="photoNew/webp/home-1.webp" width="24%">
+<img alt="Deeke主界面第二屏" src="photoNew/webp/home2.webp" width="24%">
+<img alt="Deeke主界面第三屏" src="photoNew/webp/home3.webp" width="24%">
+<img alt="Deeke主界面第四屏" src="photoNew/webp/home4.webp" width="24%">
 
-<img alt="Deeke设置" src="photo/webp/setting.webp" width="24%">
-<img alt="Deeke智能评论" src="photo/webp/speech.webp" width="24%">
-<img alt="Deeke评论应用" src="photo/webp/speech-app.webp" width="24%">
-<img alt="Deeke设置页面" src="photo/webp/1-setting.webp" width="24%">
+<img alt="Deeke工具箱" src="photoNew/webp/home5.webp" width="24%">
+<img alt="Deeke推荐营销设置页" src="photoNew/webp/function.webp" width="24%">
+<img alt="Deeke推荐营销设置页" src="photoNew/webp/function2.webp" width="24%">
+<img alt="Deeke权限设置" src="photoNew/webp/home-setting.webp" width="24%">
 
-<img alt="Deeke功能文档说明" src="photo/webp/document.webp" width="24%">
-<img alt="Deeke支付界面" src="photo/webp/pay.webp" width="24%">
-<img alt="Deeke扫码设置" src="photo/webp/scan.webp" width="24%">
-<img alt="Deeke推荐营销设置页" src="photo/webp/function.webp" width="24%">
+<img alt="Deeke工商企业查询" src="photoNew/webp/company.webp" width="24%">
+<img alt="Deeke工商企业手机号" src="photoNew/webp/company-2.webp" width="24%">
+<img alt="Deeke工商企业" src="photoNew/webp/company-detail.webp" width="24%">
+<img alt="Deeke账户" src="photoNew/webp/account.webp" width="24%">
 
-<img alt="Deeke推荐营销设置页" src="photo/webp/function2.webp" width="24%">
-<img alt="Deeke图标" src="photo/webp/icon.webp" width="24%">
-<img alt="Deeke演示" src="photo/webp/demo.webp" width="24%"/>
+<img alt="Deeke账户充值" src="photoNew/webp/company-pay.webp" width="24%">
+<img alt="Deeke智能体" src="photoNew/webp/agent.webp" width="24%">
+<img alt="Deeke设置页面" src="photoNew/webp/setting.webp" width="24%">
+<img alt="Deeke话术库" src="photoNew/webp/speech.webp" width="24%">
+
+<img alt="Deeke智能话术" src="photoNew/webp/speech-ai.webp" width="24%">
+<img alt="Deeke采集" src="photoNew/webp/grab.webp" width="24%">
+<img alt="Deeke采集列表" src="photoNew/webp/grab2.webp" width="24%">
+<img alt="Deeke采集详情" src="photoNew/webp/grab3.webp" width="24%">
+
+<img alt="Deeke设置页面提示" src="photoNew/webp/setting2.webp" width="24%">
+<img alt="Deeke功能说明" src="photoNew/webp/func.webp" width="24%">
+<img alt="Deeke支付页面" src="photoNew/webp/pay.webp" width="24%">
+<img alt="Deeke语音评论" src="photoNew/webp/comment-voice.webp" width="24%">
+
+<img alt="Deeke数据统计" src="photoNew/webp/statistics.webp" width="24%">
+<img alt="Deeke扫码设置" src="photoNew/webp/scan.webp" width="24%">
+<img alt="Deeke图标" src="photoNew/webp/icon.webp" width="24%">
+<img alt="Deeke演示" src="photoNew/webp/demo.webp" width="24%"/>
 </div>
 
 ---
