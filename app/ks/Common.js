@@ -1,5 +1,5 @@
 
-let cStorage = require('common/storage.js');
+let cStorage = require('../../common/storage.js');
 
 const Common = {
     //封装的方法
@@ -7,15 +7,30 @@ const Common = {
     filter(v) {
         return v && v.bounds() && v.bounds().top >= 0 && v.bounds().left >= 0 && v.bounds().width() > 0 && v.bounds().height() > 0;
     },
+
+    /**
+     * 
+     * @param {string} name 
+     * @returns {UiSelector}
+     */
     id(name) {
         return UiSelector().id('com.smile.gifmaker:id/' + name);
     },
 
+     /**
+     * 
+     * @param {string} name 
+     * @returns {UiSelector}
+     */
     aId(name) {
         //android:id/text1
         return UiSelector().id('android:id/' + name);
     },
 
+    /**
+     * 
+     * @param {number} time 
+     */
     sleep(time) {
         time > 200 ? Log.log("js休眠时间：" + time) : null;
         System.sleep(time);

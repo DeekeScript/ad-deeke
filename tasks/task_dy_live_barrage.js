@@ -38,7 +38,7 @@ let task = {
             return { msg: tmp[rd] };
         }
 
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -49,6 +49,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-live-barrage-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**

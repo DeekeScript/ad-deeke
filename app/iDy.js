@@ -30,7 +30,8 @@ let iDy = {
      * @returns {any}
      */
     getMsg(type, title, age, gender) {
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        Log.log('getMsg', !storage.exist('setting_baidu_wenxin_switch'), storage.get('setting_baidu_wenxin_switch', 'bool'));
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -117,6 +118,7 @@ let iDy = {
             if (containWord) {
                 return true;
             }
+            System.toast('标题不包含关键词：' + rule.toker_view_video_keywords);
             return false;
         }
         return true;
@@ -133,16 +135,50 @@ let iDy = {
             let containWord = DyCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
             if (!containWord) {
+                System.toast('标题不包含关键词：' + rule.toker_view_video_keywords);
                 return false;
             }
         }
 
         console.log('同城数据判断：', rule.toker_distance, videoData.distance);
         if (rule.toker_distance < videoData.distance) {
+            // 找不到距离时会记成 100，用来过滤，不是真实的 100 公里
+            if (videoData.distance == 100) {
+                System.toast('界面没有距离');
+            } else {
+                System.toast('距离超出限制：' + videoData.distance + '公里，限制' + rule.toker_distance + '公里');
+            }
             return false;
         }
 
         return true;
+    },
+
+    /**
+     * 性别文案
+     * @param {any} gender
+     * @returns {string}
+     */
+    genderText(gender) {
+        let map = { '0': '女', '1': '男', '2': '未知' };
+        return map['' + gender] || '未知';
+    },
+
+    /**
+     * 用户筛选不符合时返回具体原因
+     * @param {any} userData
+     * @param {boolean} [checkAge]
+     * @returns {string}
+     */
+    userRuleReason(userData, checkAge) {
+        let reasons = [];
+        if (this.configData.toker_run_sex && !this.configData.toker_run_sex.includes('' + userData.gender)) {
+            reasons.push('性别不符合：' + this.genderText(userData.gender));
+        }
+        if (checkAge && (this.configData.toker_run_min_age > userData.age || this.configData.toker_run_max_age < userData.age)) {
+            reasons.push('年龄不符合：' + userData.age + '岁');
+        }
+        return reasons.join('，');
     },
 
     /**
@@ -188,6 +224,7 @@ let iDy = {
             //直播间的话，无法获取标题，直接过滤了
             DyCommon.log('判断是否是直播');
             if (DyVideo.isLiving()) {
+                System.toast('直播中');
                 DyCommon.log('直播中，切换下一个视频');
                 DyVideo.videoSlow();
                 continue;
@@ -197,6 +234,7 @@ let iDy = {
             let vNickname = DyVideo.getNickname();
             let unique = vNickname + '_' + vContent;
             if (this.titles.includes(unique)) {
+                System.toast('重复视频');
                 DyCommon.log('重复视频');
                 continue;
             }
@@ -207,8 +245,14 @@ let iDy = {
 
             this.titles.push(unique);
 
-            if (this.nicknames.includes(vNickname) || this.accountFreGt(vNickname)) {
-                DyCommon.log(vNickname + '：重复或频率超出');
+            if (this.nicknames.includes(vNickname)) {
+                System.toast('昵称已操作：' + vNickname);
+                DyCommon.log(vNickname + '：重复');
+                continue;
+            }
+            if (this.accountFreGt(vNickname)) {
+                System.toast('操作频率超出：' + vNickname);
+                DyCommon.log(vNickname + '：频率超出');
                 continue;
             }
 
@@ -310,11 +354,14 @@ let iDy = {
                     Log.log("点赞");
                     //判断IP
                     if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, comment.ip)) {
+                        System.toast('评论IP不符合：' + (comment.ip || '无'));
                         Log.log('IP不符合规范', comment.ip);
                         continue;
                     }
                     DyComment.clickZan(comment);//////////////////////操作
+                    System.sleep(1000 + 1000 * Math.random());
                     Log.log("点赞2");
+                    DyCommon.sleep(500 + 1000 * Math.random());
                     opCount--;
                 } catch (e) {
                     Log.log(e);
@@ -452,23 +499,40 @@ let iDy = {
                 if (this.configData.toker_view_video_ip && !DyCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
                     DyCommon.back();
                     DyCommon.sleep(1000);
+                    System.toast('IP不符合：' + (userData.ip || '无'));
                     Log.log('IP不符合', userData.ip, this.configData.toker_view_video_ip);
                     continue;
                 }
 
+                // 1 0 0 100 ["0","1","2"]
+                Log.log(this.configData.toker_focus_rate, focus_rate);
                 let isPrivateAccount = userData.isPrivate;
+                let opReasons = [];
+                if (isPrivateAccount) {
+                    opReasons.push('私密账号');
+                }
+                let ruleReason = this.userRuleReason(userData, true);
+                if (ruleReason) {
+                    opReasons.push(ruleReason);
+                }
+                if (opReasons.length > 0) {
+                    System.toast(opReasons.join('，'));
+                    Log.log(opReasons.join('，'));
+                }
                 if (!isPrivateAccount && this.configData.toker_focus_rate > focus_rate) {
-                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                    Log.log('用户规则-关注：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex, this.configData.toker_run_sex.includes('' + userData.gender));
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes('' + userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
                         Log.log('关注了哦');
                         DyUser.focus();///////////////////////////////////操作  关注视频作者
                         DyCommon.sleep(500 + 500 * Math.random());
                     }
+                } else {
+                    Log.log('不符合关注条件');
                 }
 
                 if (!this.douyinExist(userData.douyin)) {
-                    Log.log('用户规则：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
+                    Log.log('用户规则-私信：', userData.gender, userData.age, this.configData.toker_run_min_age, this.configData.toker_run_max_age, this.configData.toker_run_sex, this.configData.toker_run_sex.includes('' + userData.gender));
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes('' + userData.gender) && this.configData.toker_run_min_age <= userData.age && this.configData.toker_run_max_age >= userData.age) {
                         if (!isPrivateAccount && this.configData.toker_private_msg_rate > private_rate) {
                             let msg = this.getMsg(1, userData.nickname);
                             Log.log('要私信了哦');
@@ -477,7 +541,12 @@ let iDy = {
                                 this.douyinExistUpdate(userData.douyin);
                             }
                         }
+                    } else {
+                        Log.log('不符合私信条件');
                     }
+                } else {
+                    System.toast('用户已经被私信多次');
+                    Log.log('用户已经操作过多次，忽略');
                 }
 
                 DyCommon.back();

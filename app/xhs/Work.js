@@ -1,5 +1,6 @@
 let Common = require("app/xhs/Common.js");
 let statistics = require("common/statistics.js");
+let Voice = require("service/Voice.js");
 
 let Work = {
     getCommentTag() {
@@ -122,7 +123,46 @@ let Work = {
             return false;
         }
 
-        iptTag.setText(msg);
+        if (Voice.isOpen()) {
+            let tag = UiSelector().className('android.widget.ImageView').filter(v => {
+                return v.bounds().top > Device.height() * 0.4;
+            }).isVisibleToUser(true).findOne();
+
+            if (!tag) {
+                FloatDialogs.toastLong('找不到语音评论按钮');
+                Common.log('找不到语音评论按钮');
+                if (UiSelector().text('发送').isVisibleToUser(true).findOne()) {
+                    Common.back(1);
+                    Common.log('返回');
+                    return false;
+                }
+                return false;
+            }
+            Common.click(tag, 0.2);
+            Common.log('点击语音评论');
+            Common.sleep(1000 + 500 * Math.random());
+            let voiceBeforeTag = UiSelector().className('android.widget.TextView').filter(v => {
+                return v.text() && v.text().indexOf('按住') != -1 && v.text().indexOf('语音') != -1;
+            }).isVisibleToUser(true).findOne();
+            if (!voiceBeforeTag) {
+                FloatDialogs.toastLong('找不到"按住 说话"按钮');
+                Common.log('找不到"按住 说话"按钮');
+                return false;
+            }
+
+            let voiceTag = UiSelector().className('android.view.View').filter(v => {
+                return v.bounds().top > voiceBeforeTag.bounds().top;
+            }).isVisibleToUser(true).findOne();
+
+            if (!voiceTag) {
+                FloatDialogs.toastLong('找不到"按住 说话"按钮');
+                Common.log('找不到"按住 说话"按钮');
+                return false;
+            }
+            Voice.tts(voiceTag, msg);
+        } else {
+            iptTag.setText(msg);
+        }
         Common.sleep(1500 + 500 * Math.random());
         let sendTag = UiSelector().className('android.widget.TextView').text('发送').isVisibleToUser(true).findOne();
         if (!sendTag) {
@@ -202,7 +242,7 @@ let Work = {
             }
 
             let arr = _childs[2].text().split(' ');
-            Log.log('评论内容', _childs[2].text(), index, arr);
+            Log.log('评论内容', _childs[1].text(), index, arr);
             childs.push({
                 content: _childs[1].text(),
                 ip: arr[arr.length - 2] || '-',

@@ -35,7 +35,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -46,6 +46,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-comment-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**
@@ -65,14 +66,14 @@ let task = {
 
     /**
      * 
-     * @param {any} input 
+     * @param {any} ipt 
      * @param {any} kw 
      * @returns 
      */
-    testTask(input, kw) {
+    testTask(ipt, kw) {
         //首先进入页面
         this.index++;
-        input = input.replace("\r", "").split("\n");
+        let input = tCommon.extractUrls(ipt);
         if (this.index >= input.length) {
             this.index = 0;
         }
@@ -176,7 +177,7 @@ let task = {
             }
 
             Log.log('下一页评论');
-            if (!tCommon.swipeCommentListOp()) {
+            if (!DyComment.swipeTop()) {
                 tCommon.back();
                 tCommon.sleep(1000);
                 Log.log('到底了');
@@ -199,7 +200,7 @@ let task = {
 let input = machine.get('task_dy_toker_comment_video');
 Log.log("input内容：" + machine.get('task_dy_toker_comment_video', 'string'));
 if (!input) {
-    FloatDialogs.toast('请输入账号');
+    System.toast('请输入账号');
     System.exit();
 }
 
@@ -207,7 +208,7 @@ let kw = machine.get('task_dy_toker_comment_kw');
 
 Log.log("keyword：" + machine.get('task_dy_toker_comment_kw'));
 if (!kw) {
-    FloatDialogs.toast('请输入关键词');
+    System.toast('请输入关键词');
     System.exit();
 }
 

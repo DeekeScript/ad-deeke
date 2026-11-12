@@ -100,7 +100,7 @@ const Common = {
 
     /**
      * 点击控件
-     * @param {Object} tag 
+     * @param {UiObject} tag 
      * @param {number} rate 
      * @returns boolean
      */
@@ -261,7 +261,7 @@ const Common = {
     /**
      * 滑动搜索用户列表
      * @param {boolean} [filterRootLayout] - 是否过滤掉根布局，默认为 false
-     * @returns {boolean|null}  默认用户页面
+     * @returns {boolean}  默认用户页面
      */
     swipeSearchUserOp(filterRootLayout = false) {
         let tag = UiSelector().className('androidx.recyclerview.widget.RecyclerView').scrollable(true).filter(v => {
@@ -271,8 +271,8 @@ const Common = {
             return true;
         }).isVisibleToUser(true).findOne();
         if (!tag) {
-            this.log('滑动失败');
-            return null;
+            this.log('滑动失败，可能是没有滚动的时候');//比如评论比较少的时候，就没有滚动条
+            return false;
         }
 
         if (tag.scrollForward()) {
@@ -285,7 +285,7 @@ const Common = {
 
     /**
      * 滑动粉丝列表
-     * @returns {boolean|null}
+     * @returns {boolean}
      */
     swipeFansListOp() {
         return this.swipeSearchUserOp(true);
@@ -293,7 +293,7 @@ const Common = {
 
     /**
      * 滑动关注列表
-     * @returns {boolean|null}
+     * @returns {boolean}
      */
     swipeFocusListOp() {
         return this.swipeSearchUserOp(true);
@@ -301,21 +301,30 @@ const Common = {
 
     /**
      * 滑动评论列表
-     * @returns {boolean|null}
+     * @param isNew {boolean}
+     * @returns {boolean}
      */
-    swipeCommentListOp() {
+    swipeCommentListOp(isNew) {
+        if (isNew) {
+            let tag = UiSelector().className('android.view.View').scrollable(true).isVisibleToUser(true).findOne();
+            Log.log('评论区滑动tag', tag);
+            if (!tag) {
+                return false;
+            }
+            return tag.scrollForward();
+        }
         return this.swipeSearchUserOp();
     },
 
     /**
      * 搜索列表滑动到左侧
-     * @returns {boolean|null}
+     * @returns {boolean}
      */
     swipeSearchTabToLeft() {
         let tag = UiSelector().scrollable(true).className('android.widget.HorizontalScrollView').isVisibleToUser(true).findOne();
         if (!tag) {
             this.log('滑动失败');
-            return null;
+            return false;
         }
         if (tag.scrollForward()) {
             this.log('滑动成功');
@@ -327,7 +336,7 @@ const Common = {
 
     /**
      * 粉丝群列表滑动
-     * @returns {boolean|null}
+     * @returns {boolean}
      */
     swipeFansGroupListOp() {
         return this.swipeSearchUserOp();
@@ -350,7 +359,7 @@ const Common = {
 
     /**
      * 互动消息列表滑动
-     * @returns {boolean|null}
+     * @returns {boolean}
      */
     swipeMessageDetailsList() {
         return this.swipeSearchUserOp();
@@ -358,7 +367,7 @@ const Common = {
 
     /**
     * 作品赞列表滑动
-    * @returns {boolean|null}
+    * @returns {boolean}
     */
     swipeWorkZanList() {
         return this.swipeSearchUserOp();
@@ -413,7 +422,7 @@ const Common = {
      * @param {string} msg
      */
     showToast(msg) {
-        FloatDialogs.toast(msg);
+        System.toast(msg);
         this.log(msg);
     },
 
@@ -458,6 +467,36 @@ const Common = {
      */
     getRemark(remark) {
         return remark.indexOf('#') == 0 || remark.indexOf('＃') == 0;
+    },
+
+    /**
+     * 提取链接
+     * @param {string} text
+     * @returns {Array<string>}
+     */
+    extractUrls(text) {
+        if (!text) {
+            return [];
+        }
+
+        let urls = [];
+
+        // 按行拆分
+        let lines = text.split(/\r?\n/);
+
+        // http/https链接
+        let urlRegex = /https?:\/\/[^\s]+/g;
+
+        for (let line of lines) {
+            let matches = line.match(urlRegex);
+            if (matches) {
+                for (let m of matches) {
+                    urls.push(m);
+                }
+            }
+        }
+
+        return urls;
     }
 }
 

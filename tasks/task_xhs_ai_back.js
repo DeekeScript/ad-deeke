@@ -8,6 +8,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-xhs-ai-back-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.xingin.xhs');
     },
     //最后一步
     backApp() {
@@ -36,7 +37,7 @@ let config = {
     ai_back_comment_run_other_fun: storage.get('ai_xhs_back_comment_run_other_fun'),
 }
 
-if (!storage.get('setting_baidu_wenxin_switch', 'bool')) {
+if (!(!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
     Dialogs.show('提示', '请开启智能AI话术');
     System.exit();
 }

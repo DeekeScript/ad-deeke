@@ -1,5 +1,5 @@
-let Common = require('app/ks/Common.js');
-let statistics = require('common/statistics.js');
+let Common = require('./Common.js');
+let statistics = require('../../common/statistics.js');
 
 let Video = {
     /**
@@ -22,9 +22,17 @@ let Video = {
      * @returns {UiObject}
      */
     getZanTag() {
-        let tag = UiSelector().descContains('点赞').clickable(true).isVisibleToUser(true).findOne();
+        let tag = UiSelector().descContains('点赞').clickable(true).isVisibleToUser(true).findOne() || Common.id('like_element_click_layout').isVisibleToUser(true).clickable(true).findOne();
         if (tag) {
             return tag;
+        }
+
+        if (!tag) {
+            Common.sleep(2000);
+            let tag = UiSelector().descContains('点赞').clickable(true).isVisibleToUser(true).findOne() || Common.id('like_element_click_layout').isVisibleToUser(true).clickable(true).findOne();
+            if (tag) {
+                return tag;
+            }
         }
 
         throw new Error('没有找到赞标签');
@@ -65,7 +73,7 @@ let Video = {
      * @returns {UiObject}
      */
     getCommentTag() {
-        let tag = UiSelector().descContains('评论').clickable(true).isVisibleToUser(true).findOne();
+        let tag = UiSelector().descContains('评论').clickable(true).isVisibleToUser(true).findOne() || Common.id('comment_element_click_layout').isVisibleToUser(true).clickable(true).findOne();
         if (tag) {
             return tag;
         }
@@ -276,7 +284,7 @@ let Video = {
     /**
      * 获取距离控件
      * @param {number} loop 
-     * @returns {UiObject}
+     * @returns {any}
      */
     getDistanceTag(loop) {
         let tag = Common.id('label_text').isVisibleToUser(true).findOneBy(1000);//等待作用

@@ -24,9 +24,10 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-dy-toker-fans-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
-    
+
     //type 0 评论，1私信
     /**
      * 
@@ -38,7 +39,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -75,6 +76,7 @@ let task = {
                 DyIndex.intoSearchPage();
             }
 
+            Log.log('进入了搜索页面');
             DySearch.homeIntoSearchUser(settingData.account);
         }
 
@@ -89,8 +91,10 @@ console.log(machine.getMsg(0));
 console.log(settingData.opCount);
 
 if (!settingData.account) {
-    FloatDialogs.toast('未设置账号，取消执行');
+    FloatDialogs.show('温馨提示', '未设置账号，取消执行');
     System.exit();
+    console.log('未设置账号，取消执行');
+    System.sleep(3000);
 }
 
 tCommon.openApp();
@@ -98,7 +102,6 @@ System.setAccessibilityMode('fast');
 //开启线程  自动关闭弹窗
 Engines.executeScript("unit/dialogClose.js");
 
-let thr = undefined;
 while (true) {
     Log.log('日志开始');
     task.log();

@@ -217,15 +217,9 @@ let Video = {
      */
     getNickname() {
         let tag = this.getNicknameTag();
-        let focusTag = Common.id('gac').isVisibleToUser(true).findOne();
-        let width = tag.bounds().width();
-        if (focusTag) {
-            width = tag.bounds().left - focusTag.bounds().left;
-        }
-
         let image = Images.capture();
         let titles = Images.findTextInRegion(image, tag.bounds().left, tag.bounds().top, tag.bounds().width(), tag.bounds().height());
-        return titles ? titles[0] : null;
+        return titles && titles.length > 0 ? titles[0] : null;
     },
 
     getDistanceTag() {

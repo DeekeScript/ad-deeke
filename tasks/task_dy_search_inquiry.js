@@ -30,6 +30,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-search-inquiry-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     
@@ -44,7 +45,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -111,15 +112,6 @@ let task = {
                 let sleepSec = (5 + 10 * Math.random() - 5);
                 Log.log('休眠' + sleepSec + 's');
                 tCommon.sleep(sleepSec * 1000);//最后减去视频加载时间  和查询元素的时间
-            }
-
-            Log.log('看看是不是广告');
-            if (DyVideo.viewDetail()) {
-                DyVideo.next();
-                Log.log('是广告');
-                continue;
-            } else {
-                Log.log('不是广告，准备进入主页');
             }
 
             DyVideo.openComment(!!commentCount);
@@ -223,7 +215,7 @@ let task = {
                 }
 
                 Log.log('滑动评论');
-                if (!tCommon.swipeCommentListOp()) {
+                if (!DyComment.swipeTop()) {
                     Log.log('到底了');
                     break;
                 }

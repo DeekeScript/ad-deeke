@@ -13,6 +13,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-fans-back-view-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     testTask() {

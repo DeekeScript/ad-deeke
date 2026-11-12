@@ -87,10 +87,12 @@ let User = {
     },
 
     privateMsg(msg) {
-        let sendTag = UiSelector().className('android.widget.TextView').text('私信').filter(v => {
-            return v.text() == '私信';
+        let sendTag = UiSelector().className('android.widget.TextView').text('发私信').filter(v => {
+            return v.text() == '发私信';
         }).findOne() || UiSelector().className('android.widget.TextView').text('发消息').filter(v => {
             return v.text() == '发消息';
+        }).findOne() || UiSelector().className('android.widget.TextView').text('私信').filter(v => {
+            return v.text() == '私信';
         }).findOne();
         if (!sendTag) {
             Log.log('找不到私信按钮');
@@ -126,7 +128,7 @@ let User = {
     //注意，粉丝关注有两种模式，一种是横版的，一种是关注和发私信两个按钮占据一行
     isFocus() {
         let focusTag = UiSelector().filter(v => {
-            return (v.className() == 'android.widget.TextView' && v.parent().className() == 'android.widget.FrameLayout') || v.className() == 'android.widget.Button';
+            return (v.className() == 'android.widget.TextView' && v.id()) || v.className() == 'android.widget.Button';
         }).isVisibleToUser(true).textContains('关注').findOne();
         if (focusTag && focusTag.text() != '关注') {
             Log.log('已经关注过了');
@@ -141,7 +143,7 @@ let User = {
         }
 
         let focusTag = UiSelector().filter(v => {
-            return (v.className() == 'android.widget.TextView' && v.parent().className() == 'android.view.ViewGroup') || v.className() == 'android.widget.Button';
+            return (v.className() == 'android.widget.TextView' && v.id()) || v.className() == 'android.widget.Button';
         }).isVisibleToUser(true).textContains('关注').findOne();
         Common.click(focusTag, 0.2);
         statistics.focus();

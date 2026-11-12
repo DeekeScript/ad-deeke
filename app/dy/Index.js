@@ -82,14 +82,15 @@ const Index = {
      */
     intoLikeVideo() {
         //首先知道喜欢的菜单
-        let likeTag = Common.aId('text1').textContains('喜欢').filter(v => {
+        let likeTag = Common.aId('text1').textContains('喜欢').isVisibleToUser(true).filter(v => {
             return v.text().indexOf('喜欢') == 0;
         }).findOne();
+        Log.log('likeTag', likeTag);
         if (!likeTag) {
             return false;
         }
 
-        Common.click(likeTag);
+        Common.click(likeTag, 0.2);
         Common.sleep(3000 + 2000 * Math.random());
         let containerTag = UiSelector().descMatches(/(视频|图文)/).isVisibleToUser(true).findOne() || UiSelector().id('com.ss.android.ugc.aweme:id/container').isVisibleToUser(true).findOne();
         if (!containerTag) {

@@ -28,7 +28,7 @@ let task = {
             return { msg: '' };
         }
 
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -39,6 +39,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-team-buy-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**
@@ -306,7 +307,7 @@ if (!machine.get('task_dy_team_buy_name')) {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
     tCommon.sleep(3000);
 }

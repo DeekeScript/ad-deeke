@@ -65,20 +65,18 @@ let MessageNew = {
      * @returns {string|null}
      */
     getLastMessageContent() {
-        let tags = Common.id('content_layout').className('android.widget.TextView').filter(v => {
-            let headerTag = UiSelector().className('android.widget.Button').filter(vv => {
-                return vv.bounds().left > v.bounds().left + v.bounds().width() && vv.bounds().top >= v.parent().parent().parent().bounds().top && vv.bounds().top + vv.bounds().height() < v.bounds().top + v.bounds().height();
-            }).isVisibleToUser(true).findOne();
-            if (headerTag) {
-                return false;
-            }
-            return v.bounds().left <= Device.width() - v.bounds().right;
+        let tags = UiSelector().className('android.view.ViewGroup').filter(v => {
+            return v.children().findOne(UiSelector().className('android.widget.Button').descContains('的头像')) && v.children().findOne(UiSelector().className('android.widget.TextView'));
         }).isVisibleToUser(true).find();
 
         if (tags.length === 0) {
             return null;
         }
-        return tags[tags.length - 1].text();
+
+        let container = tags[tags.length - 1];
+        let tag = container.children().findOne(UiSelector().className('android.widget.TextView'));
+
+        return tag.text();
     },
 
     /**
@@ -100,6 +98,10 @@ let MessageNew = {
      */
     backMsg(config) {
         let msg = this.getLastMessageContent();
+        if (msg === null) {
+            Common.sleep(1000);
+            msg = this.getLastMessageContent();
+        }
         if (msg === null) {
             return false;//没有消息标签，可能不是私信
         }
@@ -264,6 +266,7 @@ let MessageNew = {
                         continue;
                     }
 
+                    
                     //企业账号，识别不到昵称
                     let image = Images.capture();
                     let titleTags = Images.findTextInRegion(image, tvTitle.bounds().left, tvTitle.bounds().top, tvTitle.bounds().width(), tvTitle.bounds().height());
@@ -281,7 +284,7 @@ let MessageNew = {
 
                     Log.log('tvTitle', nickname, countTag ? countTag.text() : 0);
 
-                    if (nickname.indexOf('互动消息,') == 0) {
+                    if (nickname.indexOf('互动消息') == 0) {
                         Log.log('互动消息处理');
                         if (!config.ai_back_comment_switch) {
                             continue;

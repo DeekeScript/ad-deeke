@@ -1,8 +1,9 @@
-let Common = require('app/ks/Common.js');
-let statistics = require('common/statistics.js');
-let storage = require('common/storage.js');
+let Common = require('./Common.js');
+let statistics = require('../../common/statistics.js');
+let storage = require('../../common/storage.js');
 
 let Comment = {
+    /** @type {any} */
     tag: undefined,//当前的tag标签
     containers: [],//本次遍历的内容  主要用于去重
     /**
@@ -12,9 +13,9 @@ let Comment = {
      */
     getAvatarTag(tag) {
         if (tag) {
-            return tag.children().findOne(Common.id('avatar').desc('头像').isVisibleToUser(true));
+            return tag.children().findOne(Common.id('avatar').desc('头像'));
         }
-        return this.tag.children().findOne(Common.id('avatar').desc('头像').isVisibleToUser(true));
+        return this.tag.children().findOne(Common.id('avatar').desc('头像'));
     },
 
     /**
@@ -51,14 +52,14 @@ let Comment = {
 
     /**
      * 获取点赞控件
-     * @param tag
+     * @param tag {any}
      * @returns {UiObject}
      */
     getZanTag(tag) {
         if (tag) {
-            return tag.children().findOne(UiSelector().descContains('点赞'));
+            return tag.children().findOne(UiSelector().descContains('点赞').isVisibleToUser(true));
         }
-        return this.tag.children().findOne(UiSelector().descContains('点赞'));
+        return this.tag.children().findOne(UiSelector().descContains('点赞').isVisibleToUser(true));
     },
 
     /**
@@ -119,6 +120,11 @@ let Comment = {
     },
 
     //data 是getList返回的参数
+    /**
+     * 
+     * @param {any} data 
+     * @returns 
+     */
     clickZan(data) {
         let zanTag = this.getZanTag(data.tag);
         zanTag && Common.click(zanTag, 0.2) && statistics.zanComment();
@@ -275,7 +281,7 @@ let Comment = {
     commentMsg(msg) {
         if (UiSelector().className('android.widget.TextView').descContains('仅作者的好友可评论').isVisibleToUser(true).findOne()) {
             Log.log('仅作者的好友可评论');
-            return;
+            return false;
         }
 
         let iptTag = Common.id('editor_holder_text').isVisibleToUser(true).findOnce();
@@ -299,6 +305,7 @@ let Comment = {
         }
 
         Log.log('msg', msg);
+
         iptTag.setText(msg);
         Common.sleep(500 + Math.random() * 1000);
         statistics.comment();

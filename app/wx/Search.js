@@ -25,6 +25,19 @@ let Search = {
         if (!ignore) {
             return;
         }
+
+        //直接进入视频
+        let videoTabTag = UiSelector().textContains('视频').filter(v => {
+            return v.text() && v.text().indexOf('视频') == 0;
+        }).isVisibleToUser(true).findOne() || UiSelector().descContains('视频').filter(v => {
+            return v.desc() && v.desc().indexOf('视频') == 0;
+        }).isVisibleToUser(true).findOne();
+        if (videoTabTag) {
+            Common.click(videoTabTag, 0.15);
+            Common.sleep(5000 + 3000 * Math.random());
+            return true;
+        }
+
         while (true) {
             let tag = UiSelector().className('android.widget.TextView').filter(v => {
                 return v.text() && (v.text().indexOf('视频') !== -1 || v.text().indexOf('直播') !== -1);
@@ -34,15 +47,23 @@ let Search = {
             }
 
             let x = 200 + 300 * Math.random();
-            Gesture.swipe(x, Device.height() * 0.9, x + 20, Device.height() * 0.3, 200);
+            Gesture.swipe(x, Device.height() * 0.8, x + 20, Device.height() * 0.3, 200);
+            Common.sleep(2000 + 500 * Math.random());
         }
     },
 
     intoSearchList(keyword) {
         this._search(keyword, true);
         let tag = UiSelector().className('android.view.View').filter(v => {
-            return v.getChildCount() >= 1 && !!v.text() && v.bounds().width() < Device.width() / 2 && !v.parent().text();
+            return v.getChildCount() > 0 && !!v.text() && v.bounds().width() < Device.width() / 2 && !v.parent().text();
         }).isVisibleToUser(true).findOne();
+
+        //适配新版本，后续把上面的查找方式去掉
+        if (!tag) {
+            tag = UiSelector().className('android.widget.ImageView').filter(v => {
+                return !!v.desc() && v.bounds().width() > Device.width() / 3;
+            }).isVisibleToUser(true).findOne();
+        }
 
         if (!tag) {
             throw new Error('搜索页面未找到搜索结果');
@@ -56,7 +77,7 @@ let Search = {
     intoUserVideoPage(keyword) {
         this._search(keyword);
         let accountTag = UiSelector().filter(v => {
-            return v.text() && (v.text().indexOf('账号') !== -1 && v.text().indexOf('按钮') !== -1);
+            return (v.text() && (v.text().indexOf('账号') !== -1 && v.text().indexOf('按钮') !== -1)) || (v.desc() && (v.desc().indexOf('账号') == 0))
         }).isVisibleToUser(true).findOne();
         if (!accountTag) {
             throw new Error('搜索页面未找到账号');
@@ -65,8 +86,7 @@ let Search = {
         Common.click(accountTag, 0.15);
         Common.sleep(5000 + 3000 * Math.random());
         let tag = UiSelector().className('android.view.View').filter(v => {
-            console.log(v.text());
-            return v.text() && (v.text().indexOf(keyword) !== -1 && v.text().indexOf('帐号') !== -1);
+            return (v.text() && (v.text().indexOf(keyword) !== -1)) || (v.desc() && Helper.stripInvisible(v.desc()).indexOf(keyword) == 0);
         }).findOne();
         if (!tag) {
             return false;//弹窗提示找不到账号

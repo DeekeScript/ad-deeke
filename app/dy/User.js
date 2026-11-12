@@ -160,7 +160,7 @@ const User = {
                 throw new Error('发送消息失败');
             }
 
-            Common.sleep(500 + 500 * Math.random());
+            Common.sleep(1500 + 500 * Math.random());
             Log.log("私信发送完成");
             statistics.privateMsg();
             if (!noBackHome) {
@@ -230,8 +230,11 @@ const User = {
      * @returns {number}
      */
     getZanCount() {
+        let currentMode = System.getAccessibilityMode();
+        System.setAccessibilityMode('!fast');
         let textTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('获赞').findOne();
         let zanTag = textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+        System.setAccessibilityMode(currentMode);
         return Common.numDeal(zanTag.text());
     },
 
@@ -240,8 +243,12 @@ const User = {
      * @returns {UiObject}
      */
     getFocusTag() {
+        let currentMode = System.getAccessibilityMode();
+        System.setAccessibilityMode('!fast');
         let textTag = UiSelector().className('android.widget.TextView').text('关注').findOne();
-        return textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+        let tag = textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+        System.setAccessibilityMode(currentMode);
+        return tag;
     },
 
     /**
@@ -253,8 +260,13 @@ const User = {
     },
 
     getFansTag() {
+        let currentMode = System.getAccessibilityMode();
+        System.setAccessibilityMode('!fast');
         let textTag = UiSelector().className('android.widget.TextView').text('粉丝').findOne();
-        return textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+
+        let tag = textTag.parent().children().findOne(UiSelector().className('android.widget.TextView').isVisibleToUser(true));
+        System.setAccessibilityMode(currentMode);
+        return tag;
     },
 
     /**
@@ -302,20 +314,31 @@ const User = {
 
     /**
      * 获取作品数控件
-     * @returns {UiObject}
+     * @returns {object}
      */
     getWorksTag() {
-        let worksTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).descContains('作品').findOne();
-        console.log("worksTag", worksTag);
-        if (!worksTag) {
+        let baseMode = System.getAccessibilityMode();
+        console.log('baseMode', baseMode);
+
+        let workTag = UiSelector().descContains('作品').clickable(true).className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
+        if (!workTag) {
             return {
-                /** @ts-ignore */
-                text: function () {
-                    return 0;
-                }
+                text: () => '0',
             }
         }
-        return worksTag;
+        System.setAccessibilityMode('!fast');
+
+        let numTag = UiSelector().className('android.widget.TextView').textMatches(/\d+/).filter(v => {
+            return v.bounds().top >= workTag.bounds().top && v.bounds().bottom <= workTag.bounds().bottom && v.bounds().left >= workTag.bounds().left && v.bounds().right <= workTag.bounds().right;
+        }).findOne();
+
+        System.setAccessibilityMode(baseMode);
+        if (!numTag) {
+            return {
+                text: () => '0',
+            }
+        }
+        return numTag;
     },
 
     /**
@@ -348,7 +371,7 @@ const User = {
             return 0;
         }
 
-        return 1;
+        return 2;
     },
 
     /**
@@ -499,7 +522,7 @@ const User = {
     cancelFocusList(machine) {
         let focus = this.getFocusTag();
         if (!focus) {
-            FloatDialogs.toast('找不到关注');
+            System.toast('找不到关注');
             throw new Error('找不到关注');
         }
 
@@ -509,7 +532,7 @@ const User = {
             let containers = Common.id('root_layout').isVisibleToUser(true).find();
             if (containers.length === 0) {
                 Log.log('containers为0');
-                FloatDialogs.toast('找不到关注列表');
+                System.toast('找不到关注列表');
                 throw new Error('找不到关注列表');
             }
 
@@ -575,7 +598,8 @@ const User = {
     fansIncList(getMsg, machine, settingData, contents, meNickname) {
         let account = settingData.account;
         let fansTag = this.getFansTag();
-        Common.click(fansTag);
+        Log.log("fansTag", fansTag);
+        Common.click(fansTag, 0.2);
         Common.sleep(2000 + 1000 * Math.random());
 
         let arr = [];
@@ -584,7 +608,7 @@ const User = {
             Log.log("containers长度：" + containers.length);
             if (containers.length === 0) {
                 Log.log('containers为0');
-                FloatDialogs.toast('找不到粉丝列表');
+                System.toast('找不到粉丝列表');
                 throw new Error('找不到粉丝列表');
             }
 
@@ -598,7 +622,7 @@ const User = {
                 let nickname = containers[i].desc();
                 if (machine.get('task_dy_toker_inc_main_' + account + '_' + nickname, 'bool')) {
                     Log.log('重复');
-                    FloatDialogs.toast('重复');
+                    System.toast('重复');
                     continue;
                 }
 
@@ -670,6 +694,7 @@ const User = {
                     rateCurrent -= settingData.task_dy_fans_inc_comment_rate * 1;
                     if (rateCurrent <= settingData.task_dy_fans_inc_collection_rate * 1) {
                         Video.collect();
+                        Common.sleep(500 + 500 * Math.random());
                         this.backHome();
                         Common.back(1, 500, 500);
                         continue;
@@ -703,122 +728,158 @@ const User = {
     focusUserList(type, getMsg, machine, settingData, contents, meNickname) {
         let account = settingData.account;
         let tag = type == 0 ? this.getFocusTag() : this.getFansTag();
+        Log.log('开始进入关注或者粉丝列表', tag);
         Common.click(tag);
         Common.sleep(2000 + 1000 * Math.random());
 
         while (true) {
-            let containers = Common.id('root_layout').isVisibleToUser(true).find();
-            Log.log("containers长度：" + containers.length);
+            try {
+                let containers = Common.id('root_layout').isVisibleToUser(true).find();
+                Log.log("containers长度：" + containers.length);
 
-            if (containers.length === 0) {
-                Log.log('containers为0');
-                throw new Error('操作列表为0');
-            }
-
-            for (let i in containers) {
-                Log.log("title", containers[i].desc());
-                if (containers[i].children().findOne(UiSelector().desc('进入他的主页'))) {
-                    Log.log('自己，不操作');
-                    continue;
+                if (containers.length === 0) {
+                    Log.log('containers为0');
+                    throw new Error('操作列表为0');
                 }
 
-                let nickname = containers[i].desc();
-                if (machine.get('task_dy_toker_focus_' + account + '_' + nickname, 'bool')) {
-                    Log.log('重复');
-                    continue;
-                }
+                for (let i in containers) {
+                    let nicknameTag = UiSelector().className('android.widget.TextView').filter(v => {
+                        return v.bounds().left >= containers[i].bounds().left && v.bounds().top >= containers[i].bounds().top && v.bounds().right <= containers[i].bounds().right && v.bounds().bottom <= containers[i].bounds().bottom;
+                    }).findOne();
 
-                //进入用户首页
-                containers[i].click();
-                statistics.viewUser();
-                Common.sleep(3000 + 2000 * Math.random());
-
-                if (this.isPrivate()) {
-                    Log.log('私密账号');
-                    machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
-                    Common.back();
-                    Common.sleep(1000);
-                    continue;
-                }
-
-                //查看粉丝和作品数是否合格
-                let worksCount = this.getWorksCount() * 1;
-                if (worksCount < settingData.worksMinCount * 1 || worksCount > settingData.worksMaxCount * 1) {
-                    Log.log('作品数不符合', worksCount, settingData.worksMinCount, settingData.worksMaxCount);
-                    machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
-                    Common.back();
-                    Common.sleep(1000);
-                    continue;
-                }
-
-                //查看粉丝和作品数是否合格
-                let fansCount = 0;
-
-                try {
-                    fansCount = this.getFansCount() * 1;
-                } catch (e) {
-                    Log.log(e);
-                    continue;
-                }
-
-                if (fansCount < settingData.fansMinCount * 1 || fansCount > settingData.fansMaxCount * 1) {
-                    Log.log('粉丝数不符合', fansCount, settingData.fansMinCount, settingData.fansMaxCount);
-                    machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
-                    Common.back();
-                    Common.sleep(1000);
-                    continue;
-                }
-
-                if (Math.random() * 100 <= settingData.focusRate * 1) {
-                    this.focus();
-                }
-
-                if (Math.random() * 100 <= settingData.privateRate * 1) {
-                    this.privateMsg(getMsg(1, nickname, this.getAge(), this.getGender()).msg);
-                }
-
-                let commentRate = Math.random() * 100;
-                let zanRate = Math.random() * 100;
-
-                if ((commentRate <= settingData.commentRate * 1 || zanRate <= settingData.zanRate * 1) && Video.intoUserVideo()) {
-                    if (zanRate <= settingData.zanRate * 1) {
-                        !Video.isZan() && Video.clickZan();
+                    Log.log("title", nicknameTag.text());
+                    if (containers[i].children().findOne(UiSelector().desc('进入他的主页'))) {
+                        System.toast('自己，不操作');
+                        Log.log('自己，不操作');
+                        continue;
                     }
 
-                    if (commentRate <= settingData.commentRate * 1) {
-                        let videoTitle = Video.getContent();
-                        Video.openComment(!!Video.getCommentCount());
-                        Comment.commentMsg(getMsg(0, videoTitle).msg);
-                        Common.sleep(1000 + 1000 * Math.random());
-                        Comment.zanComment(5, meNickname);
+                    let nickname = nicknameTag.text();
+                    if (machine.get('task_dy_toker_focus_' + account + '_' + nickname, 'bool')) {
+                        System.toast('已经操作过了');
+                        Log.log('重复');
+                        continue;
                     }
 
-                    Common.back(1, 800);
+                    //进入用户首页
+                    containers[i].click();
+                    statistics.viewUser();
+                    Common.sleep(3000 + 2000 * Math.random());
+
+                    if (this.isPrivate()) {
+                        System.toast('私密账号');
+                        Log.log('私密账号');
+                        machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
+                        Common.back();
+                        Common.sleep(1000);
+                        continue;
+                    }
+
+                    //查看粉丝和作品数是否合格
+                    let worksCount = this.getWorksCount() * 1;
+                    if (worksCount < settingData.worksMinCount * 1 || worksCount > settingData.worksMaxCount * 1) {
+                        System.toast('作品数不符合：' + worksCount + '，限制' + settingData.worksMinCount + '-' + settingData.worksMaxCount);
+                        Log.log('作品数不符合', worksCount, settingData.worksMinCount, settingData.worksMaxCount);
+                        machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
+                        Common.back();
+                        Common.sleep(1000);
+                        continue;
+                    }
+
+                    //查看粉丝和作品数是否合格
+                    let fansCount = 0;
+
+                    try {
+                        fansCount = this.getFansCount() * 1;
+                    } catch (e) {
+                        System.toast('获取粉丝数失败');
+                        Log.log(e);
+                        continue;
+                    }
+
+                    if (fansCount < settingData.fansMinCount * 1 || fansCount > settingData.fansMaxCount * 1) {
+                        System.toast('粉丝数不符合：' + fansCount + '，限制' + settingData.fansMinCount + '-' + settingData.fansMaxCount);
+                        Log.log('粉丝数不符合', fansCount, settingData.fansMinCount, settingData.fansMaxCount);
+                        machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
+                        Common.back();
+                        Common.sleep(1000);
+                        continue;
+                    }
+
+                    if (Math.random() * 100 <= settingData.focusRate * 1) {
+                        this.focus();
+                    }
+
+                    if (Math.random() * 100 <= settingData.privateRate * 1) {
+                        this.privateMsg(getMsg(1, nickname, this.getAge(), this.getGender()).msg);
+                    }
+
+                    let commentRate = Math.random() * 100;
+                    let zanRate = Math.random() * 100;
+
+                    Log.log('是否评论：' + (commentRate <= settingData.commentRate * 1) + '，是否点赞：' + (zanRate <= settingData.zanRate * 1));
+                    if ((commentRate <= settingData.commentRate * 1 || zanRate <= settingData.zanRate * 1) && Video.intoUserVideo()) {
+                        if (zanRate <= settingData.zanRate * 1) {
+                            !Video.isZan() && Video.clickZan();
+                            Common.sleep(1000 + 500 * Math.random());
+                        }
+
+                        if (commentRate <= settingData.commentRate * 1) {
+                            let videoTitle = Video.getContent();
+                            Video.openComment(!!Video.getCommentCount());
+                            Comment.commentMsg(getMsg(0, videoTitle).msg);
+                            Common.sleep(1000 + 1000 * Math.random());
+                            Comment.zanComment(5, meNickname);
+                        }
+
+                        Common.back(1, 800);
+                    }
+
+                    machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
+                    settingData.opCount--;
+                    if (settingData.opCount <= 0) {
+                        return true;
+                    }
+
+                    Common.back(1, 1500);
+                    contents.push(nickname);
+                    if (UiSelector().descContains('更多').clickable(true).filter((v) => {
+                        return v && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() / 3;
+                    }).isVisibleToUser(true).findOnce()) {
+                        Log.log('识别到更多，返回');
+                        Common.back(1, 800);//偶尔会出现没有返回回来的情况，这里加一个判断
+                    }
+                    Common.sleep(500 + 500 * Math.random());
                 }
 
-                machine.set('task_dy_toker_focus_' + account + '_' + nickname, true);
-                settingData.opCount--;
-                if (settingData.opCount <= 0) {
+                Log.log('滑动');
+                let res = type === 1 ? Common.swipeFansListOp() : Common.swipeFocusListOp();
+                Common.sleep(1500);
+                if (!res) {
+                    Log.log('滑动到底了');
                     return true;
                 }
-
-                Common.back(1, 1500);
-                contents.push(nickname);
-                if (UiSelector().descContains('更多').clickable(true).filter((v) => {
-                    return v && v.bounds().top < Device.height() / 5 && v.bounds().left > Device.width() / 3;
-                }).isVisibleToUser(true).findOnce()) {
-                    Log.log('识别到更多，返回');
-                    Common.back(1, 800);//偶尔会出现没有返回回来的情况，这里加一个判断
+            } catch (e) {
+                //尝试返回
+                let k = 6;
+                while (k-- > 0) {
+                    let tabTag = UiSelector().className('androidx.appcompat.app.ActionBar$Tab').filter(v => {
+                        return !!v.children().findOne(UiSelector().id('android:id/text1').textContains('粉丝'));
+                    }).isVisibleToUser(true).findOne();
+                    if (!tabTag) {
+                        Common.back(1, 1500);
+                        continue;
+                    }
+                    break;
                 }
-                Common.sleep(500 + 500 * Math.random());
-            }
 
-            Log.log('滑动');
-            let res = type === 1 ? Common.swipeFansListOp() : Common.swipeFocusListOp();
-            Common.sleep(1500);
-            if (!res) {
-                Log.log('滑动到底了');
-                return true;
+                if (k > 0) {
+                    Log.log('修复粉丝列表异常');
+                    continue;
+                }
+
+                Log.log('异常情况：', e);
+                throw e;
             }
         }
     },

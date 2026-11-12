@@ -1,21 +1,34 @@
 let Common = require('./Common.js');
+let CommentNew = require('./CommentNew.js');
 let storage = require('../../common/storage.js');
 let statistics = require('../../common/statistics.js');
+let Voice = require('../../service/Voice.js');
 
 const Comment = {
     /** @type {UiObject|undefined}  */
     tag: undefined,//当前的tag标签
     /** @type {string[]}  */
     containers: [],//本次遍历的内容  主要用于去重
+    isNew: false,
     /**
      * 返回头像控件
      * @param {UiObject} tag 
      * @returns Object
      */
     getAvatarTag(tag) {
+        if (this.isNew) {
+            if (tag) {
+                return tag.children().findOne(UiSelector().className('android.widget.TextView').clickable(true));
+            }
+
+            // @ts-ignore
+            return this.tag.children().findOne(UiSelector().className('android.widget.TextView').clickable(true));
+        }
+
         if (tag) {
             return tag.children().findOne(Common.id('avatar'));
         }
+
         // @ts-ignore
         return this.tag.children().findOne(Common.id('avatar'));
     },
@@ -72,11 +85,11 @@ const Comment = {
      */
     getZanTag(tag) {
         if (tag) {
-            return tag.children().findOne(UiSelector().className('android.widget.LinearLayout').descContains('赞'));
+            return tag.children().findOne(UiSelector().descContains('赞'));
         }
 
         // @ts-ignore
-        return this.tag.children().findOne(UiSelector().className('android.widget.LinearLayout').descContains('赞'));
+        return this.tag.children().findOne(UiSelector().descContains('赞'));
     },
 
     /**
@@ -166,12 +179,75 @@ const Comment = {
      * @returns boolean
      */
     swipeTop() {
-        return Common.swipeCommentListOp();
+        return Common.swipeCommentListOp(this.isNew);
+    },
+
+    isOld() {
+        let tag = Common.id('avatar').isVisibleToUser(true).findOne();
+        if (!tag) {
+            return false;//没有avatar的表示是新的
+        }
+        return tag.className() == '按钮';//老的头像等于按钮
+    },
+
+    /**
+     * 新方式的获取评论区
+     * @returns {{tag:UiObject,nickname:string,content:string,isAuthor:boolean,isZan:boolean,ip:string}[]}
+     */
+    getListNew() {
+        let items = CommentNew.getList();
+        let contents = [];
+
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            this.tag = item.container;
+            // 提取点赞信息
+            let zanTag = item.container.children().findOne(UiSelector().className('android.view.View').descContains('赞'));
+            let isZan = false;
+            if (zanTag && zanTag.desc() && zanTag.desc().indexOf('已选中') !== -1) {
+                isZan = true;
+            }
+
+            let zanCount = 0;
+            if (zanTag && zanTag.desc()) {
+                zanCount = Common.numDeal(zanTag.desc());
+            }
+
+            Log.log("nickname", item.nickname);
+            let data = {
+                nickname: item.nickname,
+                content: item.content || undefined,
+                date: item.date,
+                zanCount: zanCount,
+                isZan: isZan,
+                isAuthor: false,
+                ip: item.ip,
+                tag: item.container,
+            };
+            Log.log("Data", data);
+
+            if (!data.nickname) {
+                Log.log('评论区nickname无');
+                continue;
+            }
+
+            if (this.containers && this.containers.length > 100) {
+                this.containers.shift();
+            }
+
+            if (this.containers.includes(data.nickname + '_' + data.content)) {
+                continue;
+            }
+
+            contents.push(data);
+            this.containers.push(data.nickname + '_' + data.content);
+        }
+        return contents;
     },
 
     /**
      * 返回评论内容（外层控件、昵称、评论内容、Ip、是否点赞、点赞数、作者）
-     * @returns {{tag:UiObject,nickname:string,content:string,isAuthor:boolean,isZan:boolean}[]}
+     * @returns {{tag:UiObject,nickname:string,content:string,isAuthor:boolean,isZan:boolean,ip:string}[]}
      */
     getList() {
         let moreTag = UiSelector().text('已折叠部分评论').isVisibleToUser(true).findOne();
@@ -179,6 +255,12 @@ const Comment = {
             Log.log('点击展开');
             Common.click(moreTag);
             Common.sleep(3000 + Math.random() * 1500);
+        }
+
+        if (!this.isOld()) {
+            this.isNew = true;
+            Log.log('isNew=true,使用新版本');
+            return this.getListNew();
         }
 
         let contains = UiSelector().className('android.widget.FrameLayout').filter(v => {
@@ -228,11 +310,13 @@ const Comment = {
      */
     closeCommentWindow() {
         // let closeTag = UiSelector().desc('关闭').isVisibleToUser(true).clickable(true).findOne();
-        let closeTag = Common.id('back_btn').clickable(true).isVisibleToUser(true).findOne();
+        let closeTag = Common.id('back_btn').clickable(true).filter(v => {
+            return v.bounds().left > Device.width() / 2;
+        }).findOne();
         if (!closeTag) {
             return false;
         }
-        return closeTag.click();
+        return Common.click(closeTag, 0.2);
     },
 
     /**
@@ -242,6 +326,7 @@ const Comment = {
      */
     intoUserPage(data) {
         let headTag = this.getAvatarTag(data.tag);
+        Log.log('headTag', headTag);
         let res = headTag.click();
         Common.sleep(3000 + 1000 * Math.random());
         return res;
@@ -255,7 +340,7 @@ const Comment = {
     backMsg(data, msg) {
         let backTag = this.getBackTag(data.tag);
         Log.log(backTag.bounds());
-        Common.click(backTag);
+        backTag.click();
         Common.sleep(2500 + 500 * Math.random());
 
         let iptTag = UiSelector().className('android.widget.EditText').filter(v => {
@@ -286,7 +371,38 @@ const Comment = {
             return v.isEditable();
         }).findOne();
 
-        iptTag.click();
+        if (!iptTag) {
+            iptTag = UiSelector().className('android.widget.TextView').textMatches(/[\s\S]+/).filter(v => {
+                return v.bounds().bottom > Device.height() * 0.95;
+            }).isVisibleToUser(true).findOne();
+            Log.log('iptTag', iptTag);
+
+            //作者仅允许粉丝评论,作者仅允许互关朋友评论,作者仅允许互相关注的人评论
+            if (UiSelector().textContains('作者仅允许').filter(v => {
+                return v.text().indexOf('作者仅允许') == 0;
+            }).isVisibleToUser(true).findOne()) {
+                Log.log('作者仅允许粉丝评论');
+                return false;
+            }
+            iptTag = iptTag.parent();
+        }
+
+        //作者仅允许粉丝评论,作者仅允许互关朋友评论,作者仅允许互相关注的人评论
+        if (UiSelector().textContains('作者仅允许').filter(v => {
+            return v.text().indexOf('作者仅允许') == 0;
+        }).isVisibleToUser(true).findOne()) {
+            Log.log('作者仅允许粉丝评论');
+            return false;
+        }
+
+        if (iptTag.isClickable()) {
+            iptTag.click();
+            Log.log('输入框点击成功');
+        } else {
+            Common.click(iptTag, 0.2);
+            Log.log('输入框不能点击, 使用click 函数点击');
+        }
+
         Common.sleep(1500 + 500 * Math.random());
         iptTag = UiSelector().className('android.widget.EditText').isVisibleToUser(true).filter(v => {
             return v.isEditable();
@@ -294,14 +410,41 @@ const Comment = {
 
         //获取是否评论图片
         Log.log("带图评论概率：" + storage.get("setting_comment_with_photo", "int"));
-        if (storage.get("setting_comment_with_photo", "int") > Math.random() * 100) {
+        if (storage.get("setting_comment_with_photo", "int") >= Math.random() * 100) {
             this.commentImage();
             iptTag.click();
             Common.sleep(100);
         }
 
         Log.log('msg', msg);
-        iptTag.setText(msg);
+        if (Voice.isOpen()) {
+            let tag = UiSelector().desc('语音评论').isVisibleToUser(true).findOne();
+            if (!tag) {
+                FloatDialogs.toastLong('找不到语音评论按钮');
+                Common.log('找不到语音评论按钮');
+                if (UiSelector().text('发送').isVisibleToUser(true).findOne()) {
+                    Common.back(1);
+                    Common.log('返回');
+                    return false;
+                }
+                return false;
+            }
+            Common.click(tag, 0.2);
+            Common.log('点击语音评论');
+            Common.sleep(1000 + 500 * Math.random());
+            let voiceTag = UiSelector().className('android.widget.TextView').filter(v => {
+                return v.bounds().top > Device.height() * 0.4 && ((v.text() && v.text().indexOf('按住') != -1 && v.text().indexOf('说话') != -1) || (v.desc() && v.desc().indexOf('按住') != -1 && v.desc().indexOf('说话') != -1));
+            }).isVisibleToUser(true).findOne();
+            if (!voiceTag) {
+                FloatDialogs.toastLong('找不到"按住 说话"按钮');
+                Common.log('找不到"按住 说话"按钮');
+                return false;
+            }
+            Voice.tts(voiceTag, msg);
+        } else {
+            iptTag.setText(msg);
+        }
+
         Common.sleep(500 + Math.random() * 1000);
 
         let btnTag = UiSelector().className('android.widget.TextView').isVisibleToUser(true).text('发送').findOne();
@@ -329,14 +472,15 @@ const Comment = {
     commentImage() {
         let imgTag = UiSelector().desc('表情').isVisibleToUser(true).findOne();
         Log.log("表情呢", imgTag);
-        imgTag.click();
+        Common.click(imgTag, 0.2);
         Common.sleep(1500 + 1000 * Math.random());
 
         let customTag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOne();
         if (!customTag) {
-            Common.sleep(2000);
+            Common.sleep(5000);
             customTag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOne();
         }
+
         customTag.click();
         Common.sleep(1000 + 500 * Math.random());
 
@@ -361,10 +505,11 @@ const Comment = {
      * 
      * @param {number} zanCount 
      * @param {string|undefined} meNickname 
+     * @param {number} [maxZanCount] 评论已有点赞数高于该值时不点赞
      */
-    zanComment(zanCount, meNickname) {
+    zanComment(zanCount, meNickname, maxZanCount) {
         //随机点赞 评论回复
-        /** @type {string[]} */  
+        /** @type {string[]} */
         let contains = [];//防止重复的
         let rps = 0;//大于2 则退出
         let opCount = 5;
@@ -387,14 +532,23 @@ const Comment = {
 
                 Log.log('是否作者？', comment.isAuthor, comment.nickname);
                 if (comment.nickname === meNickname || comment.isAuthor) {
+                    if (typeof maxZanCount === 'number') {
+                        System.toast(comment.isAuthor ? '作者评论，不点赞' : '自己的评论，不点赞');
+                    }
                     Log.log('作者或者自己忽略');
+                    continue;
+                }
+
+                if (typeof maxZanCount === 'number' && comment.zanCount > maxZanCount) {
+                    System.toast('评论点赞数超过限制：' + comment.zanCount + '，限制' + maxZanCount);
+                    Log.log('评论点赞数超过限制，不点赞', comment.zanCount, maxZanCount);
                     continue;
                 }
 
                 rps = 0;//只要有一个不在列表，则清零
                 contains.push(comment.nickname);
 
-                Log.log('赞评论了哦', comment.tag);
+                Log.log('赞评论了哦', comment);
                 try {
                     this.clickZan(comment);
                     Common.sleep(1000 + 1000 * Math.random());
@@ -427,7 +581,6 @@ const Comment = {
 
         Log.log('返回了哦');
         Common.sleep(300);
-        Common.back();
 
         //漏洞修复  如果此时还在评论页面，则再一次返回
         this.closeCommentWindow();

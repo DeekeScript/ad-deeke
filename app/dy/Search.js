@@ -133,7 +133,7 @@ const Search = {
         }).isVisibleToUser(true).findOne();
 
         if (descTag) {
-            Common.click(descTag);
+            Common.click(descTag, 0.2);
             return true;
         }
         throw new Error('找不到视频输入');
@@ -154,7 +154,7 @@ const Search = {
         }
 
         if (!userTag) {
-            FloatDialogs.toast('找不到抖音号：' + keyword);
+            System.toast('找不到抖音号：' + keyword);
             return false;
         }
 
@@ -176,7 +176,7 @@ const Search = {
     intoLiveRoom(douyin) {
         let tag = UiSelector().className('android.view.ViewGroup').descContains('直播').isVisibleToUser(true).findOne();
         if (!tag) {
-            FloatDialogs.toast('找不到抖音号：' + douyin);
+            System.toast('找不到抖音号：' + douyin);
             return false;
         }
 
@@ -200,13 +200,16 @@ const Search = {
      * @param {string} keyword 
      */
     homeIntoSearchUser(keyword) {
+        Log.log('homeIntoSearchUser', keyword, keyword.indexOf('+'));
         let res;
         if (keyword.indexOf('+') !== 0) {
             Search.intoSearchList(keyword, 1);
             res = Search.intoSeachUser(keyword);
         } else {
             keyword = keyword.substring(1);
+            Log.log('准备进入关注列表');
             User.intoFocusList();
+            Log.log('进入了关注列表');
             Common.sleep(3000);
             res = User.focusListSearch(keyword);
         }
@@ -378,7 +381,10 @@ const Search = {
 
                         //随机评论视频
                         Log.log('评论频率检测', commentRate, settingData.commentRate * 1);
-                        if ((commentRate <= settingData.commentRate * 1) && !UiSelector().text('作者仅允许互关朋友评论').isVisibleToUser(true).findOne()) {
+                        ////作者仅允许粉丝评论,作者仅允许互关朋友评论,作者仅允许互相关注的人评论
+                        if ((commentRate <= settingData.commentRate * 1) && !UiSelector().textContains('作者仅允许').filter(v => {
+                            return v.text().indexOf('作者仅允许') == 0;
+                        }).isVisibleToUser(true).findOne()) {
                             let msg = getMsg(0, Video.getContent());
                             if (msg) {
                                 Log.log('开启评论窗口');
@@ -419,7 +425,7 @@ const Search = {
             }
 
             if (!Common.swipeSearchUserOp()) {
-                FloatDialogs.toast('操作完了');
+                System.toast('操作完了');
                 Log.log('滑动失败了，认为是成功');
                 return true;
             }

@@ -42,7 +42,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -53,6 +53,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-xhs-toker-comment-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.xingin.xhs');
     },
 
     /**
@@ -146,10 +147,13 @@ let task = {
                         continue;
                     }
 
-                    XhsComment.clickZan(comments[k].zanTag);
+                    // XhsComment.clickZan(comments[k].zanTag);
+                    comments[k].zanTag.click();
+                    Log.log('点赞成功');
+                    tCommon.sleep(1000 + 1000 * Math.random());
                     this.nicknames.push(nickname);
                     machine.set('task_xhs_toker_comment_' + douyin + '_' + nickname, true);
-                    XhsComment.intoUserPage(comments[k].nicknameTag);
+                    XhsComment.intoUserPage(comments[k].nicknameTag, 1);
                     //私密账号
                     if (XhsUser.isPrivate()) {
                         tCommon.back();
@@ -184,7 +188,7 @@ let task = {
                     tCommon.sleep(1000);
                 }
 
-                if (UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
+                if (UiSelector().className('android.widget.ImageView').isVisibleToUser(true).descContains('头像').findOne()) {
                     tCommon.back();//有时候会出现不能返回的情况，小红薯的设计bug
                     tCommon.sleep(500);
                 }
@@ -251,7 +255,7 @@ if (sleepSecond <= 0) {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
 }
 

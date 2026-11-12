@@ -17,6 +17,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-dy-qingsong-tuoke-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     
@@ -31,7 +32,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -83,29 +84,29 @@ let task = {
                     let nickname = contains[i].desc();
 
                     if (count >= config.runTimes) {
-                        FloatDialogs.toast('运行次数达到了');
+                        System.toast('运行次数达到了');
                         return true;
                     }
 
                     if (DyUser.isPrivate()) {
                         DyCommon.back();
-                        FloatDialogs.toast('私密账号');
+                        System.toast('私密账号');
                         continue;
                     }
 
                     let account = DyUser.getDouyin();
                     if (machine.get("task_dy_friend_change_" + account, 'bool')) {
                         DyCommon.back();
-                        FloatDialogs.toast('已经操作过了');
+                        System.toast('已经操作过了');
                         continue;
                     }
 
                     Log.log("抖音号：", account);
                     let gender = DyUser.getGender();
                     Log.log('性别', gender, config.gender);
-                    if (!config.gender.includes(gender)) {
+                    if (!config.gender.includes('' + gender)) {
                         DyCommon.back();
-                        FloatDialogs.toast('性别不符合要求');
+                        System.toast('性别不符合要求');
                         Log.log('性别不符合要求');
                         continue;
                     }
@@ -115,7 +116,7 @@ let task = {
                     Log.log("粉丝数量：", fansCount);
                     if (fansCount < config.fansMin || fansCount > config.fansMax) {
                         DyCommon.back();
-                        FloatDialogs.toast('粉丝数不符合要求');
+                        System.toast('粉丝数不符合要求');
                         continue;
                     }
 
@@ -123,7 +124,7 @@ let task = {
                     Log.log("作品数量：", workCount);
                     if (workCount < config.workMin) {
                         DyCommon.back();
-                        FloatDialogs.toast('作品数不符合要求');
+                        System.toast('作品数不符合要求');
                         continue;
                     }
 
@@ -132,7 +133,7 @@ let task = {
                         Log.log("执行进入视频");
                         DyCommon.sleep(config.workWait * 1000);
                         if (DyVideo.isZan()) {
-                            FloatDialogs.toast('已经点赞了');
+                            System.toast('已经点赞了');
                         } else {
                             DyVideo.clickZan();
                             isOp = true;
@@ -152,7 +153,7 @@ let task = {
                     if (config.op.includes("0")) {
                         Log.log("执行关注");
                         if (DyUser.isFocus()) {
-                            FloatDialogs.toast('已关注，不操作');
+                            System.toast('已关注，不操作');
                         } else {
                             DyUser.focus();
                             isOp = true;

@@ -29,6 +29,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-search-vertical-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     
@@ -43,7 +44,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -174,13 +175,13 @@ let task = {
 
 let keyword = storage.get('task_dy_search_vertical');
 if (!keyword) {
-    FloatDialogs.toast('请设置关键词');
+    System.toast('请设置关键词');
     System.exit();
 }
 
 task.count = storage.get('task_dy_search_count', 'int');
 if (!task.count) {
-    FloatDialogs.toast('请设置刷视频数量');
+    System.toast('请设置刷视频数量');
     System.exit();
 }
 

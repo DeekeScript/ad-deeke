@@ -29,7 +29,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -40,6 +40,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-comment-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**
@@ -107,7 +108,7 @@ let task = {
             }
 
             if (!res) {
-                FloatDialogs.toast('找不到用户账号：' + input);
+                System.toast('找不到用户账号：' + input);
                 return 'exit';
             }
 
@@ -116,11 +117,19 @@ let task = {
             }
         }
 
-        while (true) {
+        //每个用户操作指定数量的视频，无评论或已操作的不计入
+        let videoCount = machine.get('task_dy_toker_comment_video_count', 'int') || 3;
+        let operatedVideoCount = 0;
+        while (operatedVideoCount < videoCount) {
             let title = DyVideo.getContent();
             let commentCount = DyVideo.getCommentCount();
             /** @ts-ignore */
             if (commentCount === 0 || this.contents.includes(title)) {
+                if (commentCount === 0) {
+                    System.toast('没有评论');
+                } else {
+                    System.toast('视频已操作');
+                }
                 Log.log('下一个视频');
                 DyVideo.next();
                 tCommon.sleep(3000);
@@ -136,13 +145,24 @@ let task = {
                 let comments = DyComment.getList();
                 for (let k in comments) {
                     /** @ts-ignore */
-                    if (!comments[k]['content'] || !this.includesKw(comments[k]['content'], kw) || this.nicknames.includes(comments[k].nickname)) {
-                        /** @ts-ignore */
-                        Log.log('数据：', comments[k]['content'], kw, this.nicknames.includes(comments[k].nickname));
+                    if (!comments[k]['content']) {
+                        System.toast('评论内容为空');
+                        Log.log('数据：', comments[k]['content'], kw);
+                        continue;
+                    }
+                    if (!this.includesKw(comments[k]['content'], kw)) {
+                        System.toast('评论不包含关键词');
+                        Log.log('数据：', comments[k]['content'], kw);
+                        continue;
+                    }
+                    if (this.nicknames.includes(comments[k].nickname)) {
+                        System.toast('已经操作过了');
+                        Log.log('数据：', comments[k]['content'], kw, true);
                         continue;
                     }
 
                     if (machine.get('task_dy_toker_comment_' + douyin + '_' + comments[k].nickname, 'bool')) {
+                        System.toast('已经操作过了');
                         Log.log('重复');
                         continue;
                     }
@@ -150,9 +170,11 @@ let task = {
 
                     try {
                         if (DyComment.isZan()) {
+                            System.toast('评论已点赞');
                             continue;
                         } else {
                             DyComment.clickZan(comments[k]);
+                            tCommon.sleep(500 + 500 * Math.random());
                         }
                     } catch (e) {
                         Log.log('异常处理：', e);
@@ -170,6 +192,7 @@ let task = {
                     }
                     //私密账号
                     if (DyUser.isPrivate()) {
+                        System.toast('私密账号');
                         tCommon.back();
                         tCommon.sleep(500);
                         Log.log('私密账号');
@@ -215,7 +238,7 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                if (!tCommon.swipeCommentListOp()) {
+                if (!DyComment.swipeTop()) {
                     tCommon.back();
                     tCommon.sleep(1000);
                     Log.log('到底了');
@@ -226,6 +249,13 @@ let task = {
             Log.log('下一个视频');
             /** @ts-ignore */
             this.contents.push(title);
+            operatedVideoCount++;
+            Log.log('已操作视频', operatedVideoCount + '/' + videoCount);
+            if (operatedVideoCount >= videoCount) {
+                System.toast('已达该用户操作视频数：' + videoCount);
+                Log.log('达到每个用户的操作视频数');
+                break;
+            }
             if (!DyVideo.next()) {
                 break;
             }
@@ -237,7 +267,7 @@ let task = {
         if (this.index === input.length - 1) {
             return "break";
         } else {
-            FloatDialogs.toast('一个账号完成，休息3分钟');
+            System.toast('一个账号完成，休息3分钟');
             Log.log('一个账号完成，休息3分钟');
             tCommon.sleep(180 * 1000);//休眠十分钟
         }
@@ -249,7 +279,7 @@ let task = {
 let input = machine.get('task_dy_toker_comment_account');
 Log.log("input内容：" + machine.get('task_dy_toker_comment_account', 'string'));
 if (!input) {
-    FloatDialogs.toast('请输入账号');
+    System.toast('请输入账号');
     System.exit();
 }
 
@@ -257,7 +287,7 @@ let kw = machine.get('task_dy_toker_comment_kw');
 
 Log.log("keyword：" + machine.get('task_dy_toker_comment_kw'));
 if (!kw) {
-    FloatDialogs.toast('请输入关键词');
+    System.toast('请输入关键词');
     System.exit();
 }
 

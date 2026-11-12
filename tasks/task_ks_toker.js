@@ -14,6 +14,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-ks-toker-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.smile.gifmaker');
     },
 
     testTask() {

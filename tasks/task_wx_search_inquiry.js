@@ -34,6 +34,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-wx-search-inquiry-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.tencent.mm');
     },
 
     //type 0 评论，1私信
@@ -47,7 +48,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -100,7 +101,7 @@ let task = {
             Log.log('进入图文或者视频');
             let commentCount = WxVideo.getCommentCount();
             if (commentCount === 0) {
-                Log.log('评论为0 ，下一个视频', i);
+                Log.log('评论为0 ，下一个视频');
                 WxVideo.next();
                 continue;
             }
@@ -142,7 +143,7 @@ let task = {
             Log.log('评论长度:' + WxComment.getCommentCount());
             if (comments.length === 0) {
                 Log.log('到底了，完成了');
-                if (sw++ >= 3) {
+                if (sw++ >= 2) {
                     return true;
                 }
             } else {
@@ -223,7 +224,7 @@ let task = {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
 }
 

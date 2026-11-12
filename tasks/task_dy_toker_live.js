@@ -35,7 +35,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -46,6 +46,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-toker-live-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**
@@ -227,7 +228,7 @@ let task = {
                 DyLive.swipeFansList();
                 tCommon.sleep(3000 + 1000 * Math.random());
             }
-            FloatDialogs.toast('休眠2分钟后继续执行');
+            System.toast('休眠2分钟后继续执行');
             tCommon.sleep(120 * 1000);//休眠2分钟
         }
     },

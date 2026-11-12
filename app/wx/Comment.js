@@ -226,10 +226,15 @@ let Comment = {
     },
 
     //视频评论
+    /**
+     * 
+     * @param {*} msg 
+     * @returns 
+     */
     commentMsg(msg) {
         let iptTag = Common.id('c6v').isVisibleToUser(true).findOnce();
         try {
-            Common.click(iptTag, 0.2);
+            Common.click(iptTag, 0.3);
             Common.sleep(1500 + 500 * Math.random());
         } catch (e) {
             Log.log(e);
@@ -241,7 +246,7 @@ let Comment = {
         if (storage.get("setting_comment_with_photo", "int") > Math.random() * 100) {
             this.commentImage();
             // Common.click(iptTag);
-            Common.sleep(100);
+            Common.sleep(500);
         }
 
         Log.log('msg', msg);
@@ -249,12 +254,14 @@ let Comment = {
         System.setClip(msg);
         Common.sleep(500 + Math.random() * 1000);
         iptTag.paste();
-        Common.sleep(500 + Math.random() * 1000);
+        Common.sleep(1500 + Math.random() * 500);
 
         let rp = 3;
         while (rp--) {
             try {
-                let submitTag = Common.id('uet').isVisibleToUser(true).findOne();
+                let submitTag = UiSelector().className('android.widget.Button').filter(v => {
+                    return !!(v.text() && v.text().indexOf('发送') == 0);
+                }).isVisibleToUser(true).findOne();
                 Log.log(submitTag);
                 if (!submitTag) {
                     continue;
@@ -274,7 +281,7 @@ let Comment = {
 
     //暂未变更
     commentImage() {
-        let imgTag = Common.id('ueu').isVisibleToUser(true).findOne();
+        let imgTag = UiSelector().desc('表情').isVisibleToUser(true).findOne();
         Log.log(imgTag);
 
         if (!imgTag) {
@@ -285,11 +292,11 @@ let Comment = {
         Log.log("表情呢", imgTag);
         Common.click(imgTag, 0.2);
         Common.sleep(2000 + 500 * Math.random());
-        let tag = Common.id('n0v').desc('自定义表情').isVisibleToUser(true).findOnce();
+        let tag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOnce();
         Log.log(tag);
         if (!tag) {
             Common.sleep(2000 + 500 * Math.random());
-            tag = Common.id('n0v').desc('自定义表情').isVisibleToUser(true).findOnce();
+            tag = UiSelector().desc('自定义表情').isVisibleToUser(true).findOnce();
             Log.log("再次获取", tag);
         }
         Common.click(tag, 0.2);

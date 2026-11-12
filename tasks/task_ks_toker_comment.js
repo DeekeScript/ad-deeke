@@ -11,7 +11,9 @@ let statistics = require("../common/statistics");
 
 let task = {
     index: -1,
+    /** @type {string[]} */
     nicknames: [],
+    /** @type {string[]} */
     contents: [],
     /**
      * 
@@ -34,7 +36,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -45,6 +47,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-comment-ks-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.smile.gifmaker');
     },
 
     /**
@@ -89,13 +92,18 @@ let task = {
             return 'exit';
         }
 
-        //获取最新的前三视频
+        //每个快手号操作指定数量的视频，无评论或已看过的不计入
+        let videoCount = machine.get('task_ks_toker_comment_video_count', 'int') || 3;
+        let operatedVideoCount = 0;
         let i = 0;
-        while (true) {
+        while (operatedVideoCount < videoCount) {
             let title = KsVideo.getContent();
+            let timeIpTag = tCommon.id('create_date_tv').isVisibleToUser(true).findOne();
+            let timeIp = timeIpTag ? timeIpTag.text() : '';
             let commentCount = KsVideo.getCommentCount();
+            Log.log('title+timeIp', title + '_' + timeIp);
             /** @ts-ignore */
-            if (commentCount === 0 || this.contents.includes(title)) {
+            if (commentCount === 0 || this.contents.includes(title + '_' + timeIp)) {
                 Log.log('下一个视频', i);
                 KsVideo.next();
                 tCommon.sleep(3000);
@@ -182,15 +190,25 @@ let task = {
                 Log.log('下一页评论');
                 tCommon.sleep(500);
                 if (!tCommon.swipeCommentListOp()) {
-                    tCommon.back();
-                    tCommon.sleep(1000);
-                    Log.log('评论操作完了');
-                    break;
+                    tCommon.sleep(5000);
+                     Log.log('再次尝试');
+                    if (!tCommon.swipeCommentListOp()) {
+                        tCommon.back();
+                        tCommon.sleep(1000);
+                        Log.log('评论操作完了');
+                        break;
+                    }
                 }
                 tCommon.sleep(1500 + 500 * Math.random());
             }
             Log.log('下一个视频', i++);
-            this.contents.push(title);
+            this.contents.push(title + '_' + timeIp);
+            operatedVideoCount++;
+            Log.log('已操作视频', operatedVideoCount + '/' + videoCount);
+            if (operatedVideoCount >= videoCount) {
+                Log.log('达到每个快手号的操作视频数');
+                break;
+            }
             if (!KsVideo.next()) {
                 Log.log('操作完了');
                 break;
@@ -226,7 +244,7 @@ if (!kw) {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
 }
 

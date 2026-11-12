@@ -13,15 +13,16 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-cancel-zan-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     testTask() {
         //首先进入点赞页面
         DyIndex.intoMyPage();
-        tCommon.sleep(2000);
+        tCommon.sleep(4000);
         let res = DyIndex.intoLikeVideo();
         if (!res) {
-            FloatDialogs.toast('未进入视频页面，请检查当前账号是否有“喜欢”视频');
+            System.toast('未进入视频页面，请检查当前账号是否有“喜欢”视频');
             return true;
         }
 

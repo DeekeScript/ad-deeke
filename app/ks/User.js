@@ -1,5 +1,5 @@
-let Common = require('app/ks/Common.js');
-let statistics = require('common/statistics.js');
+let Common = require('./Common.js');
+let statistics = require('../../common/statistics.js');
 
 let User = {
     /**
@@ -231,7 +231,7 @@ let User = {
 
     /**
      * 获取性别
-     * @returns {number}
+     * @returns {string}
      */
     getGender() {
         //1男，0女，2未知
@@ -291,6 +291,9 @@ let User = {
      * @returns {boolean}
      */
     focus() {
+        if (this.isFocus()) {
+            return true;
+        }
         let focusTag = UiSelector().filter(v => {
             return v.className().includes('Button');
         }).descContains('关注').findOne() || UiSelector().descContains('回关').findOne();

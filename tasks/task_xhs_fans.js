@@ -11,6 +11,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-xhs-fans-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.xingin.xhs');
     },
 
     //type 0 评论，1私信
@@ -24,7 +25,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -65,7 +66,7 @@ let task = {
         let stopMarkCount = 0;
         Log.log('总数量：' + config.runCount);
         let showAll = false;//还没有点击 “查看全部”
-        let minTop = selectedTag.bounds().top + selectedTag.bounds().height();
+        let minTop = selectedTag.parent().bounds().top + selectedTag.parent().bounds().height();
         Log.log('最低top是：', minTop);
         let containsCountError = 0;
 
@@ -125,9 +126,17 @@ let task = {
                             return v.parent() != null && v.parent().className() == 'android.widget.LinearLayout';
                         }));
                         Log.log('workTag', workTag);
+                        if (workTag === null) {
+                            continue;
+                        }
                         let fansTag = childs.findOne(UiSelector().className('android.widget.TextView').textContains('粉丝').filter(v => {
                             return v.parent() != null && v.parent().className() == 'android.widget.LinearLayout';
                         }));
+                        Log.log('fansTag', fansTag);
+                        if (fansTag === null) {
+                            continue;
+                        }
+
                         let workCount = User.getListWorkCount(workTag);
                         if (workCount < config.minWork) {
                             Log.log('作品数量不合格：', workCount, config.minWork);
@@ -171,7 +180,8 @@ let task = {
                     }
 
                     //这里防止视频页面没有进去，但是已经返回到了列表页
-                    if (!UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
+                    if (!UiSelector().textContains('小红书号：').isVisibleToUser(true).findOne() || !UiSelector().descContains('头像,').isVisibleToUser(true).findOne()) {
+                        Log.log('没有头像');
                         continue;
                     }
 
@@ -204,9 +214,10 @@ let task = {
                     Common.back();
                     Common.sleep(500);
 
-                    if (UiSelector().className('android.view.View').isVisibleToUser(true).descContains('头像').findOne()) {
-                        Common.back();//有时候会出现不能返回的情况，小红薯的设计bug
-                    }
+                    // if (!UiSelector().textContains('小红书号：').isVisibleToUser(true).findOne() || !UiSelector().descContains('头像,').isVisibleToUser(true).findOne()) {
+                    //     Log.log('没有头像');
+                    //     Common.back();
+                    // }
                     Log.log('返回到了主界面');
                 }
 

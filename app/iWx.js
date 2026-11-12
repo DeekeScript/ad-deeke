@@ -1,45 +1,78 @@
-let WxCommon = require('app/wx/Common.js');
-let WxVideo = require('app/wx/Video.js');
-let WxUser = require('app/wx/User.js');
-let WxIndex = require('app/wx/Index.js');
-let WxComment = require('app/wx/Comment.js');
-let storage = require('common/storage.js');
-let machine = require('common/machine.js');
-let baiduWenxin = require('service/baiduWenxin.js');
-let statistics = require('common/statistics.js');
+let WxCommon = require('./wx/Common.js');
+let WxVideo = require('./wx/Video.js');
+let WxUser = require('./wx/User.js');
+let WxIndex = require('./wx/Index.js');
+let WxComment = require('./wx/Comment.js');
+let storage = require('../common/storage.js');
+let machine = require('../common/machine.js');
+let baiduWenxin = require('../service/baiduWenxin.js');
+let statistics = require('../common/statistics.js');
 
 let iWx = {
+    /** @type {any} */
     me: {},//当前账号的信息
+    /** @type {any} */
     taskConfig: {},
+    /** @type {string[]} */
     titles: [],//今日刷视频的所有标题  标题+'@@@'+昵称   保证唯一，从而减少请求后台接口
     targetVideoCount: 0,//刷到目标视频数量
     videoCount: 0,//刷到视频数量
+    /** @type {string[]} */
     provices: [],
     isCity: false,//是否是同城
+    /** @type {string[]} */
     nicknames: [],//所有的昵称，重复的忽略
+    /** @type {any} */
     runTimes: undefined,  //如果是数字0 则完成
+    /** @type {any} */
+    configData: {},
 
     //type 0 评论，1私信
+    /**
+     * 
+     * @param {*} type 
+     * @param {*} [title] 
+     * @param {*} [age]
+     * @param {*} [gender] 
+     * @returns 
+     */
     getMsg(type, title, age, gender) {
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, gender) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
     },
 
+    /**
+     * 
+     * @param {*} douyin 
+     * @returns 
+     */
     douyinExist(douyin) {
         if (storage.getMachineType() === 1) {
             return machine.douyinExist(douyin);//永远不会结束
         }
     },
 
+    /**
+     * 
+     * @param {*} nickname 
+     * @param {*} title 
+     * @returns 
+     */
     videoExist(nickname, title) {
         if (storage.getMachineType() === 1) {
             return machine.videoExist(nickname, title);//永远不会结束
         }
     },
 
+    /**
+     * 
+     * @param {*} nickname 
+     * @returns 
+     */
     accountFreGt(nickname) {
+        /** @type {any} */
         let res;
         if (storage.getMachineType() === 1) {
             res = machine.accountFreGt(nickname);
@@ -71,6 +104,12 @@ let iWx = {
     },
 
     //检测标题是否正常
+    /**
+     * 
+     * @param {*} rule 
+     * @param {*} title 
+     * @returns 
+     */
     videoRulesCheckTitle(rule, title) {
         if (rule.toker_view_video_keywords) {
             let containWord = WxCommon.containsWord(rule.toker_view_video_keywords, title);
@@ -78,31 +117,74 @@ let iWx = {
             if (containWord) {
                 return true;
             }
+            System.toast('标题不包含关键词：' + rule.toker_view_video_keywords);
             return false;
         }
         return true;
     },
 
     //视频规则是否符合条件
+    /**
+     * 
+     * @param {*} rule 
+     * @param {*} videoData 
+     * @returns 
+     */
     videoRulesCheck(rule, videoData) {
         if (rule.toker_view_video_keywords) {
             let containWord = WxCommon.containsWord(rule.toker_view_video_keywords, videoData.title);
             Log.log(containWord);
             if (!containWord) {
+                System.toast('标题不包含关键词：' + rule.toker_view_video_keywords);
                 return false;
             }
         }
 
         console.log('同城数据判断：', rule.toker_distance, videoData.distance);
         if (rule.toker_distance < videoData.distance) {
+            // 找不到距离时会记成 100，用来过滤，不是真实的 100 公里
+            if (videoData.distance == 100) {
+                System.toast('界面没有距离');
+            } else {
+                System.toast('距离超出限制：' + videoData.distance + '公里，限制' + rule.toker_distance + '公里');
+            }
             return false;
         }
 
         return true;
     },
 
+    /**
+     * 性别文案
+     * @param {any} gender
+     * @returns {string}
+     */
+    genderText(gender) {
+        let map = { '0': '女', '1': '男', '2': '未知' };
+        return map['' + gender] || '未知';
+    },
+
+    /**
+     * 用户筛选不符合时返回具体原因
+     * @param {any} userData
+     * @returns {string}
+     */
+    userRuleReason(userData) {
+        if (this.configData.toker_run_sex && !this.configData.toker_run_sex.includes('' + userData.gender)) {
+            return '性别不符合：' + this.genderText(userData.gender);
+        }
+        return '';
+    },
+
+    /**
+     * 
+     * @param {*} videoRules 
+     * @param {*} isCity 
+     * @returns 
+     */
     refreshVideo(videoRules, isCity) {
         WxCommon.toast('现在是刷视频');
+        /** @type {any} */
         let videoData;
         let noTitleCount = 5;
         let rpVideoCount = 0;//5重复就报错
@@ -133,14 +215,14 @@ let iWx = {
 
             Log.log('-是否直播');
             if (WxVideo.isLiving()) {
-                WxCommon.toast('直播中，切换下一个视频');
+                System.toast('直播中');
                 WxVideo.videoSlow();
                 continue;
             }
 
             let unique = vNickname + '_' + vContent;
             if (this.titles.includes(unique)) {
-                WxCommon.toast('重复视频');
+                System.toast('重复视频');
                 rpVideoCount++;
                 if (rpVideoCount >= 5) {
                     throw new Error('5次重复，报错');
@@ -156,8 +238,12 @@ let iWx = {
 
             this.titles.push(unique);
 
-            if (this.nicknames.includes(vNickname) || this.accountFreGt(vNickname)) {
-                WxCommon.toast(vNickname + '：重复或频率超出');
+            if (this.nicknames.includes(vNickname)) {
+                System.toast('昵称已操作：' + vNickname);
+                continue;
+            }
+            if (this.accountFreGt(vNickname)) {
+                System.toast('操作频率超出：' + vNickname);
                 continue;
             }
 
@@ -187,6 +273,11 @@ let iWx = {
         return videoData;
     },
 
+    /**
+     * 
+     * @param {*} videoData 
+     * @returns 
+     */
     commentDeal(videoData) {
         let windowOpen = false;
         Log.log("评论频率", this.configData.toker_comment_rate);
@@ -223,6 +314,7 @@ let iWx = {
         }
 
         //随机点赞 评论回复
+        /** @type {any} */
         let contains = [];//防止重复的
         let rps = 5;//大于2 则退出
         let opCount = 5;
@@ -251,10 +343,12 @@ let iWx = {
                 try {
                     Log.log("点赞");
                     if (this.configData.toker_view_video_ip && !WxCommon.containsWord(this.configData.toker_view_video_ip, comment.ip)) {
+                        System.toast('评论IP不符合：' + (comment.ip || '无'));
                         Log.log('IP不符合规范', comment.ip);
                         continue;
                     }
                     WxComment.clickZan(comment);//////////////////////操作
+                    WxCommon.sleep(500 + 1000 * Math.random());
                     Log.log("点赞2");
                     opCount--;
                 } catch (e) {
@@ -276,7 +370,7 @@ let iWx = {
             WxCommon.sleep(1000 + 1000 * Math.random());
         }
 
-        Log.log('返回了哦');
+        Log.log('滑动次数结束，返回了哦');
         WxCommon.sleep(300);
         WxCommon.back();
         //漏洞修复  如果此时还在评论页面，则再一次返回
@@ -385,14 +479,27 @@ let iWx = {
                 if (this.configData.toker_view_video_ip && !WxCommon.containsWord(this.configData.toker_view_video_ip, userData.ip)) {
                     WxCommon.back();
                     WxCommon.sleep(1000);
+                    System.toast('IP不符合：' + (userData.ip || '无'));
                     Log.log('IP不符合', userData.ip, this.configData.toker_view_video_ip);
                     continue;
                 }
 
                 let isPrivateAccount = userData.isPrivate;
+                let opReasons = [];
+                if (isPrivateAccount) {
+                    opReasons.push('私密账号');
+                }
+                let ruleReason = this.userRuleReason(userData);
+                if (ruleReason) {
+                    opReasons.push(ruleReason);
+                }
+                if (opReasons.length > 0) {
+                    System.toast(opReasons.join('，'));
+                    Log.log(opReasons.join('，'));
+                }
                 if (!isPrivateAccount && this.configData.toker_focus_rate > focus_rate) {
                     Log.log('用户规则：', userData.gender, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender)) {
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes('' + userData.gender)) {
                         Log.log('关注了哦');
                         WxUser.focus();///////////////////////////////////操作  关注视频作者
                         WxCommon.sleep(3000);
@@ -401,7 +508,7 @@ let iWx = {
 
                 if (!this.douyinExist(userData.douyin)) {
                     Log.log('用户规则：', userData.gender, this.configData.toker_run_sex);
-                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes(userData.gender)) {
+                    if (this.configData.toker_run_sex && this.configData.toker_run_sex.includes('' + userData.gender)) {
                         if (!isPrivateAccount && this.configData.toker_private_msg_rate > private_rate) {
                             let msg = this.getMsg(1, userData.nickname);
                             Log.log('要私信了哦');

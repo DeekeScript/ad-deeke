@@ -49,7 +49,7 @@ let Message = {
             let contains = Common.id('content_container').descContains(account).isVisibleToUser(true).find();
             if (contains.length == 0) {
                 contains = UiSelector().className('android.widget.TextView').textContains(account).filter(v => {
-                    return v.id() !== 'com.ss.android.ugc.aweme:id/keyword_tv';
+                    return v.id() !== 'com.ss.android.ugc.aweme:id/keyword_tv' && v.text() != '群聊';
                 }).isVisibleToUser(true).find();
             }
 
@@ -128,9 +128,13 @@ let Message = {
 
         Log.log('config', config);
         //每进入这个界面，50%概率控件的“更多”没有出来，暂时这样补救
-        let moreTag = UiSelector().className('android.widget.Button').desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.Button').clickable(true).filter(v => {
-            return v.bounds().top < Device.height() / 10 && v.bounds().left > Device.width() * 0.75;
-        }).isVisibleToUser(true).findOne();
+        let moreTag = UiSelector().className('android.widget.ImageView').isVisibleToUser(true).filter(v => {
+            return v.bounds().right < Device.width() * 0.4 && v.bounds().bottom < Device.height() / 5;
+        }).findOne();
+
+        // UiSelector().className('android.widget.Button').desc('更多').clickable(true).isVisibleToUser(true).findOne() || UiSelector().className('android.widget.Button').clickable(true).filter(v => {
+        //     return v.bounds().top < Device.height() / 10 && v.bounds().left > Device.width() * 0.75;
+        // }).isVisibleToUser(true).findOne();
 
         Common.click(moreTag, 0.2);
         Common.sleep(3000 + 1000 * Math.random());
@@ -166,7 +170,7 @@ let Message = {
 
                 runIndex++;
                 if (contents.includes(contains[i].text()) || machineInclude(contains[i].text())) {
-                    FloatDialogs.toast('昵称重复，不操作');
+                    System.toast('昵称重复，不操作');
                     continue;
                 }
 
@@ -235,7 +239,15 @@ let Message = {
                 Common.sleep(1000);
                 if (Math.random() * 100 <= config.focusRate) {
                     Common.sleep(base * config.focusWait);
-                    User.focus();
+                    try {
+                        User.focus();
+                    } catch (e) {
+                        Log.log(e, '关注异常');//偶发发现找不到关注按钮，做一个错误处理
+                        if (User.inUserHome()) {
+                            Common.back(1, 2000);
+                            continue;
+                        }
+                    }
                     Common.sleep(iBase * config.focusWait);
                 }
 

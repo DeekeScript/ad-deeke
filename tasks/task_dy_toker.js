@@ -13,6 +13,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-toker-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     testTask() {
@@ -30,7 +31,7 @@ while (true) {
         tCommon.openApp();//兜底，防止跑到外面去了
         let code = task.run();
         if (code === 101) {
-            FloatDialogs.toast('不在任务时间，休息一会儿');
+            System.toast('不在任务时间，休息一会儿');
             Log.log('不在任务时间，休眠一会儿');
             tCommon.backApp();
             let hours = machine.getTokerData(0).toker_run_hour;

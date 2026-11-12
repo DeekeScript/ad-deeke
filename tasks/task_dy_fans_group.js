@@ -23,6 +23,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-fans-group-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     //type 0 评论，1私信
@@ -36,7 +37,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -80,7 +81,7 @@ if (!index) {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
     tCommon.sleep(2000);
 }

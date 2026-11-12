@@ -16,7 +16,12 @@ let Live = {
      */
     openUserList() {
         let tag = this.getUserCountTag();
-        let res = Common.click(tag);
+        if (!tag) {
+            Common.sleep(3000);
+            Log.log('再次获取在线观众数量控件');
+            tag = this.getUserCountTag();
+        }
+        let res = Common.click(tag, 0.2);
         Common.sleep(5000);
         return res;
     },
@@ -37,7 +42,7 @@ let Live = {
         }).findOnce();
         if (!parent) {
             Log.log('找不到观众列表');
-            FloatDialogs.toast('找不到观众列表');
+            System.toast('找不到观众列表');
             System.setAccessibilityMode('fast');
             return [];
         }

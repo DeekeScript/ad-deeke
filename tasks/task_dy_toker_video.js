@@ -43,7 +43,7 @@ let task = {
      */
     getMsg(type, title, age, gender = 2) {
         let genderStr = ['女', '男', '未知'][gender];
-        if (storage.get('setting_baidu_wenxin_switch', 'bool')) {
+        if ((!storage.exist('setting_baidu_wenxin_switch') || storage.get('setting_baidu_wenxin_switch', 'bool'))) {
             return { msg: type === 1 ? baiduWenxin.getChat(title, age, genderStr) : baiduWenxin.getComment(title) };
         }
         return machine.getMsg(type) || false;//永远不会结束
@@ -54,6 +54,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-dy-toker-video-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.ss.android.ugc.aweme');
     },
 
     /**
@@ -100,6 +101,7 @@ let task = {
         }
 
         Log.log('总的点赞：', rateCount, zanCommentRate, focuRate, backCommentRate);
+        let rps = 0;
         while (true) {
             tCommon.sleep(4000 + Math.random() * 2000);
             //看看是不是直播
@@ -112,12 +114,17 @@ let task = {
             let title = DyVideo.getContent();
             let commentCount = DyVideo.getCommentCount();
             statistics.viewVideo();
+            Log.log('rps', rps);
             /** @ts-ignore */
             if (commentCount === 0 || this.contents.includes(title)) {
                 Log.log('下一个视频');
+                if (rps++ > 3) {
+                    return true;
+                }
                 DyVideo.next();
                 continue;
             }
+            rps = 0;
 
             statistics.viewTargetVideo();
             DyVideo.openComment(!!commentCount);
@@ -206,7 +213,7 @@ let task = {
                 }
 
                 Log.log('下一页评论');
-                if (!tCommon.swipeCommentListOp()) {
+                if (!DyComment.swipeTop()) {
                     tCommon.back();
                     tCommon.sleep(1000);
                     Log.log('评论扫描完了');
@@ -257,12 +264,9 @@ while (true) {
     try {
         tCommon.openApp();
         let r = task.run(input, storage.get('task_dy_toker_live_video_second', 'int'));
-        if (r === 'exit') {
-            break;
-        }
-
         if (r) {
-            throw new Error('一个任务完成，重启，进入新的账号');
+            FloatDialogs.show('温馨提示', '已结束');
+            System.exit();
         }
 
         tCommon.sleep(3000);

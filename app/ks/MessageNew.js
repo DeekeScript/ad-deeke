@@ -1,6 +1,6 @@
-let Common = require("app/ks/Common.js");
-let User = require('app/ks/User.js');
-let baiduWenxin = require('service/baiduWenxin.js');
+let Common = require("./Common.js");
+let User = require('./User.js');
+let baiduWenxin = require('../../service/baiduWenxin.js');
 
 let MessageNew = {
     scrollCount: 0,

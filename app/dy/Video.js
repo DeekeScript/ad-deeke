@@ -278,9 +278,13 @@ const Video = {
      * @returns {boolean}
      */
     viewDetail() {
-        let tags = UiSelector().descMatches(/(查看|了解详情)/).isVisibleToUser(true).findOne() || UiSelector().textMatches(/(查看|了解详情)/).isVisibleToUser(true).findOne();
-        Log.log('广告', tags);
-        if (tags) {
+        let tag = UiSelector().descMatches(/(查看|了解详情)/).filter(v => {
+            return v.bounds().width() > 60;
+        }).isVisibleToUser(true).findOne() || UiSelector().textMatches(/(查看|了解详情)/).filter(v => {
+            return v.bounds().width() > 60;
+        }).isVisibleToUser(true).findOne();
+        Log.log('广告', tag);
+        if (tag) {
             return true;
         }
 
@@ -339,7 +343,7 @@ const Video = {
             /** @ts-ignore */
             return {
                 desc: () => {
-                    return tag.desc() ||tag.text() || '100';
+                    return tag.desc() || tag.text() || '100';
                 }
             };
         }
@@ -475,13 +479,40 @@ const Video = {
         return UiSelector().desc('进度条').isVisibleToUser(true).findOne();
     },
 
+    getWorksTag() {
+        let baseMode = System.getAccessibilityMode();
+        console.log('baseMode', baseMode);
+
+        let workTag = UiSelector().descContains('作品').clickable(true).className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
+        if (!workTag) {
+            return {
+                text: () => '0',
+            }
+        }
+        System.setAccessibilityMode('!fast');
+
+        let numTag = UiSelector().className('android.widget.TextView').textMatches(/\d+/).filter(v => {
+            return v.bounds().top >= workTag.bounds().top && v.bounds().bottom <= workTag.bounds().bottom && v.bounds().left >= workTag.bounds().left && v.bounds().right <= workTag.bounds().right;
+        }).findOne();
+
+        System.setAccessibilityMode(baseMode);
+        if (!numTag) {
+            return {
+                text: () => '0',
+            }
+        }
+        return numTag;
+    },
+
     /**
      * 进入非顶置的最小赞视频
      * @return {boolean}
      */
     intoUserVideo() {
-        let workTag = UiSelector().descContains('作品').clickable(true).className('androidx.appcompat.app.ActionBar$Tab').isVisibleToUser(true).findOne();
-        if (!workTag || Common.numDeal(workTag.desc()) === 0) {
+        let workTag = this.getWorksTag();
+        if (!workTag || Common.numDeal(workTag.text()) === 0) {
+            Log.log('没有作品');
+            //新方式判断
             return false;
         }
 

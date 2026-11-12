@@ -1,5 +1,5 @@
-let tCommon = require('app/ks/Common.js');
-let statistics = require('common/statistics.js');
+let tCommon = require('./Common.js');
+let statistics = require('../../common/statistics.js');
 
 let Search = {
     contents: [],

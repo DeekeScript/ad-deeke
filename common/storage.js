@@ -35,9 +35,9 @@ let storage = {
 
     //尽量 文件名 + key的模式
     /**
-     * 
-     * @param {string} key 
-     * @param {string} [type] 
+     *
+     * @param {string} key
+     * @param {string} [type]
      * @returns {any}
      */
     get(key, type) {
@@ -58,6 +58,15 @@ let storage = {
         }
 
         return undefined;
+    },
+
+    /**
+     * 判断 key 是否已在 storage 中设置过
+     * @param {string} key
+     * @returns {boolean}
+     */
+    exist(key) {
+        return Storage.exist(key);
     },
 
     /**

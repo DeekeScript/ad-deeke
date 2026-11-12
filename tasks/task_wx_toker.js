@@ -14,6 +14,7 @@ let task = {
         let file = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
         let allFile = "log/log-wx-toker-" + file + ".txt";
         Log.setFile(allFile);
+        require('../common/runEnv.js').write('com.tencent.mm');
     },
 
     testTask() {
@@ -22,7 +23,7 @@ let task = {
 }
 
 if (!Access.isMediaProjectionEnable()) {
-    FloatDialogs.show('温馨提示', '请打开主界面侧边栏，开启“图色查找”权限');
+    Access.openMediaProjectionSetting();
     System.exit();
 }
 

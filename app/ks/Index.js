@@ -1,4 +1,4 @@
-let Common = require('app/ks/Common.js');
+let Common = require('./Common.js');
 
 let Index = {
     /**
