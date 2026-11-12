@@ -1,8 +1,0 @@
-{
-    "[javascript]": {
-        "editor.maxTokenizationLineLength": 2500,
-        "editor.defaultFormatter": "vscode.typescript-language-features",
-        "editor.wordBasedSuggestions": "off",
-        "javascript.suggest.enabled": false
-    }
-}

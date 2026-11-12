@@ -1,11 +1,9 @@
 # Deeke · 多平台获客自动化
 
-<img src='https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke' width=0 height=0 />
-
 面向创业团队、获客运营与技术合作方的 Android 端自动化获客工具。  
 覆盖 **抖音 / 小红书 / 快手 / 视频号**，支持推荐引流、同行截流、私信拓客、AI 话术、评论采集与远程协同。
 
-底层基于自研 [DeekeScript](https://doc.deeke.cn)；支持贴牌 OEM、源码交付与定制开发。
+底层基于自研 <a href="https://doc.deeke.cn" target="_blank" rel="noopener noreferrer">DeekeScript</a>；支持贴牌 OEM、源码交付与定制开发。
 
 快速导航：[截图](#软件实景截图展示) · [能解决什么问题](#能解决什么问题) · [操作模式](#操作模式无障碍--hid--无线-adb) · [平台功能](#平台功能一览) · [产品能力](#产品能力) · [技术扩展](#技术底座与扩展) · [落地与合作](#落地建议与合作) · [联系合作](#联系合作)
 
@@ -141,7 +139,7 @@ Deeke 提供可切换的行为模式，兼顾兼容性与安全性：
 
 ## 技术底座与扩展
 
-- 自研运行时：[DeekeScript 文档](https://doc.deeke.cn)  
+- 自研运行时：<a href="https://doc.deeke.cn" target="_blank" rel="noopener noreferrer">DeekeScript 文档</a>  
 - 任务脚本按平台拆分，可扩展新 App / 新流程  
 - 支持行为模式切换（无障碍 / Hid / 无线 ADB），脚本侧可按环境适配  
 - OEM 与源码方案可快速交付品牌版；复杂能力可按模块定制  
@@ -173,10 +171,10 @@ Deeke 提供可切换的行为模式，兼顾兼容性与安全性：
 ## 后台系统展示
 
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke后台" src="photo/webp/backend-main.webp" width="100%">
-<img alt="Deeke代理后台" src="photo/webp/backend-agent.webp" width="100%">
-<img alt="Deeke后台登录界面" src="photo/webp/backend-login.webp" width="100%">
-<img alt="Deeke后台数据" src="photo/webp/backend-data.webp" width="100%">
+<img alt="Deeke后台" src="photoNew/photo/webp/backend-main.webp" width="100%">
+<img alt="Deeke代理后台" src="photoNew/photo/webp/backend-agent.webp" width="100%">
+<img alt="Deeke后台登录界面" src="photoNew/photo/webp/backend-login.webp" width="100%">
+<img alt="Deeke后台数据" src="photoNew/photo/webp/backend-data.webp" width="100%">
 </div>
 
 ---
@@ -197,7 +195,9 @@ Deeke 提供可切换的行为模式，兼顾兼容性与安全性：
 
 <a id="联系合作"></a>
 <div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke技术支持" src="photo/webp/weixin.webp" width="30%">
+<img alt="Deeke技术支持" src="photoNew/photo/webp/weixin.webp" width="30%">
 </div>
 
-框架文档：<https://doc.deeke.cn>
+框架文档：<a href="https://doc.deeke.cn" target="_blank" rel="noopener noreferrer">https://doc.deeke.cn</a>
+
+<img src="https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke" width="1" height="1" alt="" />
