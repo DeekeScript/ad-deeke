@@ -1,7 +1,9 @@
 # Deeke抖音黑科技 · 颠覆你的引流获客方式！
 
-作为<a href="https://github.com/DeekeScript/ad-dke" target="_blank" rel="noopener noreferrer">“嘀客”</a>升级版，**Deeke黑科技**面向创业团队与获客运营，专注 **抖音获客、小红书获客、快手获客、视频号获客**。  
-自研 <a href="https://doc.deeke.cn" target="_blank" rel="noopener noreferrer">DeekeScript</a> 底层框架，覆盖推荐引流、同行截流、私信拓客、AI 智能评论、语音评论、评论采集与远程协同，帮助团队更高效完成引流获客与私域沉淀。
+作为<a href="https://github.com/DeekeScript/ad-dke" target="_blank" rel="noopener noreferrer">“嘀客”</a>升级版，**Deeke黑科技**面向各行业需要获客的运营、销售、市场与创业团队，也特别适合 **一人公司 OPC（Solopreneur / One-Person Company）** 独立获客；专注 **抖音获客、小红书获客、快手获客、视频号获客**。  
+自研 <a href="https://doc.deeke.cn" target="_blank" rel="noopener noreferrer">DeekeScript</a> 底层框架，覆盖推荐引流、同行截流、私信拓客、AI 智能评论、语音评论、评论采集与远程协同，帮助团队与个人更高效完成引流获客与私域沉淀。
+
+无论你在做教育培训、贷款金融、房地产、装修家居、医美健康、本地生活、传统门店、电商带货、招商加盟、汽车服务，还是互联网产品推广、SaaS / 工具获客、知识付费、招聘猎头、法律财税、婚庆摄影、餐饮到店、美容美发等，只要需要持续找意向客户，都可以用 Deeke 把获客动作规模化——一人也能跑出团队级效率。
 
 支持贴牌 OEM、源码购买、群控定制与营销自动化方案。  
 <a href="#bottom">联系方式见页面底部</a>
