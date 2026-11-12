@@ -1,131 +1,188 @@
-# 🚀 Deeke抖音黑科技 · 颠覆你的引流获客方式！
+# Deeke · 多平台获客自动化
+
 <img src='https://home.deeke.top/Index/githubStatistic?name=github-ad-deeke' width=0 height=0 />
-<span style="font-size:18px;">
-🎉 全国屈指可数的自研底层框架的rpa软件研发公司！🎉
-</span>
 
-### <a href="#bottom">👇 联系方式请见页面底部！ 👇</a>
+面向创业团队、获客运营、产品经理与开发者的 Android 端自动化获客工具。  
+覆盖 **抖音 / 小红书 / 快手 / 视频号**，支持推荐引流、同行截流、私信拓客、AI 话术、评论采集与远程协同。
 
----
+底层基于自研 [DeekeScript](https://doc.deeke.cn)，不依赖 Auto.js；支持贴牌 OEM、源码交付与定制开发。
 
-## ✨ 为什么选择Deeke？
+| 你是谁 | 你可以快速看这些 |
+| --- | --- |
+| 创业者 / 获客团队 | [能解决什么问题](#能解决什么问题) · [平台功能](#平台功能一览) · [合作方式](#合作与商业化) |
+| 产品经理 | [操作模式](#操作模式无障碍--hid--无线-adb) · [产品能力](#产品能力) · [截图](#产品截图) |
+| 程序员 / 技术负责人 | [技术底座](#给程序员) · [OEM / 源码](#合作与商业化) · [框架文档](https://doc.deeke.cn) |
 
-作为<a href="https://github.com/DeekeScript/ad-dke">“嘀客”</a>升级版，**Deeke黑科技**从性能到体验全面革新！  
-
-✅ 稳定性拉升（目前业内顶级水平）<br/>
-✅ 功能更纯粹，操作更简单<br/>
-✅ 用户体验更顺滑（绝对领先）<br/>
-✅ 持续更新升级<br/>
-✅ 源码购买通道已开启（自研框架）<br/>
-
-🔥 核心变化亮点：
-
-- 🚀 **自主研发核心内核！摒弃传统Auto.js框架！**  
-  完全自研 [DeekeScript框架](https://doc.deeke.cn) ，稳定性、兼容性全线提升！
-
-- 🎨 **支持贴牌主题定制（logo、配色全改）**  
-  不懂技术也能拥有属于你的专属“黑科技”APP！
-
-- 🧹 **功能极简，只留客户最关心的核心功能**  
-  让复杂的操作统统消失，任何人都能轻松使用！
-
-- 💰 **完美集成支付宝在线支付**  
-  购买、续费、支付一站式完成，安全快捷！
-
-- 🤖 **智能评论系统全新升级！**  
-  支持DeepSeek-V4、豆包等大模型、角色评论（AI智能体Agent），人机难辨！
-
-- 🔥 语音评论
-  支持抖音/小红书语音评论（多种AI语音可选），全面提升获客效果
-
-- 🛠️ **支持专属定制（群控/营销自动化/私域流量）**  
-  满足不同场景的特殊需求，企业专属方案也OK！
+[联系合作](#联系合作)
 
 ---
 
-## 🏆 Deeke，做贴牌就是这么简单！
+## 能解决什么问题
 
-> 只需提供logo，其余全部交给我们。后台一键自动生成专属版本，带后台管理，连非技术人员也能轻松拥有“自家黑科技”软件！  
-
-💸 **市场价几万甚至十几万？我们只卖几千元！👍👍👍**  
-想低成本创业、拓展副业、做代理？这就是你的机会！🚀
-
-😄 欢迎交流合作，加入Deeke，轻松做软件老板！
-
-> 📝 **温馨提示：** 购买年卡即可申请成为我们的兼职销售，享受推广返佣收益，轻松开启副业之路！💼
+- **批量找到意向用户**：按关键词、同城、粉丝画像、UID、直播间、评论区等维度筛选目标人群  
+- **自动完成获客动作**：点赞、评论、关注、私信、收藏、回访、语音评论等，贴近真人节奏  
+- **降低人工成本**：一套流程同时服务抖音、小红书、快手、视频号  
+- **可规模化分发**：支持贴牌品牌、代理后台、卡密体系，方便做产品化与渠道销售  
 
 ---
 
-## 📸 软件实景截图展示
+## 操作模式：无障碍 / HID / 无线 ADB
 
-<div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke主界面第一屏" src="photoNew/webp/home-1.webp" width="24%">
-<img alt="Deeke主界面第二屏" src="photoNew/webp/home2.webp" width="24%">
-<img alt="Deeke主界面第三屏" src="photoNew/webp/home3.webp" width="24%">
-<img alt="Deeke主界面第四屏" src="photoNew/webp/home4.webp" width="24%">
+Deeke 提供可切换的行为模式，兼顾兼容性与安全性：
 
-<img alt="Deeke工具箱" src="photoNew/webp/home5.webp" width="24%">
-<img alt="Deeke推荐营销设置页" src="photoNew/webp/function.webp" width="24%">
-<img alt="Deeke推荐营销设置页" src="photoNew/webp/function2.webp" width="24%">
-<img alt="Deeke权限设置" src="photoNew/webp/home-setting.webp" width="24%">
+| 模式 | 识别方式 | 点击 / 滑动 / 输入 | 适合场景 |
+| --- | --- | --- | --- |
+| 纯无障碍（默认） | 无障碍 | 无障碍 | 开箱即用、快速验证流程 |
+| Hid 蓝牙 | 无障碍识别界面 | Hid 外设输入 | 更接近人工操作，推荐日常获客 |
+| 无线 ADB | 无障碍识别界面 | 无线 ADB 输入 | 需要更高稳定性与可控输入时 |
 
-<img alt="Deeke工商企业查询" src="photoNew/webp/company.webp" width="24%">
-<img alt="Deeke工商企业手机号" src="photoNew/webp/company-2.webp" width="24%">
-<img alt="Deeke工商企业" src="photoNew/webp/company-detail.webp" width="24%">
-<img alt="Deeke账户" src="photoNew/webp/account.webp" width="24%">
+说明：
 
-<img alt="Deeke账户充值" src="photoNew/webp/company-pay.webp" width="24%">
-<img alt="Deeke智能体" src="photoNew/webp/agent.webp" width="24%">
-<img alt="Deeke设置页面" src="photoNew/webp/setting.webp" width="24%">
-<img alt="Deeke话术库" src="photoNew/webp/speech.webp" width="24%">
-
-<img alt="Deeke智能话术" src="photoNew/webp/speech-ai.webp" width="24%">
-<img alt="Deeke采集" src="photoNew/webp/grab.webp" width="24%">
-<img alt="Deeke采集列表" src="photoNew/webp/grab2.webp" width="24%">
-<img alt="Deeke采集详情" src="photoNew/webp/grab3.webp" width="24%">
-
-<img alt="Deeke设置页面提示" src="photoNew/webp/setting2.webp" width="24%">
-<img alt="Deeke功能说明" src="photoNew/webp/func.webp" width="24%">
-<img alt="Deeke支付页面" src="photoNew/webp/pay.webp" width="24%">
-<img alt="Deeke语音评论" src="photoNew/webp/comment-voice.webp" width="24%">
-
-<img alt="Deeke数据统计" src="photoNew/webp/statistics.webp" width="24%">
-<img alt="Deeke扫码设置" src="photoNew/webp/scan.webp" width="24%">
-<img alt="Deeke图标" src="photoNew/webp/icon.webp" width="24%">
-<img alt="Deeke演示" src="photoNew/webp/demo.webp" width="24%"/>
-</div>
+- 开启 **Hid** 或 **无线 ADB** 后，点击、滑动、键盘输入不再走无障碍操作，无障碍仅用于识别界面  
+- Hid 方式更接近人工操作，降低自动化特征，**强烈推荐**  
+- 使用前仍需按提示开启无障碍、悬浮窗、图色等基础权限  
 
 ---
 
-## 💻 后台系统展示（功能强大，一应俱全）
+## 平台功能一览
 
-<div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke后台" src="photo/webp/backend-main.webp" width="100%">
-<img alt="Deeke代理后台" src="photo/webp/backend-agent.webp" width="100%">
-<img alt="Deeke后台登录界面" src="photo/webp/backend-login.webp" width="100%">
-<img alt="Deeke后台数据" src="photo/webp/backend-data.webp" width="100%">
-</div>
+### 抖音
+
+| 分组 | 功能 |
+| --- | --- |
+| 万能引流 | 推荐营销、同城营销、工具箱 |
+| 同行截流 | 粉丝截流、关注截流、评论区截流、直播间截流、粉丝群截流、智能询盘 |
+| 养号涨粉 | 垂直养号、快速涨粉、喜欢截流 |
+| 精准拓客 | 轻松拓客、赞回访、好友转化 |
+| UID 拓客 | UID 私信、UID 邀约 |
+| 其他 | 精准行业、AI 回复、团购营销、直播间弹幕、视频截流、评论截流 II |
+
+### 小红书
+
+| 分组 | 功能 |
+| --- | --- |
+| 万能引流 | 万能营销、同行拓客、赞回访 |
+| 同行截流 | 评论区截流、智能询盘 |
+| 其他 | 用户 ID 私信、AI 回复、垂直养号 |
+
+### 快手
+
+| 分组 | 功能 |
+| --- | --- |
+| 万能引流 | 推荐营销、同城营销、精准行业 |
+| 其他 | 评论区截流、智能询盘 |
+
+### 视频号
+
+| 分组 | 功能 |
+| --- | --- |
+| 万能引流 | 推荐营销、评论区截流、智能询盘 |
 
 ---
 
-## 🌟 我们的优势，远超同行！
+## 产品能力
 
-1️⃣ 💡 **自主研发，源头技术团队，底层框架自控** —— 行业领先稳定性！  
-2️⃣ 🎯 **界面简洁友好、极易上手** —— 推广无压力，用户秒懂！  
-3️⃣ 🛠️ **支持任意App自动化脚本定制** —— 无论什么需求，都可为您私人定制！  
+### 获客与运营
+
+- **话术库 / 智能话术**：统一评论与私信模板，可接入 AI 角色（如扣子智能体、DeepSeek / 豆包等大模型）  
+- **语音评论**：支持抖音、小红书等场景的 AI 语音评论  
+- **评论采集**：采集评论区线索，沉淀可跟进名单  
+- **数据统计**：查看运行次数、任务进度与近 7 日趋势  
+- **远程控制**：多设备远程触发任务，适合团队协同  
+
+### 增长辅助
+
+- **企业查询**：工商信息查询，辅助 B 端拓客与线索筛选  
+- **权限与稳定性引导**：无障碍、悬浮窗、图色权限按步骤开启  
+- **日志上传**：异常时可一键上传日志，便于售后定位  
+
+### 商业化能力
+
+- App 内支付与试用开通  
+- 贴牌 OEM：Logo、名称、主题可定制，配套代理 / 卡密后台  
+- 源码交付与功能定制，适合二次开发与私有化部署  
 
 ---
 
-## 🤝 想贴牌、定制、合作、成为销售？  
-立即联系我们！
-<a id="bottom"></a>
-<div style="justify-content: space-between;flex-wrap:wrap;width:100%;">
-<img alt="Deeke技术支持" src="photo/webp/weixin.webp" width="30%">
-</div>
+## 给程序员
+
+- 自研运行时：[DeekeScript 文档](https://doc.deeke.cn)  
+- 任务脚本按平台拆分，可扩展新 App / 新流程  
+- 支持行为模式切换（无障碍 / Hid / 无线 ADB），脚本侧可按环境适配  
+- OEM 与源码方案可快速交付品牌版；复杂能力可按模块定制  
+- 适合：技术合伙、私有化交付、渠道贴牌、内部获客中台  
 
 ---
 
-## ❤️ 还在等什么？  
-加入Deeke，一起开启智能引流新纪元吧！🚀✨  
+## 给产品经理与创业者
+
+### 你能怎么用
+
+1. 先明确获客目标：同城到店、私域沉淀、直播转化、同行截流等  
+2. 选择对应平台功能组合：先引流筛选，再私信 / 评论深度跟进  
+3. 控制互动频率与停留间隔，新号建议先养号 2-3 天  
+4. 需要品牌化销售时，走贴牌或源码，用后台发卡给代理与终端用户  
+
+### 合作与商业化
+
+- **试用**：App 内可按天试用完整功能  
+- **正式版**：按年订阅，功能与试用一致  
+- **贴牌 OEM**：一次性交付品牌版 + 代理后台；支持自备服务器或托管  
+- **源码**：可自行二次开发；升级可按需合并  
+- **定制**：常规功能按项报价，复杂模块评估后报价  
+
+> 具体报价与政策以商务沟通为准；年卡用户可申请兼职销售返佣。
 
 ---
+
+## 产品截图
+
+### App
+
+<img alt="主界面" src="photoNew/webp/home-1.webp" width="24%">
+<img alt="功能面板" src="photoNew/webp/home2.webp" width="24%">
+<img alt="工具箱" src="photoNew/webp/home5.webp" width="24%">
+<img alt="权限设置" src="photoNew/webp/home-setting.webp" width="24%">
+
+<img alt="推荐营销" src="photoNew/webp/function.webp" width="24%">
+<img alt="话术库" src="photoNew/webp/speech.webp" width="24%">
+<img alt="智能话术" src="photoNew/webp/speech-ai.webp" width="24%">
+<img alt="语音评论" src="photoNew/webp/comment-voice.webp" width="24%">
+
+<img alt="评论采集" src="photoNew/webp/grab.webp" width="24%">
+<img alt="采集列表" src="photoNew/webp/grab2.webp" width="24%">
+<img alt="企业查询" src="photoNew/webp/company.webp" width="24%">
+<img alt="数据统计" src="photoNew/webp/statistics.webp" width="24%">
+
+<img alt="智能体" src="photoNew/webp/agent.webp" width="24%">
+<img alt="账户充值" src="photoNew/webp/pay.webp" width="24%">
+<img alt="设置" src="photoNew/webp/setting.webp" width="24%">
+<img alt="扫码设置" src="photoNew/webp/scan.webp" width="24%">
+
+### 后台
+
+<img alt="管理后台" src="photo/webp/backend-main.webp" width="100%">
+<img alt="代理后台" src="photo/webp/backend-agent.webp" width="100%">
+<img alt="后台数据" src="photo/webp/backend-data.webp" width="100%">
+
+---
+
+## 为什么选择 Deeke
+
+1. **底层自研**：DeekeScript 自控，不绑 Auto.js，稳定性与兼容性更好  
+2. **操作更安全可选**：纯无障碍、Hid、无线 ADB 按场景切换  
+3. **功能面向获客结果**：引流、截流、拓客、AI 回复、采集一体  
+4. **可产品化分发**：贴牌、代理后台、源码、定制齐全  
+5. **适合非技术团队落地**：界面简洁，按提示开权限即可跑通  
+
+---
+
+## 联系合作
+
+贴牌、定制、源码、代理合作，请扫码联系：
+
+<a id="联系合作"></a>
+
+<img alt="Deeke 技术支持微信" src="photo/webp/weixin.webp" width="30%">
+
+框架文档：<https://doc.deeke.cn>
